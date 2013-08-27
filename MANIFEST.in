@@ -1,0 +1,5 @@
+include distribute_setup.py README.md
+graft data
+graft docs
+include tests/*.py
+graft tests/data
