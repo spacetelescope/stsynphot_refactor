@@ -1,4 +1,4 @@
-This module was part of the legacy PYSYNPHOT that deals with HST/JWST specific 
+This module was part of the legacy PYSYNPHOT that deals with HST/JWST specific
 functionalities.
 
 It is intended to be used with http://www.github.com/spacetelescope/pysynphot
@@ -15,4 +15,4 @@ If you have questions about this module, send email to ``help[at]stsci.edu``.
 **Dependencies:**
   - astropy 0.2 or higher
   - numpy 1.5.1 or higher
-  - pysynphot 3.0.0.dev or higher
+  - synphot 3.0.0.dev or higher

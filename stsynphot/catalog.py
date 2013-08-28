@@ -30,7 +30,7 @@ import numpy as np
 from astropy.io import fits
 
 # PYSYNPHOT
-from pysynphot import Cache, pysynexcept, spectrum
+from synphot import Cache, pysynexcept, spectrum
 
 # LOCAL
 from . import locations

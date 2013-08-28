@@ -186,46 +186,6 @@ class SpectrumTestCase(testutil.FPTestCase):
     def setUp(self):
         self.sp = spectrum.TabularSourceSpectrum(testdata)
 
-
-    def testRedshift0(self):
-        # redshift = 0 should return the same input.
-        sp = self.sp.redshift(0.0)
-        self.assertApproxFP(sp._wavetable[testindex], values['angstrom'], accuracy=0.0025)
-        self.assertApproxFP(sp._fluxtable[testindex], values['photlam'], accuracy=0.0025)
-        (dummy, fluxes) = sp.getArrays()
-        self.assertApproxFP(fluxes[testindex],values['flam'], accuracy=0.0025)
-
-        # convert to photnu, then redshift, and check that flux in
-        # photonu units didn't change.
-        sp.convert('photnu')
-        self.assertApproxFP(sp._wavetable[testindex], values['angstrom'], accuracy=0.0025)
-        self.assertApproxFP(sp._fluxtable[testindex], values['photlam'], accuracy=0.0025)
-        (dummy, fluxes) = sp.getArrays()
-        self.assertApproxFP(fluxes[testindex],values['photnu'], accuracy=0.0025)
-##-------------------------------------------------------
-## Redshift algorithm changed with r798
-##        - answers for this test no longer valid
-##-------------------------------------------------------
-##     def testRedshift1(self):
-##         z = 1.0
-##         sp1 = self.sp.redshift(0.0)
-##         sp1.convert('photnu')
-##         sp2 = sp1.redshift(z)
-##         self.assertApproxFP(sp2._wavetable[testindex], values['angstrom z=1.0'], accuracy=0.0025)
-##         (dummy, fluxes) = sp2.getArrays()
-##         self.assertApproxFP(fluxes[testindex],values['photnu'], accuracy=0.0025)
-
-##         # internal array should change though, it's in photlam units.
-##         self.assertApproxFP(sp2._fluxtable[testindex],values['photlam z=1.0'], accuracy=0.0025)
-
-##         # now test redshift in flam units.
-##         sp1.convert('flam')
-##         sp2 = sp1.redshift(2.5)
-##         self.assertApproxFP(sp2._wavetable[testindex], values['angstrom z=2.5'], accuracy=0.0025)
-##         self.assertApproxFP(sp2._fluxtable[testindex], values['photlam z=2.5'], accuracy=0.0025)
-##         (dummy, fluxes) = sp2.getArrays()
-##         self.assertApproxFP(fluxes[testindex],values['flam z=2.5'], accuracy=0.0025)
-
     def testIntegrate(self):
         integral = self.sp.integrate()
         self.assertApproxFP(integral, values['integral'], accuracy=0.0025)
@@ -245,11 +205,6 @@ class SpectrumTestCase(testutil.FPTestCase):
         sp2 = renorm.StdRenorm(self.sp, bp, 5.0, 'vegamag')
         (dummy, fluxes) = sp2.getArrays()
         self.assertApproxFP(fluxes[testindex], 4.37421e-09, accuracy=0.0025)
-
-class PlanckTestCase(testutil.FPTestCase):
-    def testbb(self):
-        flux = planck.bb_photlam_arcsec(refs._default_waveset, 1000.)
-        self.assertApproxFP(flux[5000], 3.89141e-08, accuracy=0.0025)
 
 
 class ObsmodeTestCase(testutil.FPTestCase):
@@ -445,17 +400,6 @@ class ParserTestCase(testutil.FPTestCase):
         wave = sp.GetWaveSet()
         flux = sp(wave)
         self.assertApproxFP(flux[5000], 1.06813E-2, accuracy=0.0025)
-
-##------------------------------------------------------------
-## Redshift algorithm changed with r798
-##    - answers for this test no longer valid
-##------------------------------------------------------------
-##     def testzbb(self):
-##         expr = "z(bb(10000.0),1.0)"
-##         sp = P.interpret(P.parse(P.scan(expr)))
-##         wave = sp.GetWaveSet()
-##         flux = sp(wave)
-##         self.assertApproxFP(flux[5000], 2.67032E-3, accuracy=0.0025)
 
     def testem(self):
         expr = "em(3880.0,10.0,1.0000000168623835E-16,flam)"
@@ -823,18 +767,6 @@ class EnforceWaveFile(EnforceWave):
     def tearDown(self):
         for k in self.cases:
             os.remove(self.cases[k])
-
-class Ticket87(testutil.FPTestCase):
-    def setUp(self):
-        self.sp=S.FlatSpectrum(1)
-        self.z=2.5
-        self.wavecheck=N.array([550])
-
-    def testminwave(self):
-        tst=self.sp.redshift(self.z)
-        self.assert_(self.sp.wave.min() == tst.wave.min(),"wave.min=%f"%tst.wave.min())
-
-
 
 
 if __name__ == '__main__':

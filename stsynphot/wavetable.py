@@ -1,6 +1,4 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-
-
 """
 This module handles the wavecat.dat table presently used by the
 synphot countrate task (and thus the ETC) to select an appropriate wavelength

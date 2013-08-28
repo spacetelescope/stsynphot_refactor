@@ -38,7 +38,7 @@ if not os.path.isdir(specdir):
         setup_py = os.path.join(pardir, 'setup.py')
 
         if not os.path.exists(specdir) or not os.path.exists(setup_py):
-            raise RuntimeError('pysynphot data directory missing!')
+            raise RuntimeError('synphot data directory missing!')
     del pardir
     del setup_py
 
@@ -81,7 +81,7 @@ else:
 
     warnings.warn('Extinction files should be moved to '
                   '$PYSYN_CDBS/extinction for compatibility with '
-                  'future versions of pysynphot.')
+                  'future versions of synphot.')
 
 
 #Define wavecat file explicitly

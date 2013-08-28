@@ -6,9 +6,13 @@ set for a given obsmode.
 """
 from __future__ import division, print_function
 
+# STDLIB
 import re
+
+# THIRD-PARTY
 import numpy as np
 
+# LOCAL
 from . import locations
 
 

@@ -1,7 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """
-This file implements the pysynphot language parser.
+This file implements the synphot language parser.
 
 The language definition is in the docstring of class BaseParser,
 function p_top.  The parser code in spark.py builds its internal
@@ -14,7 +14,7 @@ tables by reading the docstring, so you can't put anything else
   t = parse(l) converts the list of tokens into an Abstract Syntax Tree
 
   r = interpret(t) converts that abstract syntax tree into a (tree
-    of?) pysynphot object, based on the conversion rules in class Interpreter
+    of?) synphot object, based on the conversion rules in class Interpreter
 
 In class Interpreter, the docstring of every function named with p\_
 is part of the instructions to the parser.
@@ -22,11 +22,11 @@ is part of the instructions to the parser.
 """
 from __future__ import division, print_function
 
-# PYSYNPHOT
-from pysynphot import obsbandpass, pysynexcept, reddening, spectrum
+# SYNPHOT
+from synphot import synexceptions, reddening, spectrum
 
 # LOCAL
-from . import catalog, locations, spark
+from . import catalog, locations, obsbandpass, spark
 
 
 syfunctions = [
@@ -349,14 +349,14 @@ class Interpreter(spark.GenericASTMatcher):
                 # Always force the renormalization to occur: prevent exceptions
                 # in case of partial overlap. Less robust but duplicates
                 # synphot. Force the renormalization in the case of partial
-                # overlap (pysynexcept.OverlapError), but raise an exception if
+                # overlap (synexceptions.OverlapError), but raise an exception if
                 # the spectrum and bandpass are entirely disjoint
-                # (pysynexcept.DisjoinError)
+                # (synexceptions.DisjoinError)
                 try:
                     tree.value = sp.renorm(args[2], args[3], args[1])
-                except pysynexcept.DisjoinError:
+                except synexceptions.DisjoinError:
                     raise
-                except pysynexcept.OverlapError:
+                except synexceptions.OverlapError:
                     tree.value = sp.renorm(args[2], args[3],
                                            args[1], force=True)
                     tree.value.warnings['force_renorm'] = \

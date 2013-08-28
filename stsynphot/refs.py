@@ -8,12 +8,12 @@ import warnings
 # THIRD-PARTY
 import numpy as np
 
+# SYNPHOT
+from synphot.spectrum import generate_wavelengths
+
 # LOCAL
 from . import locations
 
-
-_default_waveset = None
-_default_waveset_str = None
 
 # Constants to hold tables.
 GRAPHTABLE = ''
@@ -25,73 +25,13 @@ THERMDICT = {}
 
 PRIMARY_AREA = 45238.93416  # cm^2 - default to HST mirror
 
-
-def set_default_waveset(minwave=500, maxwave=26000, num=10000.,
-                        delta=None, log=True):
-    """
-    Set the default waveset for pysynphot spectral types. Calculated wavesets
-    are inclusive of `minwave` and exclusive of `maxwave`.
-
-    Parameters
-    ----------
-    minwave: float, optional
-        The starting point of the waveset.
-
-    maxwave: float, optional
-        The end point of the waveset.
-
-    num: int, optional
-        The number of elements in the waveset. If `delta` is not None this
-        is ignored.
-
-    delta: float, optional
-        Delta between values in the waveset. If not None, this overrides
-        the `num` parameter. If `log` is True then `delta` is assumed to be
-        the spacing in log space.
-
-    log: bool, optional
-        Sets whether the waveset is evenly spaced in log or linear space. If
-        `log` is True then `delta` is assumed to be the delta in log space.
-        `minwave` and `maxwave` should be given in normal space regardless
-        of the value of `log`.
-
-    """
-    global _default_waveset
-    global _default_waveset_str
-
-    s = 'Min: %s, Max: %s, Num: %s, Delta: %s, Log: %s'
-
-    if log and not delta:
-        s = s % tuple([str(x) for x in (minwave, maxwave, num, None, log)])
-
-        logmin = np.log10(minwave)
-        logmax = np.log10(maxwave)
-
-        _default_waveset = np.logspace(logmin, logmax, num, endpoint=False)
-
-    elif log and delta:
-        s = s % tuple([str(x) for x in (minwave, maxwave, None, delta, log)])
-
-        logmin = np.log10(minwave)
-        logmax = np.log10(maxwave)
-
-        _default_waveset = 10 ** np.arange(logmin, logmax, delta)
-
-    elif not log and not delta:
-        s = s % tuple([str(x) for x in (minwave, maxwave, num, None, log)])
-
-        _default_waveset = np.linspace(minwave, maxwave, num, endpoint=False)
-
-    elif not log and delta:
-        s = s % tuple([str(x) for x in (minwave, maxwave, None, delta, log)])
-
-        _default_waveset = np.arange(minwave, maxwave, delta)
-
-    _default_waveset_str = s
+_default_waveset = None
+_default_waveset_str = None
 
 
 def _set_default_refdata():
     global GRAPHTABLE, COMPTABLE, THERMTABLE, PRIMARY_AREA
+    global _default_waveset, _default_waveset_str
     # Component tables are defined here.
 
     try:
@@ -112,7 +52,10 @@ def _set_default_refdata():
 
     PRIMARY_AREA = 45238.93416  # cm^2 - default to HST mirror
 
-    set_default_waveset()
+    _default_waveset, _default_waveset_str = generate_wavelengths(
+        minwave=500, maxwave=26000, num=10000, delta=None, log=True,
+        wave_unit='angstrom')
+
 
 # Do this on import
 _set_default_refdata()

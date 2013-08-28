@@ -39,19 +39,6 @@ class FileTestCase(testutil.FPTestCase):
         self.openfits.close()
 
 
-class TicketXX(testutil.FPTestCase):
-    def setUp(self):
-        self.sp=S.FlatSpectrum(1)
-        self.z=2.5
-        self.wavecheck=np.array([550])
-
-
-    def testfluxpt(self):
-        tst=self.sp.redshift(self.z)
-        tstpt=tst(self.wavecheck)[0]
-        self.assert_(tst.flux.max() == tstpt,"tstpt=%f"%tstpt)
-
-
 class FileSpecIRAF(testutil.FPTestCase):
     def setUp(self):
         self.opener = S.FileSpectrum

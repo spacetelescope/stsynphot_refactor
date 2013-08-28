@@ -21,9 +21,9 @@ to the top level directory where you have installed these files.
 If you have questions about this module, send email to ``help[at]stsci.edu``.
 
 **Dependencies:**
-  - astropy 0.2 or higher
+  - astropy 0.3 or higher
   - numpy 1.5.1 or higher
-  - pysynphot 3.0.0.dev or higher
+  - synphot 3.0.0.dev or higher
 
 
 Modules
@@ -35,12 +35,19 @@ Modules
    catalog
    graphtab
    locations
+   obsbandpass
+   observationmode
    refs
    reseltable
    spark
    spparser
    tables
    wavetable
+
+
+References
+==========
+Acknowledge astropy paper here
 
 
 Indices and tables
