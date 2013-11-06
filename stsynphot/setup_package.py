@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 def get_package_data():
     return {
         str('stsynphot'): [
-            str('data/*.dat'), str('data/wavecats/*.dat'),
+            str('data/*.txt'), str('data/*.dat'), str('data/wavecats/*.dat'),
             str('data/wavecats/*.txt')],
         str('stsynphot.tests'): [
             str('data/*.txt'), str('data/*.dat'), str('data/*.fits'),

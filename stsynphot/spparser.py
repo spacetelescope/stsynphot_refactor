@@ -1,75 +1,74 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
+"""Synthetic photometry language parser.
+
+See :ref:`stsynphot-parser` for more details and
+:func:`BaseParser.p_top` for language definition.
+
+.. note::
+
+    Like `stsynphot.spark`, parser docstrings in this module
+    are used by the parser itself, so modify any docstring in
+    this module with care.
+
+    In `Interpreter`, the docstring of every function named with ``p_*``
+    is part of the instructions to the parser.
+
+    IRAF SYNPHOT extinction names are obsolete and no longer supported.
 
 """
-This file implements the synphot language parser.
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-The language definition is in the docstring of class BaseParser,
-function p_top.  The parser code in spark.py builds its internal
-tables by reading the docstring, so you can't put anything else
-(like documentation) there.
-::
-
-  l = scan('text') returns a list of tokens
-
-  t = parse(l) converts the list of tokens into an Abstract Syntax Tree
-
-  r = interpret(t) converts that abstract syntax tree into a (tree
-    of?) synphot object, based on the conversion rules in class Interpreter
-
-In class Interpreter, the docstring of every function named with p\_
-is part of the instructions to the parser.
-
-"""
-from __future__ import division, print_function
+# ASTROPY
+from astropy import log
+from astropy import units as u
+from astropy.extern import six
 
 # SYNPHOT
-from synphot import synexceptions, reddening, spectrum
+from synphot import analytic, reddening
+from synphot import exceptions as synexceptions
+from synphot import spectrum as synspectrum
 
 # LOCAL
-from . import catalog, locations, obsbandpass, spark
+from . import catalog, config, exceptions, io, spark, spectrum
 
 
-syfunctions = [
-    'spec',
-    'unit',
-    'box',
-    'bb',
-    'pl',
-    'em',
-    'icat',
-    'rn',
-    'z',
-    'ebmvx',
-    'band'
-]
+__all__ = ['Token', 'AST', 'BaseScanner', 'Scanner', 'BaseParser',
+           'Interpreter', 'tokens_info', 'scan', 'parse', 'interpret',
+           'parse_spec']
 
-synforms = [
-    'fnu',
-    'flam',
-    'photnu',
-    'photlam',
-    'counts',
-    'abmag',
-    'stmag',
-    'obmag',
-    'vegamag',
-    'jy',
-    'mjy'
-]
+# IRAF SYNPHOT functions
+_SYFUNCTIONS = ('band', 'bb', 'box', 'ebmvx', 'em', 'icat', 'pl', 'rn', 'spec',
+                'unit', 'z')
 
-syredlaws = [
-    'gal1',
-    'gal2',
-    'gal3',
-    'smc',
-    'lmc',
-    'xgal'
-]
+# IRAF SYNPHOT flux units
+_SYFORMS = ('abmag', 'counts', 'flam', 'fnu', 'jy', 'mjy', 'obmag', 'photlam',
+             'photnu', 'stmag', 'vegamag')
+
+# Filelist is not supported yet. Should be handled in :func:`interpret`.
+#_ZZZ = """ top ::= FILELIST """
 
 
-class Token:
-    def __init__(self, type=None, attr=None):
-        self.type = type
+def _convertstr(value):
+    """Convert given filename to source spectrum or passband.
+
+    This is used by the interpreter to do the conversion from
+    string to spectrum object.
+
+    """
+    if not isinstance(value, six.string_types):
+        return value
+    value = io.irafconvert(value)
+    try:
+        sp = synspectrum.SourceSpectrum.from_file(value)
+    except KeyError:
+        sp = synspectrum.SpectralElement.from_file(value)
+    return sp
+
+
+class Token(object):
+    # Class to handle token.
+    def __init__(self, token_type=None, attr=None):
+        self.type = token_type
         self.attr = attr
 
     def __cmp__(self, o):
@@ -82,9 +81,10 @@ class Token:
             return self.type
 
 
-class AST:
-    def __init__(self, type):
-        self.type = type
+class AST(object):
+    # Class to handle Abstract Syntax Tree (AST).
+    def __init__(self, ast_type):
+        self.type = ast_type
         self._kids = []
 
     def __getitem__(self, i):
@@ -101,60 +101,75 @@ class AST:
 
 
 class BaseScanner(spark.GenericScanner):
+    # Base class to handle language scanner.
     def __init__(self):
         spark.GenericScanner.__init__(self)
 
-    def tokenize(self, input):
+    def tokenize(self, s):
+        # Tokenize string.
         self.rv = []
-        spark.GenericScanner.tokenize(self, input)
+        spark.GenericScanner.tokenize(self, s)
         return self.rv
 
     def t_whitespace(self, s):
+        # Whitespace regular expression.
         r' \s+ '
 
     def t_op(self, s):
+        # Addition, multiplication, and subtraction operations
+        # regular expression.
         r' \+ | \* | - '
-        self.rv.append(Token(type=s))
+        self.rv.append(Token(token_type=s))
 
     def t_lparens(self, s):
+        # Left parenthesis regular expression.
         r' \( '
-        self.rv.append(Token(type='LPAREN'))
+        self.rv.append(Token(token_type='LPAREN'))
 
     def t_rparens(self, s):
+        # Right parenthesis regular expression.
         r' \) '
-        self.rv.append(Token(type='RPAREN'))
+        self.rv.append(Token(token_type='RPAREN'))
 
     def t_comma(self, s):
+        # Comma regular expression.
         r' , '
-        self.rv.append(Token(type=s))
+        self.rv.append(Token(token_type=s))
 
     def t_integer(self, s):
+        # Integer regular expression.
         r' \d+ '
-        self.rv.append(Token(type='INTEGER', attr=s))
+        self.rv.append(Token(token_type='INTEGER', attr=s))
 
     def t_identifier(self, s):
+        # Identifier regular expression.
         r' [$a-z_A-Z/\//][\w/\.\$:#]*'
-        self.rv.append(Token(type='IDENTIFIER', attr=s))
+        self.rv.append(Token(token_type='IDENTIFIER', attr=s))
 
     def t_filelist(self, s):
+        # File list regular expression.
         r' @\w+'
-        self.rv.append(Token(type='FILELIST', attr=s[1:]))
+        self.rv.append(Token(token_type='FILELIST', attr=s[1:]))
 
 
 class Scanner(BaseScanner):
+    # Class to handle language scanner.
     def __init__(self):
         BaseScanner.__init__(self)
 
     def t_float(self, s):
+        # Float regular expression.
         r' ((\d*\.\d+)|(\d+\.d*)|(\d+)) ([eE][-+]?\d+)?'
-        self.rv.append(Token(type='FLOAT', attr=s))
+        self.rv.append(Token(token_type='FLOAT', attr=s))
 
     def t_divop(self, s):
+        # Division operation regular expression.
         r' \s/\s '
-        self.rv.append(Token(type='/'))
+        self.rv.append(Token(token_type='/'))
 
 
 class BaseParser(spark.GenericASTBuilder):
+    # Base class to handle language parser.
     def __init__(self, ASTclass, start='top'):
         spark.GenericASTBuilder.__init__(self, ASTclass, start)
 
@@ -183,102 +198,75 @@ class BaseParser(spark.GenericASTBuilder):
         """
 
     def terminal(self, token):
+        # Return terminal element.
         rv = AST(token.type)
         rv.attr = token.attr
         return rv
 
-    def nonterminal(self, type, args):
+    def nonterminal(self, intype, args):
+        # Return non-terminal element.
         if len(args) == 1:
-            return args[0]
-        return spark.GenericASTBuilder.nonterminal(self, type, args)
+            rv = args[0]
+        else:
+            rv = spark.GenericASTBuilder.nonterminal(self, intype, args)
+        return rv
 
 
 class Interpreter(spark.GenericASTMatcher):
+    # Class to handle language interpreter.
     def __init__(self, ast):
         spark.GenericASTMatcher.__init__(self, 'V', ast)
 
     def error(self, token):
-        raise ValueError("problems in interpreting AST")
+        # Raise en exception.
+        raise exceptions.ParserError('Cannot interpret AST.')
 
     def p_int(self, tree):
-        """
-        V ::= INTEGER
-
-        """
+        """ V ::= INTEGER """
         tree.value = int(tree.attr)
         tree.svalue = tree.attr
 
     def p_float(self, tree):
-        """
-        V ::= FLOAT
-
-        """
+        """ V ::= FLOAT """
         tree.value = float(tree.attr)
         tree.svalue = tree.attr
 
     def p_identifier(self, tree):
-        """
-        V ::= IDENTIFIER
-
-        """
+        """ V ::= IDENTIFIER """
         tree.value = tree.attr
         tree.svalue = tree.attr
 
     def p_factor_unary_plus(self, tree):
-        """
-        V ::= factor ( + V )
-
-        """
-        tree.value = convertstr(tree[1].value)
+        """ V ::= factor ( + V ) """
+        tree.value = _convertstr(tree[1].value)
 
     def p_factor_unary_minus(self, tree):
-        """
-        V ::= factor ( - V )
-
-        """
-        tree.value = - convertstr(tree[1].value)
+        """ V ::= factor ( - V ) """
+        tree.value = - _convertstr(tree[1].value)
 
     def p_expr_plus(self, tree):
-        """
-        V ::= expr ( V + V )
-
-        """
-        tree.value = convertstr(tree[0].value) + convertstr(tree[2].value)
+        """ V ::= expr ( V + V ) """
+        tree.value = _convertstr(tree[0].value) + _convertstr(tree[2].value)
 
     def p_expr_minus(self, tree):
-        """
-        V ::= expr ( V - V )
-
-        """
-        tree.value = convertstr(tree[0].value) - convertstr(tree[2].value)
+        """ V ::= expr ( V - V ) """
+        tree.value = _convertstr(tree[0].value) - _convertstr(tree[2].value)
 
     def p_term_mult(self, tree):
-        """
-        V ::= term ( V * V )
-
-        """
-        tree.value = convertstr(tree[0].value) * convertstr(tree[2].value)
+        """ V ::= term ( V * V ) """
+        tree.value = _convertstr(tree[0].value) * _convertstr(tree[2].value)
 
     def p_term_div(self, tree):
-        """
-        V ::= term ( V / V )
-
-        """
-        tree.value = convertstr(tree[0].value) / tree[2].value
+        """ V ::= term ( V / V ) """
+        tree.value = _convertstr(tree[0].value) / tree[2].value
 
     def p_value_paren(self, tree):
-        """
-        V ::= value ( LPAREN V RPAREN )
-
-        """
-        tree.value = convertstr(tree[1].value)
+        """ V ::= value ( LPAREN V RPAREN ) """
+        tree.value = _convertstr(tree[1].value)
         tree.svalue = "(%s)" % str(tree[1].value)
 
     def p_arglist(self, tree):
-        """
-        V ::= arglist ( V , V )
-
-        """
+        """ V ::= arglist ( V , V ) """
         if isinstance(tree[0].value, list):
             tree.value = tree[0].value + [tree[2].value]
         else:
@@ -289,165 +277,180 @@ class Interpreter(spark.GenericASTMatcher):
             pass  # We only care about this for relatively simple constructs.
 
     def p_functioncall(self, tree):
-        # Where all the real interpreter action is
+        # Where all the real interpreter action is.
         # Note that things that should only be done at the top level
-        # are performed in the interpret function defined below.
-        """
-        V ::= function_call ( V LPAREN V RPAREN )
-
-        """
+        # are performed in :func:`interpret` defined below.
+        """ V ::= function_call ( V LPAREN V RPAREN ) """
         if type(tree[2].value)!=type([]):
             args = [tree[2].value]
         else:
             args = tree[2].value
+
         fname = tree[0].value
-        if fname not in syfunctions:
-            print("Error: unknown function:", fname)
+
+        if fname not in _SYFUNCTIONS:
+            log.error('Unknown function: {0}'.format(fname))
             self.error(fname)
+
         else:
+            area = config.PRIMARY_AREA()
+
+            # Constant spectrum
             if fname == 'unit':
-                # constant spectrum
-                tree.value = spectrum.FlatSpectrum(args[0], fluxunits=args[1])
+                if args[1] not in _SYFORMS:
+                    log.error('Unrecognized unit: {0}'.format(args[1]))
+                    self.error(fname)
+                tree.value = analytic.Const1DSpectrum(
+                    args[0], flux_unit=args[1], area=area)
+
+            # Black body
             elif fname == 'bb':
-                # black body
-                tree.value = spectrum.BlackBody(args[0])
+                tree.value = analytic.BlackBody1DSpectrum(args[0], area=area)
+
+            # Power law
             elif fname == 'pl':
-                # power law
-                if args[2] not in synforms:
-                    print("Error: unrecognized units:", args[2])
-                # code to create powerlaw spectrum object
-                tree.value = spectrum.Powerlaw(args[0], args[1],
-                                               fluxunits=args[2]
-                )
+                if args[2] not in _SYFORMS:
+                    log.error('Unrecognized unit: {0}'.format(args[2]))
+                    self.error(fname)
+                tree.value = analytic.PowerLaw1DSpectrum(
+                    1.0, args[0], -1.0 * args[1], flux_unit=args[2], area=area)
+
+            # Box throughput
             elif fname == 'box':
-                # box throughput
-                tree.value = spectrum.Box(args[0], args[1])
+                tree.value = analytic.Box1DSpectrum(
+                    1.0, args[0], args[1], area=area)
+
+            # Source spectrum from file
             elif fname == 'spec':
-                # spectrum from reference file (for now....)
-                name = args[0]
-                tree.value = spectrum.TabularSourceSpectrum(
-                    _handleIRAFName(name)
-                )
+                tree.value = synspectrum.SourceSpectrum.from_file(
+                    io.irafconvert(args[0]), area=area)
+
+            # Passband
             elif fname == 'band':
-                # passband
-                args = tree[2].svalue
-                tree.value = obsbandpass.ObsBandpass(args)
+                tree.value = spectrum.band(tree[2].svalue)
+
+            # Gaussian emission line
             elif fname == 'em':
-                # emission line
-                tree.value = spectrum.GaussianSource(args[2], args[0],
-                                                     args[1], fluxunits=args[3])
+                if args[3] not in _SYFORMS:
+                    log.error('Unrecognized unit: {0}'.format(args[3]))
+                    self.error(fname)
+                totflux = u.Quantity(args[2], args[3])
+                tree.value = analytic.gaussian_spectrum(
+                    totflux, args[0], args[1], area=area)
+
+            # Catalog interpolation
             elif fname == 'icat':
-                # catalog interpolation
-                tree.value = catalog.Icat(*args)
+                tree.value = catalog.grid_to_spec(*args, area=area)
+
+            # Renormalize source spectrum
             elif fname == 'rn':
-                # renormalize
                 sp = args[0]
-                if not isinstance(sp,spectrum.SourceSpectrum):
-                    name = _handleIRAFName(args[0])
-                    sp = spectrum.TabularSourceSpectrum(name)
+                bp = args[1]
+                rnval = u.Quantity(args[2], args[3])
+
+                if isinstance(sp, analytic.BaseMixinAnalytic):
+                    sp = sp.to_spectrum(config._DEFAULT_WAVESET())
+                elif not isinstance(sp, synspectrum.SourceSpectrum):
+                    sp = synspectrum.SourceSpectrum.from_file(
+                        io.irafconvert(sp), area=area)
+
+                if isinstance(bp, analytic.BaseMixinAnalytic):
+                    bp = bp.to_spectrum(config._DEFAULT_WAVESET())
+                elif not isinstance(bp, synspectrum.SpectralElement):
+                    bp = synspectrum.SpectralElement.from_file(
+                        io.irafconvert(bp), area=area)
 
                 # Always force the renormalization to occur: prevent exceptions
                 # in case of partial overlap. Less robust but duplicates
-                # synphot. Force the renormalization in the case of partial
-                # overlap (synexceptions.OverlapError), but raise an exception if
-                # the spectrum and bandpass are entirely disjoint
-                # (synexceptions.DisjoinError)
+                # IRAF SYNPHOT. Force the renormalization in the case of partial
+                # overlap, but raise an exception if the spectrum and bandpass
+                # are entirely disjoint.
                 try:
-                    tree.value = sp.renorm(args[2], args[3], args[1])
-                except synexceptions.DisjoinError:
-                    raise
-                except synexceptions.OverlapError:
-                    tree.value = sp.renorm(args[2], args[3],
-                                           args[1], force=True)
+                    tree.value = sp.renorm(rnval, bp, vegaspec=spectrum.Vega)
+                except synexceptions.PartialOverlap:
+                    tree.value = sp.renorm(rnval, bp, vegaspec=spectrum.Vega,
+                                           force=True)
                     tree.value.warnings['force_renorm'] = \
-                        'Warning: Renormalization of the spectrum, ' \
-                        'to the specified value, in the specified units, ' \
-                        'exceeds the limit of the specified passband.'
+                        'Renormalization of {0}, to {1} and {2}, ' \
+                        'exceeds the limit of the specified passband.'.format(
+                        str(sp), rnval, str(bp))
 
+            # Redshift source spectrum (flat spectrum if fails)
             elif fname == 'z':
-                # redshift
-                if args[0] != 'null':  # the ETC generates junk sometimes....
-                    try:
-                        tree.value = args[0].redshift(args[1])
-                    except AttributeError:
-                        try:
-                            sp = spectrum.TabularSourceSpectrum(
-                                _handleIRAFName(args[0])
-                            )
-                            tree.value = sp.redshift(args[1])
-                        except AttributeError:
-                            tree.value = spectrum.FlatSpectrum(1.0)
+                sp = args[0]
+
+                # ETC generates junk (i.e., 'null') sometimes
+                if isinstance(sp, six.string_types) and sp != 'null':
+                    sp = synspectrum.SourceSpectrum.from_file(
+                        io.irafconvert(sp), area=area)
+                elif isinstance(sp, analytic.BaseMixinAnalytic):
+                    sp = sp.to_spectrum(config._DEFAULT_WAVESET())
+
+                if isinstance(sp, synspectrum.SourceSpectrum):
+                    tree.value = sp.apply_redshift(args[1])
                 else:
-                    tree.value = spectrum.FlatSpectrum(1.0)
+                    tree.value = analytic.flat_spectrum('photlam', area=area)
+
+            # Extinction
             elif fname == 'ebmvx':
-                # extinction
-                tree.value = reddening.Extinction(args[0], args[1])
+                try:
+                    tree.value = spectrum.ebmvx(args[1], args[0], area=area)
+                except synexceptions.SynphotError as e:
+                    log.error(str(e))
+                    self.error(fname)
 
+            # Default
             else:
-                tree.value = "would call %s with the following args: %s" % \
-                             (fname, repr(args))
+                tree.value = 'would call {0} with the following args: ' \
+                    '{1}'.format(fname, repr(args))
 
 
-# stuff not yet handled, namely, Filelist, should be handled in interp function
-zzz = """ top ::= FILELIST """
+def tokens_info(tlist):
+    """Print tokens for debugging.
+
+    Parameters
+    ----------
+    tlist : list
+        List of tokens.
+
+    """
+    for token in tlist:
+        log.info('{0} {1}'.format(token.type, token.attr))
 
 
-def convertstr(value):
-    # Any string appearing in numeric expressions must be
-    # assumed to be a filename that should be read in as a table
-    # This is a utility function used by the interpreter to do the
-    # conversion from string to spectrum object
-    if isinstance(value, str):
-        return _handleThroughputFiles(_handleIRAFName(value))
-    else:
-        return value
-
-
-def scan(input):
+def scan(input_str):
+    """Scan language string."""
     scanner = Scanner()
-    input = input.replace('%2b', '+')
-    return scanner.tokenize(input)
+    input_str = input_str.replace('%2b', '+')
+    return scanner.tokenize(input_str)
 
 
 def parse(tokens):
+    """Parse tokens."""
     parser = BaseParser(AST)
     return parser.parse(tokens)
 
 
 def interpret(ast):
+    """Interpret AST."""
     interpreter = Interpreter(ast)
     interpreter.match()
     value = ast.value
-    return convertstr(value)
+    return _convertstr(value)
 
 
-def ptokens(tlist):
-    for token in tlist:
-        print(token.type, token.attr)
-
-
-def _handleIRAFName(name):
-    """
-    Calls locations.irafconvert() to translate shell or iraf variables
-
-    """
-
-    return locations.irafconvert(name)
-
-
-def _handleThroughputFiles(name):
-    #Most files will be spectrum files, but some will be throughput files.
-    try:
-        return spectrum.TabularSourceSpectrum(_handleIRAFName(name))
-    except NameError:
-        return spectrum.TabularSourceSpectrum(_handleIRAFName(name))
-
-
-#Convenience function
 def parse_spec(syncommand):
-    """
-    Parse the synphot-classic command and return the resulting spectrum
+    """Parse a classic SYNPHOT command and return the resulting spectrum.
+
+    Parameters
+    ----------
+    syncommand : str
+        SYNPHOT command string.
+
+    Returns
+    -------
+    sp : obj
+        Spectrum object.
 
     """
-    sp = interpret(parse(scan(syncommand)))
-    return sp
+    return interpret(parse(scan(syncommand)))

@@ -1,4 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 #this indicates whether or not we are in the package's setup.py
 try:
@@ -126,3 +127,7 @@ if not _ASTROPY_SETUP_:
 #--------------#
 # STSYNPHOT UI #
 #--------------#
+from .config import setdir, getdir, setref, getref, showref
+from .spectrum import band, ebmvx, Vega
+from .spparser import parse_spec
+from .wavetable import WAVECAT

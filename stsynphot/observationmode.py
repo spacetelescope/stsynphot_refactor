@@ -1,6 +1,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""Observation mode handling."""
-from __future__ import division, print_function
+"""Module to handle observations based on observation modes."""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # STDLIB
 import re
@@ -9,91 +9,302 @@ import re
 import numpy as np
 
 # ASTROPY
+from astropy import log
 from astropy import units as u
 
 # SYNPHOT
-from synphot import planck, spectrum, units
+from synphot import planck, units
+from synphot import exceptions as synexceptions
+from synphot import spectrum as synspectrum
+from synphot.utils import merge_wavelengths
 
 # LOCAL
-from . import locations, refs, tables, wavetable
+from . import config, exceptions, io, spectrum, tables
+from .wavetable import WAVECAT
 
 
-#Flag to control verbosity
-DEBUG = False
+__all__ = ['reset_cache', 'Component', 'ThermalComponent',
+           'BaseObservationMode', 'ObservationMode', 'ThermalObservationMode']
 
-rootdir = locations.rootdir
-datadir = locations.specdir
-wavecat = locations.wavecat
+_band_patt = re.compile(r'band\((.*?)\)', re.IGNORECASE)
 
-CLEAR = 'clear'
+# Cache previously loaded graph, component, and thermal tables
+_GRAPHDICT = {}
+_COMPDICT = {}
+_THERMDICT = {}
+
+
+def reset_cache():
+    """Empty the table dictionaries cache."""
+    global _GRAPHDICT, _COMPDICT, _THERMDICT
+    _GRAPHDICT.clear()
+    _COMPDICT.clear()
+    _THERMDICT.clear()
+
+
+class Component(object):
+    """Class to handle individual components in `BaseObservationMode`.
+
+    Parameters
+    ----------
+    throughput_name : str
+        Component filename.
+
+    interpval : float or `None`, optional
+        If not `None`, interpolate to the given value.
+        See :func:`stsynphot.spectrum.interpolate_spectral_element`.
+
+    area : float or `astropy.units.quantity.Quantity`, optional
+        Telescope collecting area. If not Quantity, assumed
+        to be in :math:`cm^{2}`.
+
+    Attributes
+    ----------
+    throughput_name : str
+        Component filename.
+
+    throughput : `synphot.spectrum.SpectralElement` or `None`
+        Component spectrum object.
+
+    primary_area : float or `astropy.units.quantity.Quantity`
+        Telescope collecting area. If not Quantity, assumed
+        to be in :math:`cm^{2}`.
+
+    """
+    def __init__(self, throughput_name, interpval=None, area=None):
+        self.throughput_name = throughput_name
+        self.primary_area = area
+        self._interpval = interpval
+        self._empty = True
+        self._build_throughput()
+
+    def _build_throughput(self):
+        """Extract passband spectrum unless component is a CLEAR filter."""
+        if self.throughput_name != tables.CLEAR_FILTER:
+            self._empty = False
+            if self._interpval is None:
+                self.throughput = synspectrum.SpectralElement.from_file(
+                    self.throughput_name, area=self.primary_area)
+            else:
+                self.throughput = spectrum.interpolate_spectral_element(
+                    self.throughput_name, self._interpval,
+                    area=self.primary_area)
+        else:
+            self.throughput = None
+
+    def __str__(self):
+        return str(self.throughput)
+
+    @property
+    def empty(self):
+        """`True` if ``self.throughput`` is empty."""
+        return self._empty
+
+
+class ThermalComponent(Component):
+    """Class to handle thermal components in `BaseObservationMode`.
+
+    Parameters
+    ----------
+    throughput_name, thermal_name : str
+        Optical and thermal component filenames.
+
+    interpval : float or `None`, optional
+        If not `None`, interpolate to the given value (optical only).
+        See :func:`stsynphot.spectrum.interpolate_spectral_element`.
+
+    area : float or `astropy.units.quantity.Quantity`, optional
+        Telescope collecting area. If not Quantity, assumed
+        to be in :math:`cm^{2}`.
+
+    Attributes
+    ----------
+    throughput_name, thermal_name : str
+        Optical and thermal component filenames.
+
+    throughput : `synphot.spectrum.SpectralElement` or `None`
+        Optical component spectrum object.
+
+    emissivity : `stsynphot.spectrum.ThermalSpectralElement` or `None`
+        Thermal component spectrum object.
+
+    primary_area : float or `astropy.units.quantity.Quantity`
+        Telescope collecting area. If not Quantity, assumed
+        to be in :math:`cm^{2}`.
+
+    """
+    def __init__(self, throughput_name, thermal_name, interpval=None,
+                 area=None):
+        Component.__init__(
+            self, throughput_name, interpval=interpval, area=area)
+        self.thermal_name = thermal_name
+        self._build_emissivity()
+
+    def _build_emissivity(self):
+        """Extract thermal spectrum unless component is a CLEAR filter."""
+        if self.thermal_name != tables.CLEAR_FILTER:
+            self._empty = False
+            self.emissivity = spectrum.ThermalSpectralElement.from_file(
+                self.thermal_name, area=self.primary_area)
+        else:
+            self.emissivity = None
+
+
+def _process_graphtable(graphtable):
+    """Load and cache graphtable. Get primary area."""
+    global _GRAPHDICT
+
+    # Use default graph table if not given
+    if graphtable is None:
+        gtname = config.GRAPHTABLE()
+    else:
+        gtname = graphtable
+
+    # Load and cache graphtable, if not in cache
+    if gtname in _GRAPHDICT:
+        gt = _GRAPHDICT[gtname]
+    else:
+        gt = tables.GraphTable(gtname)
+        _GRAPHDICT[gtname] = gt
+
+    # Set telescope collecting area
+    if gt.primary_area is None:
+        area = config.PRIMARY_AREA()
+    else:
+        area = gt.primary_area
+    primary_area = units.validate_quantity(area, units.AREA)
+
+    return gt, gtname, primary_area
 
 
 class BaseObservationMode(object):
-    """
-    Class that handles the graph table, common to both optical and
-    thermal obsmodes.
+    """Base class to handle an observation that uses the graph
+    and optical component tables, common to both optical and
+    thermal observation modes.
+
+    Parameters
+    ----------
+    obsmode : str
+        Observation mode.
+
+    graphtable : str or `None`
+        Graph table filename. If `None`, uses ``stsynphot.config.GRAPHTABLE``.
+
+    comptable : str or `None`
+        Optical component table filename. If `None`, uses
+        ``stsynphot.config.COMPTABLE``.
+
+    Attributes
+    ----------
+    modes : list
+        List of individual modes within observation mode. For parameterized mode, its value is stripped. For example, ``'acs,wfc1,f555w,mjd#53000'`` becomes ``['acs', 'wfc1', 'f555w', 'mjd#']``.
+
+    pardict : dict
+        Maps parameterized mode to its value. For example, ``'mjd#53000'`` becomes ``{'mjd': 53000.0}``.
+
+    gtname, ctname : str
+        Graph and component table filenames.
+
+    compnames, thcompnames : list of str
+        Optical and thermal components.
+
+    components : list of obj
+        List of component objects.
+
+    primary_area : `astropy.units.quantity.Quantity`
+        Telescope collecting area.
+
+    pixscale : `astropy.units.quantity.Quantity`
+        Detector pixel scale from ``stsynphot.config.DETECTORFILE``, which is parsed with :func:`synphot.io.read_detector_pars`.
+
+    binset : str
+        Wavelength table filename or parameter string from the  matching observation mode in ``stsynphot.wavetable.WAVECAT``.
+
+    bandwave : `astropy.units.quantity.Quantity`
+        Wavelength set defined by ``binset``.
 
     """
+    def __init__(self, obsmode, graphtable=None, comptable=None):
+        global _GRAPHDICT, _COMPDICT
 
-    def __init__(self, obsmode, method='HSTGraphTable', graphtable=None):
-        # Strip "band()" syntax if present
-        tmatch=re.search(r'band\((.*?)\)', obsmode, re.IGNORECASE)
+        # Strip "band()" syntax if present, and force lowercase
+        tmatch = _band_patt.search(obsmode)
         if tmatch:
-            obsmode=tmatch.group(1)
-        self._obsmode = obsmode
+            self._obsmode = tmatch.group(1).lower()
+        else:
+            self._obsmode = obsmode.lower()
 
-        if graphtable is None:
-            graphtable = refs.GRAPHTABLE
-
-        self.pardict={}
-
-        modes = obsmode.lower().split(',')
-        if '#' in obsmode:
+        # Split obsmode and separate parameterized modes
+        modes = self._obsmode.split(',')
+        self.pardict = {}
+        if '#' in self._obsmode:
             self.modes = []
             for m in modes:
                 if '#' in m:
                     key, val = m.split('#')
                     self.pardict[key] = float(val)
-                    self.modes.append("%s#" % key)
+                    self.modes.append('{0:s}#'.format(key))
                 else:
                     self.modes.append(m)
         else:
             self.modes = modes
 
-#        gt = tables.GraphTable(graphtable)
-        if graphtable in refs.GRAPHDICT.keys():
-            gt = refs.GRAPHDICT[graphtable]
+        # Get graph table and primary area
+        gt, self.gtname, self.primary_area = _process_graphtable(graphtable)
+
+        # Get optical and thermal components
+        self.compnames, self.thcompnames = gt.get_comp_from_gt(self.modes, 1)
+
+        # Use default optical component table if not given
+        if comptable is None:
+            self.ctname = config.COMPTABLE()
         else:
-            gt = tables.GraphTable(graphtable)
-            refs.GRAPHDICT[graphtable] = gt
+            self.ctname = comptable
 
-        self.gtname = graphtable
-
-        self.compnames, self.thcompnames = \
-            gt.GetComponentsFromGT(self.modes, 1)
-
-        if hasattr(gt, 'primary_area'):
-            self.primary_area = gt.primary_area
+        # Load and cache comptable, if not in cache
+        if self.ctname in _COMPDICT:
+            ct = _COMPDICT[self.ctname]
         else:
-            self.primary_area = refs.PRIMARY_AREA
+            ct = tables.CompTable(self.ctname)
+            _COMPDICT[self.ctname] = ct
 
-        # For sensitivity calculations: 5.03411762e7 is hc in
-        # the appropriate units
+        # Set by sub-classes
+        self.components = None
+
+        # Get optical component filenames
+        self._throughput_filenames = ct.get_filenames(self.compnames)
+
+        # Set detector pixel scale
+        self._set_pixscale()
+
+        # For sensitivity calculations
         self._constant = self.primary_area / units.HC
 
-        self.components = None  # Will be filled by subclasses
-        self.pixscale = None
-
-        obm = self._obsmode.lower()
-
+        # Get wavelength set
         try:
-            self.binset = wavetable.wavetable[obm]
-        except KeyError as e:
-            # If zero candidates were found, that's ok.
-            pass
-        except ValueError as e:
-            # wavetable will raise a ValueError if the key was ambiguous
-            print("Warning, ", str(e))
+            self.binset, self.bandwave = WAVECAT.load_waveset(self._obsmode)
+        except (KeyError, exceptions.AmbiguousObsmode) as e:
+            log.warn(str(e))
+            self.binset = ''
+            self.bandwave = None
+
+    def _set_pixscale(self):
+        """Set pixel scale.
+        If multiple matches found, only first match is used.
+
+        """
+        data = io.read_detector_pars(io.irafconvert(config.DETECTORFILE()))
+        obsmode = ','.join(self._obsmode.split(',')[:2])
+        pixscales = data[data['OBSMODE'] == obsmode]['SCALE'].data
+
+        if pixscales.size < 1:
+            raise synexceptions.SynphotError(
+                '{0} not found in {1}.'.format(obsmode, config.DETECTORFILE()))
+
+        self.pixscale = u.Quantity(pixscales[0], unit=u.arcsec)
+
+    def _get_components(self):
+        raise NotImplementedError('To be implemented by subclasses.')
 
     def __str__(self):
         return self._obsmode
@@ -101,432 +312,354 @@ class BaseObservationMode(object):
     def __len__(self):
         return len(self.components)
 
-    def _getFileNames(self, comptable, compnames):
-        files = []
-        for compname in compnames:
-            if compname not in [None, '', CLEAR]:
-                index = np.where(comptable.compnames == compname)
-                try:
-                    iraffilename = comptable.filenames[index[0][0]]
-                    filename = locations.irafconvert(iraffilename)
-                    files.append(filename.lstrip())
-                except IndexError:
-                    raise IndexError("Can't find %s in comptable %s" %
-                                     (compname, comptable.name))
-            else:
-                files.append(CLEAR)
+    @staticmethod
+    def _parkey_from_filename(filename):
+        """Extract parkey from component filename in the format of
+        ``name[parkey#]``.
 
-        return files
-
-    def GetFileNames(self):
-        return self._throughput_filenames
+        """
+        if filename.endswith('#]'):
+            x = filename.split('[')
+            parkey = x[1][:-2]
+        else:
+            parkey = None
+        return parkey
 
     def showfiles(self):
-        """
-        Duplicate synphot showfiles behavior
+        """Display optical component filenames.
+
+        .. note:: Similar to IRAF SYNPHOT SHOWFILES.
 
         """
+        info_str = '#Throughput table names:\n'
         for name in self._throughput_filenames:
-            if name != 'clear':
-                print(name)
-
-    def bandWave(self):
-        """
-        Return the binned waveset most appropriate for the obsmode,
-        as defined by the wavecat.dat file.
-
-        """
-
-        if self.binset.startswith('('):
-            return self._computeBandwave(self.binset)
-        else:
-            return self._getBandwaveFomFile(self.binset)
-
-    def _computeBandwave(self, coeff):
-        (a, b, c, nwave) = self._computeQuadraticCoefficients(coeff)
-
-        result = np.zeros(shape=[nwave, ], dtype=np.float64)
-
-        for i in range(nwave):
-            result[i] = ((a * i) + b) * i + c
-
-        return result
-
-    def _computeQuadraticCoefficients(self, coeff):
-
-        coefficients = (coeff[1:][:-1]).split(',')
-
-        c0 = float(coefficients[0])
-        c1 = float(coefficients[1])
-        c2 = (c1 - c0) / 1999.0  # arbitraily copied from synphot....
-        # In synphot.countrate/calcstep.x, it was NSPEC-1, where
-        # NSPEC was hardcoded to 2000 as the number of bins into
-        # which the wavelength set should be divided by default
-        c3 = c2
-        if len(coefficients) > 2:
-            c2 = float(coefficients[2])
-            c3 = c2
-        if len(coefficients) > 3:
-            c3 = float(coefficients[3])
-
-        nwave = int(2.0 * (c1 - c0) / (c3 + c2)) + 1
-
-        c = c0
-        b = c2
-        a = (c3 * c3 - c2 * c2) / (4.0 * (c1 - c0))
-
-        return (a, b, c, nwave)
-
-    def _getBandwaveFomFile(self, filename):
-        name = locations.irafconvert(filename)
-
-        fs = open(name, mode='r')
-        lines = fs.readlines()
-        fs.close()
-
-        tokens = []
-        for line in lines:
-            if not line.startswith('#'):
-                tokens.append(line)
-
-        return np.float_(tokens)
+            if name != tables.CLEAR_FILTER:
+                info_str += '{0}\n'.format(name)
+        log.info(info_str.rstrip())
 
 
 class ObservationMode(BaseObservationMode):
+    """Class to handle an observation that uses the graph
+    and optical component tables.
 
-    def __init__(self, obsmode,
-                 method='HSTGraphTable',
-                 graphtable=None,
-                 comptable=None,
+    Parameters
+    ----------
+    obsmode, graphtable, comptable
+        See `BaseObservationMode`.
+
+    component_dict : dict
+        Maps component filename to corresponding `Component`.
+
+    Attributes
+    ----------
+    modes, pardict, gtname, ctname, compnames, thcompnames, components, primary_area, pixscale, binset, bandwave
+        See `BaseObservationMode`.
+
+    """
+    def __init__(self, obsmode, graphtable=None, comptable=None,
                  component_dict={}):
+        super(ObservationMode, self).__init__(
+            obsmode, graphtable=graphtable, comptable=comptable)
+        self._component_dict = component_dict
+        self.components = self._get_components()
 
-        if graphtable is None:
-            graphtable = refs.GRAPHTABLE
-        if comptable is None:
-            comptable = refs.COMPTABLE
-
-        BaseObservationMode.__init__(self, obsmode, method, graphtable)
-
-#        ct = tables.CompTable(comptable)
-        if comptable in refs.COMPDICT.keys():
-            ct = refs.COMPDICT[comptable]
-        else:
-            ct = tables.CompTable(comptable)
-            refs.COMPDICT[comptable] = ct
-
-        self.ctname = comptable
-
-        self._throughput_filenames = self._getFileNames(ct, self.compnames)
-
-        self.components = self._getOpticalComponents(self._throughput_filenames,
-                                                     component_dict)
-
-    def _getOpticalComponents(self, throughput_filenames, component_dict):
+    def _get_components(self):
+        """Get optical components."""
         components = []
-        for throughput_name in throughput_filenames:
-            if throughput_name.endswith('#]'):
-                barename, parkey = throughput_name.split('[')
-                parkey = parkey[:-2]
-            else:
-                parkey = None
 
-            if (throughput_name, self.pardict.get(parkey)) in \
-                    component_dict.keys():
-                component = component_dict[(throughput_name,
-                                            self.pardict.get(parkey))]
-            else:
-                component = _Component(throughput_name,
-                                       interpval=self.pardict.get(parkey))
-                component_dict[(throughput_name, self.pardict.get(parkey))] = \
-                    component
+        for throughput_name in self._throughput_filenames:
+            parkey = self._parkey_from_filename(throughput_name)
+            cdict_key = (throughput_name, self.pardict.get(parkey))
 
-            if not component.isEmpty():
+            if cdict_key not in self._component_dict:
+                self._component_dict[cdict_key] = Component(
+                    cdict_key[0], interpval=cdict_key[1],
+                    area=self.primary_area)
+
+            component = self._component_dict[cdict_key]
+
+            if not component.empty:
                 components.append(component)
 
         return components
 
-    def Sensitivity(self):
-        """
-        Calculate the sensitivity by combining the throughput curves
-        with hc/lambda to convert erg/cm^2/sec/Angstrom to counts/sec.
-        Multiplying this by the flux in erg/cm^2/sec/Angstrom will give
-        counts/sec/Angstrom
-
-        """
-        sensitivity = spectrum.TabularSpectralElement()
-
-        product = self._multiplyThroughputs()
-
-        sensitivity._wavetable = product.GetWaveSet()
-        sensitivity._throughputtable = product(sensitivity._wavetable) \
-            * sensitivity._wavetable * self._constant
-
-        return sensitivity
-
-    def Throughput(self):
-        """
-        Throughput returns the TabularSpectralElement obtained by
-        multiplying the SpectralElement components together.  Unitless
-
-        """
-        try:
-            throughput = spectrum.TabularSpectralElement()
-
-            product = self._multiplyThroughputs(0)
-
-            throughput._wavetable = product.GetWaveSet()
-            throughput._throughputtable = product(throughput._wavetable)
-            throughput.waveunits = product.waveunits
-            throughput.name = '*'.join([str(x) for x in self.components])
-
-#            throughput = throughput.resample(spectrum._default_waveset)
-
-            return throughput
-
-        except IndexError:   # graph table is broken.
-            return None
-
-    def _multiplyThroughputs(self, index):
+    def _mul_thru(self, index):
+        """Multiply all component spectra starting at given index."""
         product = self.components[index].throughput
         if len(self.components) > index:
             for component in self.components[index+1:]:
-                if component.throughput is not None:
+                if not component.empty:
                     product = product * component.throughput
         return product
 
-    def ThermalSpectrum(self):
+    def sensitivity(self):
+        """Calculate sensitivity spectrum.
+
+        Calculation is done by combining the throughput curves
+        with :math:`\\frac{h \\; c}{\\lambda}` to convert
+        :math:`erg \\; cm^{-2} \\; s^{-1} \\; \\AA^{-1}` to
+        :math:`count s^{-1}`. Multiplying this by the flux in
+        :math:`erg \\; cm^{-2} \\; s^{-1} \\; \\AA^{-1}`
+        will give :math:`count s^{-1} \\AA^{-1}`.
+
+        Returns
+        -------
+        sp : `synphot.spectrum.SpectralElement`
+            Sensitivity spectrum.
+
+        """
+        product = self._mul_thru(0)
+        thru = product.thru.value * product.wave.value * self._constant.value
+        header = {'expr': 'Sensitivity for {0}'.format(self._obsmode)}
+        sp = synspectrum.SpectralElement(
+            product.wave, thru, area=self.primary_area, header=header)
+        return sp
+
+    def throughput(self):
+        """Calculate combined throughput spectrum.
+        Calculation is done by multiplying all the components together.
+
+        Returns
+        -------
+        sp : `synphot.spectrum.SpectralElement` or `None`
+            Combined throughput. `None` if calculation failed.
+
+        """
         try:
-            # delegate to subclass.
-            thom = _ThermalObservationMode(self._obsmode)
-            self.pixscale = thom.pixscale
-            return thom._getSpectrum()
-        except IndexError:   # graph table is broken.
-            raise IndexError("Cannot calculate thermal spectrum; "
-                             "graphtable may be broken")
+            sp = self._mul_thru(0)
+        except IndexError as e:
+            log.warn('Graph table is broken: {0}'.format(str(e)))
+            sp = None
+        else:
+            sp.metadata['expr'] = '*'.join([str(x) for x in self.components])
+
+        return sp
+
+    def thermal_spectrum(self, thermtable=None):
+        """Calculate thermal spectrum using
+        :func:`ThermalObservationMode.to_spectrum`.
+
+        Parameters
+        ----------
+        thermtable : str or `None`
+            Thermal component table filename. If `None`, uses
+            ``stsynphot.config.THERMTABLE``.
+
+        Returns
+        -------
+        sp : `synphot.spectrum.SourceSpectrum`
+            Thermal spectrum.
+
+        Raises
+        ------
+        synphot.exceptions.SynphotError
+            Calculation failed.
+
+        """
+        thom = ThermalObservationMode(
+            self._obsmode, graphtable=self.gtname, comptable=self.ctname,
+            thermtable=thermtable)
+
+        try:
+            sp = thom.to_spectrum()
+        except IndexError as e:
+            raise synexceptions.SynphotError(
+                'Broken graph table: {0}'.format(str(e)))
+
+        return sp
 
 
-class _ThermalObservationMode(BaseObservationMode):
+class ThermalObservationMode(BaseObservationMode):
+    """Class to handle an observation that uses the graph,
+    optical component, and thermal component tables.
 
-    def __init__(self, obsmode, method='HSTGraphTable', graphtable=None,
-                 comptable=None, thermtable=None):
+    Parameters
+    ----------
+    obsmode, graphtable, comptable
+        See `BaseObservationMode`.
 
-        if graphtable is None:
-            graphtable = refs.GRAPHTABLE
-        if comptable is None:
-            comptable = refs.COMPTABLE
+    thermtable : str or `None`
+        Thermal component table filename. If `None`, uses
+        ``stsynphot.config.THERMTABLE``.
+
+    Attributes
+    ----------
+    modes, pardict, gtname, ctname, compnames, thcompnames, components, primary_area, pixscale, binset, bandwave
+        See `BaseObservationMode`.
+
+    thname : str
+        Thermal component table filename.
+
+    Raises
+    ------
+    NotImplementedError
+        Clear filters only not supported.
+
+    """
+    def __init__(self, obsmode, graphtable=None, comptable=None,
+                 thermtable=None):
+        global _GRAPHDICT, _COMPDICT, _THERMDICT
+
+        super(ThermalObservationMode, self).__init__(
+            obsmode, graphtable=graphtable, comptable=comptable)
+
+        # Check here to see if there are any valid filters
+        if set(self.thcompnames).issubset(set([tables.CLEAR_FILTER, ''])):
+            raise NotImplementedError(
+                'No thermal support provided for {0}'.format(self._obsmode))
+
+        # Use default thermal component table if not given
         if thermtable is None:
-            thermtable = refs.THERMTABLE
-
-        #The constructor of the parent class defines the self.thcompnames
-        BaseObservationMode.__init__(self, obsmode, method, graphtable)
-
-        #Check here to see if there are any.
-        if set(self.thcompnames).issubset(set(['clear', ''])):
-            raise NotImplementedError("No thermal support provided for %s"
-                                      % obsmode)
-
-#        ct = tables.CompTable(comptable)
-        if comptable in refs.COMPDICT.keys():
-            ct = refs.COMPDICT[comptable]
+            self.thname = config.THERMTABLE()
         else:
-            ct = tables.CompTable(comptable)
-            refs.COMPDICT[comptable] = ct
+            self.thname = thermtable
 
-        self.ctname = comptable
-
-        throughput_filenames = self._getFileNames(ct, self.compnames)
-
-#        thct = tables.CompTable(thermtable)
-        if thermtable in refs.THERMDICT.keys():
-            thct = refs.THERMDICT[thermtable]
+        # Load and cache thermtable, if not in cache
+        if self.thname in _THERMDICT:
+            thct = _THERMDICT[self.thname]
         else:
-            thct = tables.CompTable(thermtable)
-            refs.THERMDICT[thermtable] = thct
+            thct = tables.CompTable(self.thname)
+            _THERMDICT[self.thname] = thct
 
-        self.thname = thermtable
+        # Get thermal component filenames
+        self._thermal_filenames = thct.get_filenames(self.thcompnames)
 
-        thermal_filenames = self._getFileNames(thct, self.thcompnames)
+        self.components = self._get_components()
 
-        self.components = self._getThermalComponents(throughput_filenames,
-                                                     thermal_filenames)
-
-        self.pixscale = self._getPixelScale()
-        self.name = obsmode+" (thermal)"
-
-    def _getPixelScale(self):
-        obsmode = self._obsmode.split(',')
-        obsmode = str(obsmode[0]) + ',' + str(obsmode[1])
-
-        fname = locations.get_data_filename('detectors.dat')
-        fs = open(fname, mode='r')
-        lines = fs.readlines()
-        fs.close()
-
-        regx = re.compile(r'\S+', re.IGNORECASE)
-        for line in lines:
-            try:
-                tokens = regx.findall(line)
-                if tokens[0] == obsmode:
-                    break
-            except Exception as e:
-                raise ValueError("Error processing %s: %s" % (fname, str(e)))
-
-        return float(tokens[1])
-
-    def _getThermalComponents(self, throughput_filenames, thermal_filenames):
+    def _get_components(self):
+        """Get thermal components."""
         components = []
-        for i in range(len(throughput_filenames)):
-            throughput_name = throughput_filenames[i]
-            thermal_name = thermal_filenames[i]
-            if throughput_name.endswith('#]'):
-                barename, parkey=throughput_name.split('[')
-                parkey = parkey[:-2]
-            else:
-                parkey = None
 
-            component = _ThermalComponent(throughput_name, thermal_name,
-                                          interpval=self.pardict.get(parkey))
-            if not component.isEmpty():
+        for throughput_name, thermal_name in zip(
+                self._throughput_filenames, self._thermal_filenames):
+            parkey = self._parkey_from_filename(throughput_name)
+            component = ThermalComponent(
+                throughput_name, thermal_name,
+                interpval=self.pardict.get(parkey), area=self.primary_area)
+            if not component.empty:
                 components.append(component)
 
         return components
 
-    def _multiplyThroughputs(self):
-        """
-        Overrides base class in order to deal with opaque components.
+    def __str__(self):
+        return '{0} (thermal)'.format(self._obsmode)
+
+    def _merge_em_wave(self, wave_unit='angstrom'):
+        """Merge emissivity wavelength sets in given unit.
+
+        Returns
+        -------
+        result : array_like
 
         """
-        index = 0
-        for component in self.components:
-            if component.throughput is not None:
-                break
-            index += 1
-
-        return BaseObservationMode._multiplyThroughputs(self, index)
-
-    def _getSpectrum(self):
-        wave = self._getWavesetIntersection()
-        sp = spectrum.ArraySourceSpectrum(wave=wave,
-                                          flux=np.zeros(shape=wave.shape,
-                                                        dtype=np.float64),
-                                          waveunits=u.AA,
-                                          fluxunits='photlam',
-                                          name="%s %s" % (self.name,
-                                                          'ThermalSpectrum'))
-
-
-        minw = sp._wavetable[0]
-        maxw = sp._wavetable[-1]
-
-        for component in self.components:
-            # transmissive section
-            if component.throughput is not None:
-                sp = sp * component.throughput
-
- #               sp = spectrum.trimSpectrum(sp, minw, maxw)
-
-            # thermal section
-            if component.emissivity is not None:
-                bb = self._bb(sp.GetWaveSet(), component.emissivity.temperature)
-
-                sp_comp = component.emissivity.beamFillFactor * bb * \
-                    component.emissivity
-
-                sp = sp + sp_comp
-
-                sp = spectrum.trimSpectrum(sp, minw, maxw)
-
-        return sp
-
-    def _getWavesetIntersection(self):
-        minw = refs._default_waveset[0]
-        maxw = refs._default_waveset[-1]
-
-        for component in self.components[1:]:
-            if component.emissivity is not None:
-                wave = component.emissivity.GetWaveSet()
-
-                minw = max(minw, wave[0])
-                maxw = min(maxw, wave[-1])
-
-        result = self._mergeEmissivityWavesets()
-
-        result = np.compress(result > minw, result)
-        result = np.compress(result < maxw, result)
-
-        # intersection with vega spectrum (why???)
-        vegasp = spectrum.TabularSourceSpectrum(locations.VegaFile)
-        vegaws = vegasp.GetWaveSet()
-        result = np.compress(result > vegaws[0], result)
-        result = np.compress(result < vegaws[-1], result)
-
-        return result
-
-    def _mergeEmissivityWavesets(self):
         index = 1
 
+        # Find first wavelength set
         for component in self.components:
             emissivity = component.emissivity
             if emissivity is None:
-                index = index + 1
+                index += 1
             else:
-                result = emissivity.GetWaveSet()
+                result = emissivity.wave.to(
+                    wave_unit, equivalencies=u.spectral()).value
                 break
 
+        # Merge subsequent wavelength sets
         for component in self.components[index:]:
             if component.emissivity is not None:
-                result = spectrum.MergeWaveSets(
-                    result, component.emissivity.GetWaveSet())
+                w = component.emissivity.wave.to(
+                    wave_unit, equivalencies=u.spectral())
+                result = merge_wavelengths(result, w.value)
+
         return result
 
-    def _bb(self, wave, temperature):
-        sp = spectrum.ArraySourceSpectrum(
-            wave=wave,
-            flux=planck.bb_photlam_arcsec(wave, temperature),
-            name='planck bb_photlam_arcsec')
+    def _get_wave_intersection(self):
+        """Find wavelengths where ``stsynphot.config._DEFAULT_WAVESET``
+        intersects with ``synphot.config.VEGA_FILE``.
+
+        .. note:: No one knows why Vega is the chosen one.
+
+        Returns
+        -------
+        wave : `astropy.units.quantity.Quantity`
+
+        """
+        def_wave = config._DEFAULT_WAVESET()  # Angstrom
+        def_wave_unit = u.AA
+        minw = def_wave[0]
+        maxw = def_wave[-1]
+
+        # Refine min and max wavelengths using thermal components
+        for component in self.components[1:]:
+            if component.emissivity is not None:
+                w = component.emissivity.wave.to(
+                    def_wave_unit, equivalencies=u.spectral()).value
+                minw = max(minw, w[0])
+                maxw = min(maxw, w[-1])
+
+        w = self._merge_em_wave()
+        result = w[(w > minw) & (w < maxw)]
+
+        # Intersect with Vega
+        if spectrum.Vega is None:
+            raise synexceptions.SynphotError('Missing Vega spectrum.')
+        w = spectrum.Vega.wave.to(
+            def_wave_unit, equivalencies=u.spectral()).value
+
+        return u.Quantity(result[(result > w[0]) & (result < w[-1])],
+                          unit=def_wave_unit)
+
+    def to_spectrum(self):
+        """Get thermal spectrum.
+
+        The calculations start with zero-flux spectrum.
+        Then for each component:
+            #. Multiply with optical throughput.
+            #. For thermal component:
+                #. Calculate blackbody radiation (per square
+                   arcsec) for given temperature.
+                #. Multiply blackbody with emissivity and
+                   beam fill factor.
+                #. Add the result to output spectrum.
+
+        Returns
+        -------
+        sp : `synphot.spectrum.SourceSpectrum`
+            Thermal spectrum.
+
+        """
+        # Create zero-flux spectrum
+        wave = self._get_wave_intersection()
+        flux = u.Quantity(np.zeros(wave.shape, dtype=np.float64),
+                          unit=units.PHOTLAM)
+        sp = synspectrum.SourceSpectrum(
+            wave, flux, area=self.primary_area,
+            header={'expr': '{0}'.format(str(self))})
+
+        minw = sp.wave.value[0]
+        maxw = sp.wave.value[-1]
+
+        for component in self.components:
+            # Transmissive section (optical passband)
+            if component.throughput is not None:
+                sp = sp * component.throughput
+
+            # Thermal section
+            if component.emissivity is not None:
+                # Blackbody from temperature
+                t = component.emissivity.temperature
+                bbflux = planck.bb_photlam_arcsec(sp.wave, t)
+                sp_bb = synspectrum.SourceSpectrum(
+                    sp.wave, bbflux.value, flux_unit=units.PHOTLAM,
+                    area=self.primary_area,
+                    header={'expr': 'bb_per_arcsec({0})'.format(t)})
+
+                # Thermal spectrum to add
+                sp_comp = (sp_bb * component.emissivity *
+                           component.emissivity.beam_fill_factor)
+                sp = sp + sp_comp
+
+                # Trim spectrum
+                sp = sp.trim_spectrum(minw, maxw)
+
         return sp
-
-
-class _Component(object):
-    def __init__(self, throughput_name, interpval):
-        self.throughput_name = throughput_name
-
-        self._empty = True
-
-        self.throughput = self._buildThroughput(throughput_name, interpval)
-        if self.throughput is not None:
-            self.waveunits = self.throughput.waveunits
-
-    def __str__(self):
-        return str(self.throughput)
-
-    def _buildThroughput(self, name, interpval):
-        if name != CLEAR:
-            if interpval is None:
-                self._empty = False
-                return spectrum.TabularSpectralElement(name)
-            else:
-                self._empty = False
-                return spectrum.InterpolatedSpectralElement(name, interpval)
-        else:
-            return None
-
-    def isEmpty(self):
-        return self._empty
-
-
-class _ThermalComponent(_Component):
-
-    def __init__(self, throughput_name, thermal_name, interpval):
-        self.throughput_name = throughput_name
-        self.thermal_name = thermal_name
-
-        self._empty = True
-
-        self.throughput = self._buildThroughput(throughput_name, interpval)
-
-        if thermal_name != CLEAR:
-            self._empty = False
-            self.emissivity = spectrum.ThermalSpectralElement(thermal_name)
-        else:
-            self.emissivity = None

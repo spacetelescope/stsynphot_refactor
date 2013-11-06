@@ -1,17 +1,30 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""Custom exceptions for stsynphot to raise."""
-from __future__ import division, print_function
+"""Custom exceptions for `stsynphot` to raise."""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # SYNPHOT
-from synphot.synexceptions import SynphotError
+from synphot.exceptions import SynphotError
+
+
+__all__ = ['ParserError', 'GenericASTTraversalPruningException',
+           'ParameterOutOfBounds', 'GraphtabError', 'UnusedKeyword',
+           'IncompleteObsmode', 'AmbiguousObsmode']
+
+
+class ParserError(SynphotError):
+    """Exceptions for language parser."""
+    pass
+
+
+class GenericASTTraversalPruningException(ParserError):
+    """SPARK AST traversal pruning exception."""
+    pass
 
 
 class ParameterOutOfBounds(SynphotError):
     """Exceptions for catalog problems."""
     pass
 
-
-# Do we need these???
 
 class GraphtabError(SynphotError):
     """Exceptions to do with graph table traversal."""

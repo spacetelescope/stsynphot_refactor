@@ -1,31 +1,27 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-
-#  Copyright (c) 1998-2000 John Aycock
+# Also see SPARK_LICENSE.rst
 #
-#  Permission is hereby granted, free of charge, to any person obtaining
-#  a copy of this software and associated documentation files (the
-#  "Software"), to deal in the Software without restriction, including
-#  without limitation the rights to use, copy, modify, merge, publish,
-#  distribute, sublicense, and/or sell copies of the Software, and to
-#  permit persons to whom the Software is furnished to do so, subject to
-#  the following conditions:
+# This module contains SPARK parser by John Aycock.
 #
-#  The above copyright notice and this permission notice shall be
-#  included in all copies or substantial portions of the Software.
+# *** NO DOCSTRING ALLOWED IN THIS MODULE ***
+# The parser builds its internal tables by reading the docstring,
+# so you cannot put documentation here.
 #
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-#  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-#  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-#  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-#  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-#  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from __future__ import division, print_function
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # STDLIB
 import re
 import string
 
+# ASTROPY
+from astropy import log
+
+# LOCAL
+from .exceptions import ParserError, GenericASTTraversalPruningException
+
+
+__all__ = ['GenericScanner', 'GenericParser', 'GenericASTBuilder',
+           'GenericASTTraversal', 'GenericASTMatcher']
 
 __version__ = 'SPARK-0.6.1'
 
@@ -42,6 +38,18 @@ def _namelist(instance):
     return namelist
 
 
+def _dump(tokens, states):
+    out_str = '\n'
+    for i in range(len(states)):
+        out_str += 'state {0}\n'.format(i)
+        for (lhs, rhs), pos, parent in states[i]:
+            out_str += '\t{0}::={1}.{2},{3}'.format(
+                lhs, string.join(rhs[:pos]), string.join(rhs[pos:]), parent)
+        if i < len(tokens):
+            out_str += '\ntoken {0}\n'.format(tokens[i])
+    log.info(out_str)
+
+
 class GenericScanner:
     def __init__(self):
         pattern = self.reflect()
@@ -49,7 +57,7 @@ class GenericScanner:
 
         self.index2func = {}
         for name, number in self.re.groupindex.items():
-            self.index2func[number - 1] = getattr(self, 't_' + name)
+            self.index2func[number-1] = getattr(self, 't_' + name)
 
     def makeRE(self, name):
         doc = getattr(self, name).__doc__
@@ -66,8 +74,7 @@ class GenericScanner:
         return string.join(rv, '|')
 
     def error(self, s, pos):
-        print("Lexical error at position ", pos)
-        raise SystemExit
+        raise ParserError('Lexical error at position {0}'.format(pos))
 
     def tokenize(self, s):
         pos = 0
@@ -112,12 +119,12 @@ class GenericParser:
         index = []
         for i in range(len(rules)):
             if rules[i] == '::=':
-                index.append(i - 1)
+                index.append(i-1)
         index.append(len(rules))
 
-        for i in range(len(index) - 1):
+        for i in range(len(index)-1):
             lhs = rules[index[i]]
-            rhs = rules[index[i] + 2:index[i + 1]]
+            rhs = rules[index[i]+2:index[i+1]]
             rule = (lhs, tuple(rhs))
 
             rule, fn = self.preprocess(rule, func)
@@ -125,7 +132,7 @@ class GenericParser:
             if lhs in self.rules:
                 self.rules[lhs].append(rule)
             else:
-                self.rules[lhs] = [rule]
+                self.rules[lhs] = [ rule ]
             self.rule2func[rule] = fn
             self.rule2name[rule] = func.__name__[2:]
         self.ruleschanged = 1
@@ -143,9 +150,9 @@ class GenericParser:
         #  to self.addRule() because the start rule shouldn't
         #  be subject to preprocessing.
         #
-        startRule = (self._START, (start, self._EOF))
+        startRule = (self._START, ( start, self._EOF ))
         self.rule2func[startRule] = lambda args: args[0]
-        self.rules[self._START] = [startRule]
+        self.rules[self._START] = [ startRule ]
         self.rule2name[startRule] = ''
         return startRule
 
@@ -176,7 +183,7 @@ class GenericParser:
                 if len(self.first[dest]) != destlen:
                     changes = 1
 
-        #
+    #
     #  An Earley parser, as per J. Earley, "An Efficient Context-Free
     #  Parsing Algorithm", CACM 13(2), pp. 94-102.  Also J. C. Earley,
     #  "An Efficient Context-Free Parsing Algorithm", Ph.D. thesis,
@@ -187,30 +194,29 @@ class GenericParser:
         return None
 
     def error(self, token):
-        s = "Pysynphot syntax error at or near '%s' token" % token
-        raise ValueError(s)
+        raise ParserError('Syntax error at or near "{0}" token'.format(token))
 
     def parse(self, tokens):
         tree = {}
         tokens.append(self._EOF)
-        states = {0: [(self.startRule, 0, 0)]}
+        states = { 0: [ (self.startRule, 0, 0) ] }
 
         if self.ruleschanged:
             self.makeFIRST()
 
         for i in xrange(len(tokens)):
-            states[i + 1] = []
+            states[i+1] = []
 
-            if states[i]:
+            if states[i] == []:
                 break
             self.buildState(tokens[i], states, i, tree)
 
         #_dump(tokens, states)
 
-        if i < len(tokens) - 1 or states[i + 1] != [(self.startRule, 2, 0)]:
+        if i < len(tokens)-1 or states[i+1] != [(self.startRule, 2, 0)]:
             del tokens[-1]
-            self.error(tokens[i - 1])
-        rv = self.buildTree(tokens, tree, ((self.startRule, 2, 0), i + 1))
+            self.error(tokens[i-1])
+        rv = self.buildTree(tokens, tree, ((self.startRule, 2, 0), i+1))
         del tokens[-1]
         return rv
 
@@ -237,9 +243,9 @@ class GenericParser:
                     prule, ppos, pparent = pitem
                     plhs, prhs = prule
 
-                    if prhs[ppos:ppos + 1] == (lhs,):
+                    if prhs[ppos:ppos+1] == (lhs,):
                         new = (prule,
-                               ppos + 1,
+                               ppos+1,
                                pparent)
                         if new not in state:
                             state.append(new)
@@ -262,7 +268,7 @@ class GenericParser:
                 #  may not all be present when it runs.
                 #
                 if nextSym in needsCompletion:
-                    new = (rule, pos + 1, parent)
+                    new = (rule, pos+1, parent)
                     olditem_i = needsCompletion[nextSym]
                     if new not in state:
                         state.append(new)
@@ -278,8 +284,8 @@ class GenericParser:
                 predicted[nextSym] = 1
 
                 ttype = token is not self._EOF and \
-                        self.typestring(token) or \
-                        None
+                    self.typestring(token) or \
+                    None
                 if ttype is not None:
                     #
                     #  Even smarter predictor, when the
@@ -305,7 +311,7 @@ class GenericParser:
                                 continue
                         first = self.first[prhs0]
                         if None not in first and \
-                                        ttype not in first:
+                           ttype not in first:
                             continue
                         state.append(new)
                     continue
@@ -318,8 +324,8 @@ class GenericParser:
                     #
                     prhs = prule[1]
                     if len(prhs) > 0 and \
-                                    prhs[0] not in self.rules and \
-                                    token != prhs[0]:
+                       prhs[0] not in self.rules and \
+                       token != prhs[0]:
                         continue
                     state.append((prule, 0, i))
 
@@ -328,7 +334,7 @@ class GenericParser:
             #
             elif token == nextSym:
                 #assert new not in states[i+1]
-                states[i + 1].append((rule, pos + 1, parent))
+                states[i+1].append((rule, pos+1, parent))
 
     def buildTree(self, tokens, tree, root):
         stack = []
@@ -368,8 +374,8 @@ class GenericParser:
                     child = children[0]
 
                 tokpos = self.buildTree_r(stack,
-                                          tokens, tokpos,
-                                          tree, child)
+                              tokens, tokpos,
+                              tree, child)
                 pos = pos - 1
                 (crule, cpos, cparent), cstate = child
                 state = cparent
@@ -382,10 +388,10 @@ class GenericParser:
     def ambiguity(self, children):
         #
         #  XXX - problem here and in collectRules() if the same
-        #        rule appears in >1 method.  But in that case the
-        #        user probably gets what they deserve :-)  Also
-        #        undefined results if rules causing the ambiguity
-        #        appear in the same method.
+        #    rule appears in >1 method.  But in that case the
+        #    user probably gets what they deserve :-)  Also
+        #    undefined results if rules causing the ambiguity
+        #    appear in the same method.
         #
         sortlist = []
         name2index = {}
@@ -396,7 +402,7 @@ class GenericParser:
             sortlist.append((len(rhs), name))
             name2index[name] = i
         sortlist.sort()
-        list = map(lambda (a, b): b, sortlist)
+        list = map(lambda ab: ab[1], sortlist)
         return children[name2index[self.resolve(list)]]
 
     def resolve(self, list):
@@ -407,6 +413,7 @@ class GenericParser:
         #
         return list[0]
 
+
 #
 #  GenericASTBuilder automagically constructs a concrete/abstract syntax tree
 #  for a given input.  The extra argument is a class (not an instance!)
@@ -415,7 +422,6 @@ class GenericParser:
 #  XXX - silently overrides any user code in methods.
 #
 
-
 class GenericASTBuilder(GenericParser):
     def __init__(self, AST, start):
         GenericParser.__init__(self, start)
@@ -423,8 +429,8 @@ class GenericASTBuilder(GenericParser):
 
     def preprocess(self, rule, func):
         rebind = lambda lhs, self=self: \
-            lambda args, lhs=lhs, self=self: \
-                self.buildASTNode(args, lhs)
+                lambda args, lhs=lhs, self=self: \
+                    self.buildASTNode(args, lhs)
         lhs, rhs = rule
         return rule, rebind(lhs)
 
@@ -445,6 +451,7 @@ class GenericASTBuilder(GenericParser):
         rv[:len(args)] = args
         return rv
 
+
 #
 #  GenericASTTraversal is a Visitor pattern according to Design Patterns.  For
 #  each node it attempts to invoke the method n_<node type>, falling
@@ -454,11 +461,6 @@ class GenericASTBuilder(GenericParser):
 #  of a subtree, call the prune() method -- this only makes sense for a
 #  preorder traversal.  Node type is determined via the typestring() method.
 #
-
-
-class GenericASTTraversalPruningException:
-    pass
-
 
 class GenericASTTraversal:
     def __init__(self, ast):
@@ -506,8 +508,10 @@ class GenericASTTraversal:
         else:
             self.default(node)
 
+
     def default(self, node):
         pass
+
 
 #
 #  GenericASTMatcher.  AST nodes must have "__getitem__" and "__cmp__"
@@ -516,7 +520,6 @@ class GenericASTTraversal:
 #  XXX - makes assumptions about how GenericParser walks the parse tree.
 #
 
-
 class GenericASTMatcher(GenericParser):
     def __init__(self, start, ast):
         GenericParser.__init__(self, start)
@@ -524,8 +527,8 @@ class GenericASTMatcher(GenericParser):
 
     def preprocess(self, rule, func):
         rebind = lambda func, self=self: \
-            lambda args, func=func, self=self: \
-                self.foundMatch(args, func)
+                lambda args, func=func, self=self: \
+                    self.foundMatch(args, func)
         lhs, rhs = rule
         rhslist = list(rhs)
         rhslist.reverse()
@@ -562,18 +565,3 @@ class GenericASTMatcher(GenericParser):
         #  Resolve ambiguity in favor of the longest RHS.
         #
         return list[-1]
-
-
-def _dump(tokens, states):
-    for i in range(len(states)):
-        print('state', i)
-        for (lhs, rhs), pos, parent in states[i]:
-            print('\t', lhs, '::=')
-            print(string.join(rhs[:pos]))
-            print('.')
-            print(string.join(rhs[pos:]))
-            print(',', parent)
-        if i < len(tokens):
-            print('')
-            print('token', str(tokens[i]))
-            print('')

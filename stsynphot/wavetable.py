@@ -1,11 +1,10 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""
-This module handles the wavecat.dat table presently used by the
-synphot countrate task (and thus the ETC) to select an appropriate wavelength
-set for a given obsmode.
+"""Module to handle ``stsynphot.config.WAVECATFILE`` table,
+which is used by ETC to select an appropriate wavelength set
+for a given observation mode for count rate calculations.
 
 """
-from __future__ import division, print_function
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # STDLIB
 import re
@@ -13,84 +12,187 @@ import re
 # THIRD-PARTY
 import numpy as np
 
+# ASTROPY
+from astropy import log
+from astropy import units as u
+
 # LOCAL
-from . import locations
+from . import config, exceptions, io
 
 
-class Wavetable(object):
+__all__ = ['WAVECAT', 'WaveCatalog', 'load_wavecat']
+
+# This is NSPEC-1 in IRAF SYNPHOT COUNTRATE calcstep.x.
+# NSPEC was hardcoded to 2000 as the number of bins into
+# which the wavelength set should be divided by default.
+_N_SPEC = 1999.0
+
+# Will be initialized by load_wavecat()
+WAVECAT = None
+
+
+class WaveCatalog(object):
+    """Class to handle ``stsynphot.config.WAVECATFILE`` initialization
+    and access.
+
+    Input is parsed with :func:`stsynphot.io.read_wavecat`.
+    Wavelengths assumed to be always in Angstrom.
+
+    For each observation mode, its wavelength table is defined
+    by filename or parameter string. When it is accessed with
+    :func:`__getitem__`, the string is replaced by the actual
+    wavelengths array. If filename is given, it is parsed with
+    :func:`stsynphot.io.read_waveset`.
+
+    Parameters
+    ----------
+    fname : str
+        Wavecat filename.
+
+    wave_unit : str or `astropy.units.core.Unit`, optional
+        Wavelength unit.
+
+    Attributes
+    ----------
+    file : str
+        Wavecat filename.
+
+    wave_unit : str or `astropy.units.core.Unit`
+        Wavelength unit.
+
+    lookup : dict
+        Maps observation mode to corresponding wavelength table
+        filename or parameter string.
+
+    setlookup : dict
+        Maps individual components of observation mode to its
+        string. Used for partial matching.
+
     """
-    Class to handle wavecat.dat initialization and access. (This class
-    may need a better name; wavetable and waveset are awfully close.)
-    Also, put the default waveset into this object with a key of NONE.
+    def __init__(self, fname, wave_unit='angstrom'):
+        data = io.read_wavecat(io.irafconvert(fname))
 
-    """
-
-    def __init__(self, fname):
-        """
-        Instantiate a Wavetable from a file
-
-        """
         self.file = fname
+        self.wave_unit = wave_unit
         self.lookup = {}
         self.setlookup = {}
-        fs = open(wavecat_file, mode='r')
-        lines = fs.readlines()
-        fs.close()
 
-        regx = re.compile(r'\S+', re.IGNORECASE)
-        for line in lines:
-            if not line.startswith("#"):
-                try:
-                    [obm, coeff] = regx.findall(line)
-                    self.lookup[obm] = coeff
-                    self.setlookup[frozenset(obm.split(','))] = coeff
-                except ValueError:
-                    raise ValueError("Error processing line: %s" % line)
-
+        for line in data:
+            obm = line['OBSMODE']
+            coeff = line['FILENAME']
+            self.lookup[obm] = coeff
+            self.setlookup[frozenset(obm.split(','))] = obm
 
     def __getitem__(self, key):
-        """
-        Fairly smart lookup: if no exact match, find the most complete
-        match.
+        """Fairly smart lookup by observation mode.
+        If no exact match, find the most complete match.
 
         """
-
-        ans = None
+        # Find exact match
         try:
-            #Try an exact match
             ans = self.lookup[key]
-
+        # Find the next most complete match
         except KeyError:
             ans = None
-            #Try a setwise match.
-            #The correct key will be a subset of the input key.
+            # Try a set-wise match.
+            # The correct key will be a subset of the input key.
             setkey = set(key.split(','))
-            candidates = []
-            for k in self.setlookup:
-                if k.issubset(setkey):
-                    candidates.append(k)
-                #We may have 1, 0, or >1 candidates.
-            if len(candidates) == 1:
-                ans = self.setlookup[candidates[0]]
-            elif len(candidates) == 0:
-                raise KeyError("%s not found in %s; candidates:%s" % (
-                    setkey, self.file, str(candidates))
-                )
-            elif len(candidates) > 1:
+            candidates = [k for k in self.setlookup if k.issubset(setkey)]
+            n_match = len(candidates)
+            # We may have 1, 0, or >1 candidates.
+            if n_match == 1:
+                ans = self.lookup[self.setlookup[candidates[0]]]
+            elif n_match == 0:
+                raise KeyError('{0} not found in {1}; candidates: {2}'.format(
+                    setkey, self.file, str(candidates)))
+            elif n_match > 1:
                 setlens = np.array([len(k) for k in candidates])
                 srtlen = setlens.argsort()
                 k, j = srtlen[-2:]
+                # It's really ambiguous
                 if setlens[k] == setlens[j]:
-                    #It's really ambiguous
-                    raise ValueError("Ambiguous key %s; candidates %s" % (
-                        setkey, candidates)
-                    )
+                    raise exceptions.AmbiguousObsmode(
+                        '{0}; candidates: {1}'.format(setkey, str(candidates)))
+                # We have a winner
                 else:
-                    #We have a winner
                     k = candidates[srtlen[-1]]
-                    ans = self.setlookup[k]
+                    ans = self.lookup[self.setlookup[k]]
         return ans
 
-wavecat_file = locations.wavecat
-wavetable = Wavetable(wavecat_file)
+    @staticmethod
+    def _calc_quadratic_coeff(coeff):
+        """Calculate quadratic coefficients from parameter string."""
+        coefficients = coeff[1:-1].split(',')
+        n_coeff = len(coefficients)
 
+        c0 = float(coefficients[0])
+        c1 = float(coefficients[1])
+        c2 = (c1 - c0) / _N_SPEC
+        c3 = c2
+
+        if n_coeff > 2:
+            c2 = float(coefficients[2])
+            c3 = c2
+        if n_coeff > 3:
+            c3 = float(coefficients[3])
+
+        nwave = int(2.0 * (c1 - c0) / (c3 + c2)) + 1
+        c = c0
+        b = c2
+        a = (c3 * c3 - c2 * c2) * 0.25 / (c1 - c0)
+
+        return (a, b, c, nwave)
+
+    def _waveset_from_parstring(self, coeff):
+        """Get wavelengths array from parameter string."""
+        a, b, c, nwave = self._calc_quadratic_coeff(coeff)
+        i = np.arange(nwave, dtype=np.float64)
+        return u.Quantity(((a * i) + b) * i + c, unit=self.wave_unit)
+
+    def load_waveset(self, obsmode):
+        """Load wavelength table by observation mode.
+        If no exact match, find the most complete match.
+
+        Parameters
+        ----------
+        obsmode : str
+            Observation mode.
+
+        Returns
+        -------
+        par : str
+            Matched filename or parameter string.
+            May be exact or closest.
+
+        waveset : `astropy.units.quantity.Quantity`
+            Corresponding wavelength set.
+
+        """
+        par = self.__getitem__(obsmode)
+        if par.startswith('('):
+            waveset = self._waveset_from_parstring(par)
+        else:
+            waveset = io.read_waveset(
+                io.irafconvert(par), wave_unit=self.wave_unit)
+        return par, waveset
+
+
+def load_wavecat(wave_unit='angstrom'):
+    """Convenience function to update ``stsynphot.wavetable.WAVECAT``
+    global variable with the latest ``stsynphot.config.WAVECATFILE``.
+
+    Parameters
+    ----------
+    wave_unit : str or `astropy.units.core.Unit`, optional
+        Wavelength unit.
+
+    """
+    global WAVECAT
+    WAVECAT = WaveCatalog(config.WAVECATFILE(), wave_unit=wave_unit)
+
+
+# Load default wavecat file in Angstrom.
+try:
+    load_wavecat()
+except Exception as e:
+    log.warn('Failed to load {0}: {1}'.format(config.WAVECATFILE(), str(e)))
