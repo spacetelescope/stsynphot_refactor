@@ -50,7 +50,7 @@ def _iraf_decode(irafdir):
         path = config.MTABDIR()
     elif irafdir.startswith('crgrid'):  # Catalogs dir
         path = config.CATDIR()
-        catcode = irafdir.strip('crgrid')
+        catcode = irafdir[len('crgrid'):]
         if catcode == 'gs':
             path = os.path.join(path, 'gunnstryker')
         elif catcode == 'jac':
@@ -183,7 +183,7 @@ def get_latest_file(template, raise_error=False, err_msg=''):
     path, pattern = os.path.split(template)
 
     # Remote FTP directory
-    if 'ftp' in path:
+    if path.lower().startswith('ftp:'):
         import urllib2
 
         response = urllib2.urlopen(path).read().decode('utf-8').splitlines()
@@ -254,7 +254,7 @@ def _read_table(filename, ext, dtypes):
             raise synexceptions.SynphotError(err_str)
 
     # ASCII
-    else:
+    else:  # pragma: no cover
         converters = OrderedDict([[k, ascii.convert_numpy(v)]
                                   for k, v in dtypes.items()])
         data = ascii.read(filename, converters=converters)
@@ -322,13 +322,15 @@ def read_graphtable(filename, tab_ext=1):
     # Get primary area
     if filename.endswith('.fits') or filename.endswith('.fit'):
         with fits.open(filename) as f:
-            primary_area = f['PRIMARY'].header.get('PRIMAREA', None)
-    else:
+            primary_area = f[str('PRIMARY')].header.get('PRIMAREA', None)
+    else:  # pragma: no cover
         primary_area = None
 
     # Check for segmented graph table
-    if np.any([x.lower().endswith('graph') for x in data['COMPNAME']]):
-        raise synexceptions.SynphotError('Segmented graph tables not supported.')
+    if np.any([x.lower().endswith('graph')
+               for x in data['COMPNAME']]):  # pragma: no cover
+        raise synexceptions.SynphotError(
+            'Segmented graph tables not supported.')
 
     return primary_area, data
 

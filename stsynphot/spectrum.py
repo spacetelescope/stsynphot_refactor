@@ -508,6 +508,10 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
             raise synexceptions.SynphotError(
                 'Calculation not possible due to missing obsmode.')
 
+        if self.obsmode.pixscale is None:
+            raise synexceptions.SynphotError(
+                'Undefined pixel scale for {0}.'.format(self.obsmode))
+
         sp = self.obsmode.thermal_spectrum(thermtable=thermtable)
         bg = sp.integrate() * self.obsmode.pixscale ** 2 * self.primary_area
 
@@ -689,47 +693,26 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
 
 def band(input_str, **kwargs):
     """Convenience function to create passband spectrum
-    with observation mode string or filename like IRAF SYNPHOT.
-
-    Observation mode is distinguished from filename by the
-    presence of comma in the given string.
+    with observation mode string.
 
     For more details, see :ref:`synphot-obsmode`.
 
     Parameters
     ----------
     input_str : str
-        Observation mode or filename.
+        Observation mode.
 
     kwargs : dict
         Keywords accepted by
         :func:`ObservationSpectralElement.from_obsmode`.
-        ``graphtable`` is used to determine telescope
-        collecting area (or use default if none found).
-        The rest are only used if ``input_str`` is
-        observation mode.
 
     Returns
     -------
-    sp : `ObservationSpectralElement` or `SpectralElement`
+    sp : `ObservationSpectralElement`
         Passband spectrum.
 
     """
-    # Observation mode
-    if ',' in input_str:
-        sp = ObservationSpectralElement.from_obsmode(input_str, **kwargs)
-
-    # Filename
-    else:
-        from .observationmode import _process_graphtable
-
-        # Get telescope collecting area (to be consistent with above)
-        area = _process_graphtable(kwargs.get('graphtable', None))[2]
-
-        filename = io.irafconvert(input_str)
-        sp = synspectrum.SpectralElement.from_file(filename, area=area)
-
-    return sp
+    return ObservationSpectralElement.from_obsmode(input_str, **kwargs)
 
 
 def ebmvx(redlaw_name, ebv, area=None):

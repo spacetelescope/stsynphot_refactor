@@ -284,7 +284,7 @@ class BaseObservationMode(object):
         try:
             self.binset, self.bandwave = WAVECAT.load_waveset(self._obsmode)
         except (KeyError, exceptions.AmbiguousObsmode) as e:
-            log.warn(str(e))
+            #log.warn(str(e))
             self.binset = ''
             self.bandwave = None
 
@@ -298,10 +298,9 @@ class BaseObservationMode(object):
         pixscales = data[data['OBSMODE'] == obsmode]['SCALE'].data
 
         if pixscales.size < 1:
-            raise synexceptions.SynphotError(
-                '{0} not found in {1}.'.format(obsmode, config.DETECTORFILE()))
-
-        self.pixscale = u.Quantity(pixscales[0], unit=u.arcsec)
+            self.pixscale = None
+        else:
+            self.pixscale = u.Quantity(pixscales[0], unit=u.arcsec)
 
     def _get_components(self):
         raise NotImplementedError('To be implemented by subclasses.')
