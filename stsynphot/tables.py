@@ -8,9 +8,6 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-# STDLIB
-import string
-
 # THIRD-PARTY
 import numpy as np
 
@@ -63,9 +60,9 @@ class GraphTable(object):
         self.primary_area, data = io.read_graphtable(graphfile, tab_ext=ext)
 
         # Convert all strings to lowercase
-        self.keywords = np.array(map(string.lower, data['KEYWORD']))
-        self.compnames = np.array(map(string.lower, data['COMPNAME']))
-        self.thcompnames = np.array(map(string.lower, data['THCOMPNAME']))
+        self.keywords = np.array([s.lower() for s in data['KEYWORD']])
+        self.compnames = np.array([s.lower() for s in data['COMPNAME']])
+        self.thcompnames = np.array([s.lower() for s in data['THCOMPNAME']])
 
         # Already int
         self.innodes = data['INNODE']
@@ -98,25 +95,24 @@ class GraphTable(object):
             Matching output node, or -1 if given input node not found.
 
         """
-        nodes = np.where(self.innodes == innode)
+        nodes = np.where(self.innodes == innode)[0]
 
         # No match
-        if len(nodes[0]) == 0:
+        if len(nodes) == 0:
             return -1
 
         # Output node for default mode
-        defaultindex = np.where(self.keywords[nodes] == 'default')
+        defaultindex = np.where(self.keywords[nodes] == 'default')[0]
 
-        if len(defaultindex[0]) != 0:
-            outnode = self.outnodes[nodes[0][defaultindex[0]]]
+        if len(defaultindex) != 0:
+            outnode = self.outnodes[nodes[defaultindex]]
 
         for mode in modes:
-            result = self.keywords[nodes].count(mode)
-            if result != 0:
-                index = np.where(self.keywords[nodes] == mode)
-                outnode = self.outnodes[nodes[0][index[0]]]
+            index = np.where(self.keywords[nodes] == mode)[0]
+            if len(index) > 0:
+                outnode = self.outnodes[nodes[index]]
 
-        return outnode
+        return outnode[0]
 
     def get_comp_from_gt(self, modes, innode):
         """Return component names for the given modes by traversing
@@ -160,7 +156,7 @@ class GraphTable(object):
         count = 0
 
         while outnode >= 0:
-            if outnode < 0:
+            if outnode < 0:  # pragma: no cover
                 log.debug('outnode={0} (stop condition).'.format(outnode))
 
             previous_outnode = outnode
@@ -258,7 +254,7 @@ class CompTable(object):
     def __init__(self, compfile, ext=1):
         data = io.read_comptable(compfile, tab_ext=ext)
         self.name = compfile
-        self.compnames = np.array(map(string.lower, data['COMPNAME']))
+        self.compnames = np.array([s.lower() for s in data['COMPNAME']])
         self.filenames = np.array(map(io.irafconvert, data['FILENAME']))
 
     def get_filenames(self, compnames):
