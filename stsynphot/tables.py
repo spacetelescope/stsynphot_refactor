@@ -18,7 +18,7 @@ from astropy import log
 from synphot import exceptions as synexceptions
 
 # LOCAL
-from . import exceptions, io
+from . import exceptions, stio
 
 
 __all__ = ['CLEAR_FILTER', 'GraphTable', 'CompTable']
@@ -29,7 +29,7 @@ CLEAR_FILTER = 'clear'
 class GraphTable(object):
     """Class to handle graph table.
 
-    Table is parsed with :func:`~stsynphot.io.read_graphtable`.
+    Table is parsed with :func:`~stsynphot.stio.read_graphtable`.
     All string entries will be converted to lower case.
     Comment column is ignored.
 
@@ -57,7 +57,7 @@ class GraphTable(object):
 
     """
     def __init__(self, graphfile, ext=1):
-        self.primary_area, data = io.read_graphtable(graphfile, tab_ext=ext)
+        self.primary_area, data = stio.read_graphtable(graphfile, tab_ext=ext)
 
         # Convert all strings to lowercase
         self.keywords = np.array([s.lower() for s in data['KEYWORD']])
@@ -229,10 +229,10 @@ class GraphTable(object):
 class CompTable(object):
     """Class to handle component table (optical or thermal).
 
-    Table is parsed with :func:`~stsynphot.io.read_comptable`.
+    Table is parsed with :func:`~stsynphot.stio.read_comptable`.
     Only component names and filenames are kept.
     Component throughput filenames are parsed with
-    :func:`~stsynphot.io.irafconvert`.
+    :func:`~stsynphot.stio.irafconvert`.
 
     Parameters
     ----------
@@ -252,10 +252,10 @@ class CompTable(object):
 
     """
     def __init__(self, compfile, ext=1):
-        data = io.read_comptable(compfile, tab_ext=ext)
+        data = stio.read_comptable(compfile, tab_ext=ext)
         self.name = compfile
         self.compnames = np.array([s.lower() for s in data['COMPNAME']])
-        self.filenames = np.array(map(io.irafconvert, data['FILENAME']))
+        self.filenames = np.array(map(stio.irafconvert, data['FILENAME']))
 
     def get_filenames(self, compnames):
         """Get filenames of given component names.

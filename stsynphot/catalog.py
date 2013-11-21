@@ -17,7 +17,7 @@ from synphot import exceptions as synexceptions
 from synphot import SourceSpectrum, units
 
 # LOCAL
-from . import config, exceptions, io
+from . import config, exceptions, stio
 
 
 __all__ = ['reset_cache', 'grid_to_spec']
@@ -122,7 +122,7 @@ def grid_to_spec(catdir, t_eff, metallicity, log_g, area=None):
     Interpolate if necessary.
 
     Grid must be defined by ``catdir/catalog.fits``, which
-    is parsed with :func:`stsynphot.io.read_catalog`.
+    is parsed with :func:`stsynphot.stio.read_catalog`.
 
     Grid parameters are only read once and then cached.
     Until the cache is cleared explicitly using
@@ -191,7 +191,7 @@ def grid_to_spec(catdir, t_eff, metallicity, log_g, area=None):
 
     # If not cached, read from grid catalog and cache it
     if filename not in _CACHE:
-        data = io.read_catalog(filename)  # Ext 1
+        data = stio.read_catalog(filename)  # Ext 1
         _CACHE[filename] = [[float(x) for x in index.split(',')] +
                             [data['FILENAME'][i]]
                             for i, index in enumerate(data['INDEX'])]

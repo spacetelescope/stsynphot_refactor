@@ -17,7 +17,7 @@ from astropy import log
 from astropy import units as u
 
 # LOCAL
-from . import config, exceptions, io
+from . import config, exceptions, stio
 
 
 __all__ = ['WAVECAT', 'WaveCatalog', 'load_wavecat']
@@ -35,14 +35,14 @@ class WaveCatalog(object):
     """Class to handle ``stsynphot.config.WAVECATFILE`` initialization
     and access.
 
-    Input is parsed with :func:`stsynphot.io.read_wavecat`.
+    Input is parsed with :func:`stsynphot.stio.read_wavecat`.
     Wavelengths assumed to be always in Angstrom.
 
     For each observation mode, its wavelength table is defined
     by filename or parameter string. When it is accessed with
     :func:`__getitem__`, the string is replaced by the actual
     wavelengths array. If filename is given, it is parsed with
-    :func:`stsynphot.io.read_waveset`.
+    :func:`stsynphot.stio.read_waveset`.
 
     Parameters
     ----------
@@ -70,7 +70,7 @@ class WaveCatalog(object):
 
     """
     def __init__(self, fname, wave_unit='angstrom'):
-        data = io.read_wavecat(io.irafconvert(fname))
+        data = stio.read_wavecat(stio.irafconvert(fname))
 
         self.file = fname
         self.wave_unit = wave_unit
@@ -172,8 +172,8 @@ class WaveCatalog(object):
         if par.startswith('('):
             waveset = self._waveset_from_parstring(par)
         else:
-            waveset = io.read_waveset(
-                io.irafconvert(par), wave_unit=self.wave_unit)
+            waveset = stio.read_waveset(
+                stio.irafconvert(par), wave_unit=self.wave_unit)
         return par, waveset
 
 

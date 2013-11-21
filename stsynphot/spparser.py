@@ -29,7 +29,7 @@ from synphot import exceptions as synexceptions
 from synphot import spectrum as synspectrum
 
 # LOCAL
-from . import catalog, config, exceptions, io, spark, spectrum
+from . import catalog, config, exceptions, stio, spark, spectrum
 
 
 __all__ = ['Token', 'AST', 'BaseScanner', 'Scanner', 'BaseParser',
@@ -57,7 +57,7 @@ def _convertstr(value):
     """
     if not isinstance(value, six.string_types):
         return value
-    value = io.irafconvert(value)
+    value = stio.irafconvert(value)
     try:
         sp = synspectrum.SourceSpectrum.from_file(value)
     except KeyError:
@@ -323,7 +323,7 @@ class Interpreter(spark.GenericASTMatcher):
             # Source spectrum from file
             elif fname == 'spec':
                 tree.value = synspectrum.SourceSpectrum.from_file(
-                    io.irafconvert(args[0]), area=area)
+                    stio.irafconvert(args[0]), area=area)
 
             # Passband
             elif fname == 'band':
@@ -352,13 +352,13 @@ class Interpreter(spark.GenericASTMatcher):
                     sp = sp.to_spectrum(config._DEFAULT_WAVESET())
                 elif not isinstance(sp, synspectrum.SourceSpectrum):
                     sp = synspectrum.SourceSpectrum.from_file(
-                        io.irafconvert(sp), area=area)
+                        stio.irafconvert(sp), area=area)
 
                 if isinstance(bp, analytic.BaseMixinAnalytic):
                     bp = bp.to_spectrum(config._DEFAULT_WAVESET())
                 elif not isinstance(bp, synspectrum.SpectralElement):
                     bp = synspectrum.SpectralElement.from_file(
-                        io.irafconvert(bp), area=area)
+                        stio.irafconvert(bp), area=area)
 
                 # Always force the renormalization to occur: prevent exceptions
                 # in case of partial overlap. Less robust but duplicates
@@ -382,7 +382,7 @@ class Interpreter(spark.GenericASTMatcher):
                 # ETC generates junk (i.e., 'null') sometimes
                 if isinstance(sp, six.string_types) and sp != 'null':
                     sp = synspectrum.SourceSpectrum.from_file(
-                        io.irafconvert(sp), area=area)
+                        stio.irafconvert(sp), area=area)
                 elif isinstance(sp, analytic.BaseMixinAnalytic):
                     sp = sp.to_spectrum(config._DEFAULT_WAVESET())
 

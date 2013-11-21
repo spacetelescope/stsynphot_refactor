@@ -60,7 +60,7 @@ WAVECATFILE = ConfigurationItem(
 DETECTORFILE = ConfigurationItem(
     'detectorfile', 'synphot$detectors.dat', 'Detector parameters file.')
 
-# IRAF shortcuts file for stsynphot.io.irafconvert()
+# IRAF shortcuts file for stsynphot.stio.irafconvert()
 IRAFSHORTCUTFILE = ConfigurationItem(
     'irafshortcutfile', 'synphot$irafshortcuts.txt',
     'col1=shortcut_name col2=path_rel_to_rootdir, space separated, has header.')
@@ -159,22 +159,23 @@ def setref(graphtable=None, comptable=None, thermtable=None, area=None,
         Invalid ``waveset`` parameters.
 
     """
+    from synphot.specio import get_latest_file
     from synphot.utils import generate_wavelengths
-    from . import io
+    from . import stio
 
     # Check for all None, which means reset
     if set([graphtable, comptable, thermtable, area, waveset]) == set([None]):
-        GRAPHTABLE.set(io.get_latest_file(
+        GRAPHTABLE.set(get_latest_file(
             os.path.join(MTABDIR(), '*_tmg.fits'),
             err_msg='No graph tables found; functionality will be SEVERELY ' \
             'crippled.'))
 
-        COMPTABLE.set(io.get_latest_file(
+        COMPTABLE.set(get_latest_file(
             os.path.join(MTABDIR(), '*_tmc.fits'),
             err_msg='No component tables found; functionality will be ' \
                 'SEVERELY crippled.'))
 
-        THERMTABLE.set(io.get_latest_file(
+        THERMTABLE.set(get_latest_file(
             os.path.join(MTABDIR(), '*_tmt.fits'),
             err_msg='No thermal tables found; no thermal calculations can ' \
                 'be performed.'))
@@ -188,13 +189,13 @@ def setref(graphtable=None, comptable=None, thermtable=None, area=None,
     # Otherwise, check them all separately
     else:
         if graphtable is not None:
-            GRAPHTABLE.set(io.irafconvert(graphtable))
+            GRAPHTABLE.set(stio.irafconvert(graphtable))
 
         if comptable is not None:
-            COMPTABLE.set(io.irafconvert(comptable))
+            COMPTABLE.set(stio.irafconvert(comptable))
 
         if thermtable is not None:
-            THERMTABLE.set(io.irafconvert(thermtable))
+            THERMTABLE.set(stio.irafconvert(thermtable))
 
         if area is not None:
             PRIMARY_AREA.set(area)

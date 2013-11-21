@@ -8,7 +8,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # STDLIB
-import fnmatch
 import re
 import os
 
@@ -27,9 +26,9 @@ from astropy.utils.data import _find_pkg_data_path, get_pkg_data_filename
 from synphot import exceptions as synexceptions
 
 
-__all__ = ['irafconvert', 'get_latest_file', 'read_graphtable',
-           'read_comptable', 'read_catalog', 'read_wavecat', 'read_waveset',
-           'read_detector_pars', 'read_interp_spec']
+__all__ = ['irafconvert', 'read_graphtable', 'read_comptable', 'read_catalog',
+           'read_wavecat', 'read_waveset', 'read_detector_pars',
+           'read_interp_spec']
 
 _irafconvpat = re.compile('\$(\w*)')
 _irafconvdata = None
@@ -149,68 +148,6 @@ def irafconvert(iraf_filename, sep='$'):
         path = _iraf_decode(irafdir)
 
     return os.path.join(path, fname)
-
-
-def get_latest_file(template, raise_error=False, err_msg=''):
-    """Find the filename that appears last in sorted order
-    based on given template.
-
-    Parameters
-    ----------
-    template : str
-        Search template in the form of ``path/pattern``
-        where pattern is acceptable by :py:mod:`fnmatch`.
-
-    raise_error : bool, optional
-        Raise an error when no files found.
-        Otherwise, will issue warning only.
-
-    err_msg : str
-        Alternate message for when no files found.
-        If not given, generic message is used.
-
-    Returns
-    -------
-    filename : str
-        Latest filename.
-
-    Raises
-    ------
-    IOError
-        No files found.
-
-    """
-    path, pattern = os.path.split(template)
-
-    # Remote FTP directory
-    if path.lower().startswith('ftp:'):
-        import urllib2
-
-        response = urllib2.urlopen(path).read().decode('utf-8').splitlines()
-        allfiles = list(set([x.split()[-1] for x in response]))  # Rid symlink
-
-    # Local directory
-    else:
-        allfiles = os.listdir(path)
-
-    matched_files = sorted(fnmatch.filter(allfiles, pattern))
-
-    # Last file in sorted listing
-    if matched_files:
-        filename = os.path.join(path, matched_files[-1])
-
-    # No files found
-    else:
-        if not err_msg:
-            err_msg = 'No files found for {0}'.format(template)
-
-        if raise_error:
-            raise IOError(err_msg)
-        else:
-            log.warn(err_msg)
-            filename = ''
-
-    return filename
 
 
 def _read_table(filename, ext, dtypes):

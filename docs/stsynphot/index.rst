@@ -93,9 +93,6 @@ Reference/API
 .. automodapi:: stsynphot.graphtab
    :no-inheritance-diagram:
 
-.. automodapi:: stsynphot.io
-   :no-inheritance-diagram:
-
 .. automodapi:: stsynphot.observationmode
 
 .. automodapi:: stsynphot.spark
@@ -103,6 +100,9 @@ Reference/API
 .. automodapi:: stsynphot.spectrum
 
 .. automodapi:: stsynphot.spparser
+
+.. automodapi:: stsynphot.stio
+   :no-inheritance-diagram:
 
 .. automodapi:: stsynphot.tables
 

@@ -21,7 +21,7 @@ from astropy import log
 from astropy.io import fits
 
 # LOCAL
-from . import exceptions, io
+from . import exceptions, stio
 
 
 __all__ = ['extract_keywords', 'GraphNode', 'GraphPath', 'GraphTable',
@@ -193,7 +193,7 @@ class GraphPath(object):
 class GraphTable(object):
     """Class to handle graph table.
 
-    Table is parsed with :func:`~stsynphot.io.read_graphtable`.
+    Table is parsed with :func:`~stsynphot.stio.read_graphtable`.
     Component names that match 'clear' (case-insensitive) will
     be converted to `None`. All string entries will be converted
     to lower case. Comment column is ignored.
@@ -225,7 +225,7 @@ class GraphTable(object):
 
     """
     def __init__(self, fname, ext=1):
-        self.primary_area, data = io.read_graphtable(fname, tab_ext=ext)
+        self.primary_area, data = stio.read_graphtable(fname, tab_ext=ext)
         self.tname = fname
         self.tab = collections.defaultdict(GraphNode)
         self.problemset = set()
@@ -429,10 +429,10 @@ class GraphTable(object):
 class CompTable(object):
     """Class to handle component table (optical or thermal).
 
-    Table is parsed with :func:`~stsynphot.io.read_comptable`.
+    Table is parsed with :func:`~stsynphot.stio.read_comptable`.
     Only component names and filenames are kept.
     Component throughput filenames are parsed with
-    :func:`~stsynphot.io.irafconvert`.
+    :func:`~stsynphot.stio.irafconvert`.
 
     This class is used with `GraphPath` to produce a realized
     list of files.
@@ -455,14 +455,14 @@ class CompTable(object):
 
     """
     def __init__(self, fname, ext=1):
-        data = io.read_comptable(fname, tab_ext=ext)
+        data = stio.read_comptable(fname, tab_ext=ext)
         self.tname = fname
         self.tab = dict()
 
         for row in data:
             compname = row['COMPNAME'].lower()
             compfile = row['FILENAME']
-            self.tab[compname] = io.irafconvert(compfile)
+            self.tab[compname] = stio.irafconvert(compfile)
 
     def __getitem__(self, key):
         """Return throughput filename for given component name."""

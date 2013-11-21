@@ -19,7 +19,7 @@ from synphot import spectrum as synspectrum
 from synphot.utils import merge_wavelengths
 
 # LOCAL
-from . import config, exceptions, io, spectrum, tables
+from . import config, exceptions, stio, spectrum, tables
 from .wavetable import WAVECAT
 
 
@@ -215,7 +215,7 @@ class BaseObservationMode(object):
         Telescope collecting area.
 
     pixscale : `astropy.units.quantity.Quantity`
-        Detector pixel scale from ``stsynphot.config.DETECTORFILE``, which is parsed with :func:`synphot.io.read_detector_pars`.
+        Detector pixel scale from ``stsynphot.config.DETECTORFILE``, which is parsed with :func:`synphot.stio.read_detector_pars`.
 
     binset : str
         Wavelength table filename or parameter string from the  matching observation mode in ``stsynphot.wavetable.WAVECAT``.
@@ -293,7 +293,7 @@ class BaseObservationMode(object):
         If multiple matches found, only first match is used.
 
         """
-        data = io.read_detector_pars(io.irafconvert(config.DETECTORFILE()))
+        data = stio.read_detector_pars(stio.irafconvert(config.DETECTORFILE()))
         obsmode = ','.join(self._obsmode.split(',')[:2])
         pixscales = data[data['OBSMODE'] == obsmode]['SCALE'].data
 

@@ -17,11 +17,11 @@ from astropy import units as u
 from synphot import binning, reddening, units
 from synphot import config as synconfig
 from synphot import exceptions as synexceptions
-from synphot import io as synio
+from synphot import specio
 from synphot import spectrum as synspectrum
 
 # LOCAL
-from . import config, io
+from . import config, stio
 
 
 __all__ = ['reset_cache', 'interpolate_spectral_element',
@@ -96,7 +96,7 @@ def interpolate_spectral_element(parfilename, interpval, ext=1, area=None):
     """Interpolate (or extrapolate) throughput spectra in given
     parameterized FITS table to given parameter value.
 
-    FITS table is parsed with :func:`stsynphot.io.read_interp_spec`.
+    FITS table is parsed with :func:`stsynphot.stio.read_interp_spec`.
     Parameterized values must be in ascending order in the
     table columns.
 
@@ -143,7 +143,7 @@ def interpolate_spectral_element(parfilename, interpval, ext=1, area=None):
     col_prefix = xre.group('col').upper()
 
     # Read data table
-    data, wave_unit, doshift, extrapolate = io.read_interp_spec(
+    data, wave_unit, doshift, extrapolate = stio.read_interp_spec(
         filename, tab_ext=ext)
     wave0 = data['WAVELENGTH']
 
@@ -322,8 +322,8 @@ class ThermalSpectralElement(synspectrum.BaseUnitlessSpectrum):
 
         kwargs : dict
             Keywords acceptable by
-            :func:`synphot.io.read_fits_spec` (if FITS) or
-            :func:`synphot.io.read_ascii_spec` (if ASCII).
+            :func:`synphot.stio.read_fits_spec` (if FITS) or
+            :func:`synphot.stio.read_ascii_spec` (if ASCII).
 
         Returns
         -------
@@ -353,7 +353,7 @@ class ThermalSpectralElement(synspectrum.BaseUnitlessSpectrum):
         if 'flux_col' not in kwargs:
             kwargs['flux_col'] = 'EMISSIVITY'
 
-        header, wavelengths, fluxes = synio.read_spec(filename, **kwargs)
+        header, wavelengths, fluxes = specstio.read_spec(filename, **kwargs)
         return cls(wavelengths, fluxes, temperature, beam_fill_factor,
                    area=area, header=header)
 
@@ -621,7 +621,7 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
             Output filename.
 
         kwargs : dict
-            Keywords accepted by :func:`synphot.io.write_fits_spec`.
+            Keywords accepted by :func:`synphot.stio.write_fits_spec`.
 
         """
         kwargs['flux_col'] = 'THROUGHPUT'
@@ -643,7 +643,7 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
         else:
             kwargs['ext_header'] = bkeys
 
-        synio.write_fits_spec(filename, self.wave, self.thru, **kwargs)
+        specstio.write_fits_spec(filename, self.wave, self.thru, **kwargs)
 
     @classmethod
     def from_obsmode(cls, obsmode, graphtable=None, comptable=None,
@@ -769,7 +769,7 @@ def load_vega(vegafile=None, area=None, **kwargs):
         be in :math:`cm^{2}`.
 
     kwargs : dict
-        Keywords acceptable by :func:`synphot.io.read_remote_spec`.
+        Keywords acceptable by :func:`synphot.stio.read_remote_spec`.
 
     Returns
     -------
