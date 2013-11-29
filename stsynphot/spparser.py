@@ -102,9 +102,6 @@ class AST(object):
 
 class BaseScanner(spark.GenericScanner):
     # Base class to handle language scanner.
-    def __init__(self):
-        spark.GenericScanner.__init__(self)
-
     def tokenize(self, s):
         # Tokenize string.
         self.rv = []
@@ -154,9 +151,6 @@ class BaseScanner(spark.GenericScanner):
 
 class Scanner(BaseScanner):
     # Class to handle language scanner.
-    def __init__(self):
-        BaseScanner.__init__(self)
-
     def t_float(self, s):
         # Float regular expression.
         r' ((\d*\.\d+)|(\d+\.d*)|(\d+)) ([eE][-+]?\d+)?'
@@ -171,7 +165,7 @@ class Scanner(BaseScanner):
 class BaseParser(spark.GenericASTBuilder):
     # Base class to handle language parser.
     def __init__(self, ASTclass, start='top'):
-        spark.GenericASTBuilder.__init__(self, ASTclass, start)
+        super(BaseParser, self).__init__(ASTclass, start)
 
     def p_top(self, args):
         """
@@ -215,7 +209,7 @@ class BaseParser(spark.GenericASTBuilder):
 class Interpreter(spark.GenericASTMatcher):
     # Class to handle language interpreter.
     def __init__(self, ast):
-        spark.GenericASTMatcher.__init__(self, 'V', ast)
+        super(Interpreter, self).__init__('V', ast)
 
     def error(self, token):
         # Raise en exception.

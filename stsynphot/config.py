@@ -185,6 +185,8 @@ def setref(graphtable=None, comptable=None, thermtable=None, area=None,
         wave, wave_str = generate_wavelengths(
             minwave=500, maxwave=26000, num=10000, delta=None, log=True,
             wave_unit='angstrom')
+        _DEFAULT_WAVESET.set(wave.tolist())
+        _DEFAULT_WAVESET_STR.set(wave_str)
 
     # Otherwise, check them all separately
     else:
@@ -225,9 +227,8 @@ def setref(graphtable=None, comptable=None, thermtable=None, area=None,
             wave, wave_str = generate_wavelengths(
                 minwave=minwave, maxwave=maxwave, num=num, log=log,
                 wave_unit='angstrom')
-
-    _DEFAULT_WAVESET.set(wave.tolist())
-    _DEFAULT_WAVESET_STR.set(wave_str)
+            _DEFAULT_WAVESET.set(wave.tolist())
+            _DEFAULT_WAVESET_STR.set(wave_str)
 
 
 def getref():

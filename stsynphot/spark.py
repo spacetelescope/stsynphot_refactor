@@ -50,7 +50,7 @@ def _dump(tokens, states):
     log.info(out_str)
 
 
-class GenericScanner:
+class GenericScanner(object):
     def __init__(self):
         pattern = self.reflect()
         self.re = re.compile(pattern, re.VERBOSE)
@@ -95,7 +95,7 @@ class GenericScanner:
         pass
 
 
-class GenericParser:
+class GenericParser(object):
     def __init__(self, start):
         self.rules = {}
         self.rule2func = {}
@@ -424,7 +424,7 @@ class GenericParser:
 
 class GenericASTBuilder(GenericParser):
     def __init__(self, AST, start):
-        GenericParser.__init__(self, start)
+        super(GenericASTBuilder, self).__init__(start)
         self.AST = AST
 
     def preprocess(self, rule, func):
@@ -462,7 +462,7 @@ class GenericASTBuilder(GenericParser):
 #  preorder traversal.  Node type is determined via the typestring() method.
 #
 
-class GenericASTTraversal:
+class GenericASTTraversal(object):
     def __init__(self, ast):
         self.ast = ast
 
@@ -522,7 +522,7 @@ class GenericASTTraversal:
 
 class GenericASTMatcher(GenericParser):
     def __init__(self, start, ast):
-        GenericParser.__init__(self, start)
+        super(GenericASTMatcher, self).__init__(start)
         self.ast = ast
 
     def preprocess(self, rule, func):

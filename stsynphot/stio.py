@@ -538,13 +538,15 @@ def read_interp_spec(filename, tab_ext=1):
 
     """
     with fits.open(filename) as f:
-        params = f['PRIMARY'].header.get('PARAMS', '')
+        pri_hdr = f[str('PRIMARY')].header
+
+        params = pri_hdr.get('PARAMS', '')
         if params.lower() == 'wavelength':
             do_wave_shift = True
         else:
             do_wave_shift = False
 
-        extrap = f['PRIMARY'].header.get('EXTRAP', False)
+        extrap = pri_hdr.get('EXTRAP', False)
         if extrap in (True, 'T', 't'):
             allow_extrap = True
         else:

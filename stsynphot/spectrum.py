@@ -1,10 +1,11 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """This module contains spectrum classes specific to STScI formats."""
-from __future__ import division, print_function
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # STDLIB
-import re
 import os
+import re
+from copy import deepcopy
 
 # THIRD-PARTY
 import numpy as np
@@ -14,10 +15,9 @@ from astropy import log
 from astropy import units as u
 
 # SYNPHOT
-from synphot import binning, reddening, units
+from synphot import binning, reddening, specio, units
 from synphot import config as synconfig
 from synphot import exceptions as synexceptions
-from synphot import specio
 from synphot import spectrum as synspectrum
 
 # LOCAL
@@ -25,8 +25,7 @@ from . import config, stio
 
 
 __all__ = ['reset_cache', 'interpolate_spectral_element',
-           'ThermalSpectralElement', 'ObservationSpectralElement', 'band',
-           'ebmvx', 'load_vega', 'Vega']
+           'ObservationSpectralElement', 'band', 'ebmvx', 'load_vega', 'Vega']
 
 _interpfilepatt = re.compile('\[(?P<col>.*?)\]')
 _REDLAWS = {}  # Cache previously loaded reddening laws
@@ -139,12 +138,17 @@ def interpolate_spectral_element(parfilename, interpval, ext=1, area=None):
 
     # Separate real filename and column name specification
     xre = _interpfilepatt.search(parfilename)
+    if xre is None:
+        raise synexceptions.SynphotError(
+            '{0} must be in the format of "path/filename.fits'
+            '[col#]"'.format(parfilename))
     filename = parfilename[0:xre.start()]
     col_prefix = xre.group('col').upper()
 
     # Read data table
     data, wave_unit, doshift, extrapolate = stio.read_interp_spec(
         filename, tab_ext=ext)
+    wave_unit = units.validate_unit(wave_unit)
     wave0 = data['WAVELENGTH']
 
     # Determine the columns that bracket the desired value.
@@ -160,7 +164,8 @@ def interpolate_spectral_element(parfilename, interpval, ext=1, area=None):
 
     if len(col_names) < 1:
         raise synexceptions.SynphotError(
-            '{0} contains no interpolated columns.'.format(parfilename))
+            '{0} contains no interpolated columns for {1}.'.format(
+                filename, col_prefix))
 
     # Assumes ascending order of parameter values in table.
     min_par = col_pars[0]
@@ -214,148 +219,6 @@ def interpolate_spectral_element(parfilename, interpval, ext=1, area=None):
     sp.warnings.update(warnings)
 
     return sp
-
-
-class ThermalSpectralElement(synspectrum.BaseUnitlessSpectrum):
-    """Class to handle spectral element with associated thermal
-    properties.
-
-    This differs from `synphot.spectrum.SpectralElements` in the
-    sense that it carries thermal parameters such as temperature
-    and beam filling factor.
-
-    .. note::
-
-        This class does not know how to apply itself to an
-        existing beam. Its emissivity should be handled explicitly
-        outside the class. Also see
-        :func:`stsynphot.observationmode.ThermalObservationMode.to_spectrum`.
-
-    Wavelengths must be monotonic ascending/descending without zeroes
-    or duplicate values.
-
-    Values for the unitless component (hereafter, known as emissivity)
-    must be dimensionless. They are checked for negative values.
-    If found, warning is issued and negative values are set to zeroes.
-
-    Parameters
-    ----------
-    wavelengths : array_like or `astropy.units.quantity.Quantity`
-        Wavelength values. If not a Quantity, assumed to be in
-        Angstrom.
-
-    emissivity : array_like or `astropy.units.quantity.Quantity`
-        Emissivity values. Must be dimensionless.
-        If not a Quantity, assumed to be in THROUGHPUT.
-
-    temperature : float or `astropy.units.quantity.Quantity`
-        Temperature. If not a Quantity, assumed to be in Kelvin.
-
-    beam_fill_factor : float
-        Beam filling factor.
-
-    kwargs : dict
-        Keywords accepted by `synphot.spectrum.BaseSpectrum`,
-        except ``flux_unit``.
-
-    Attributes
-    ----------
-    wave, thru : `astropy.units.quantity.Quantity`
-        Wavelength and emissivity of the spectrum.
-
-    temperature : `astropy.units.quantity.Quantity`
-        Temperature.
-
-    beam_fill_factor : float
-        Beam filling factor.
-
-    primary_area : `astropy.units.quantity.Quantity` or `None`
-        Area that flux covers in :math:`cm^{2}`.
-
-    metadata : dict
-        Metadata. ``self.metadata['expr']`` must contain a descriptive string of the object.
-
-    warnings : dict
-        List of warnings related to spectrum object.
-
-    Raises
-    ------
-    synphot.exceptions.SynphotError
-        If wavelengths and emissivity do not match, or if they have
-        invalid units.
-
-    synphot.exceptions.DuplicateWavelength
-        If wavelength array contains duplicate entries.
-
-    synphot.exceptions.UnsortedWavelength
-        If wavelength array is not monotonic.
-
-    synphot.exceptions.ZeroWavelength
-        If negative or zero wavelength occurs in wavelength array.
-
-    """
-    def __init__(self, wavelengths, emissivity, temperature, beam_fill_factor,
-                 **kwargs):
-        super(ThermalSpectralElement, self).__init__(
-            wavelengths, emissivity, **kwargs)
-        self.temperature = units.validate_quantity(temperature, u.K)
-        self.beam_fill_factor = float(beam_fill_factor)
-
-    @classmethod
-    def from_file(cls, filename, area=None, **kwargs):
-        """Creates a thermal spectrum object from file.
-
-        Only FITS is supported. Table extension header
-        must have the following keywords:
-
-            * ``DEFT`` - Temperature in Kelvin.
-            * ``BEAMFILL`` - Beam filling factor.
-
-        Parameters
-        ----------
-        filename : str
-            Thermal spectrum filename.
-
-        area : float or `astropy.units.quantity.Quantity`, optional
-            Telescope collecting area.
-            If not a Quantity, assumed to be in :math:`cm^{2}`.
-
-        kwargs : dict
-            Keywords acceptable by
-            :func:`synphot.stio.read_fits_spec` (if FITS) or
-            :func:`synphot.stio.read_ascii_spec` (if ASCII).
-
-        Returns
-        -------
-        newspec : obj
-            New thermal spectrum object.
-
-        Raises
-        ------
-        synphot.exceptions.SynphotError
-            Invalid file format.
-
-        """
-        from astropy.io import fits
-
-        if not (filename.endswith('fits') or filename.endswith('fit')):
-            raise synexceptions.SynphotError('Only FITS is supported.')
-
-        # Extra info from table header
-        ext = kwargs.get('ext', 1)
-        tab_hdr = fits.getheader(filename, ext=ext)
-        temperature = tab_hdr['DEFT']
-        beam_fill_factor = tab_hdr['BEAMFILL']
-
-        if 'flux_unit' not in kwargs:
-            kwargs['flux_unit'] = units.THROUGHPUT
-
-        if 'flux_col' not in kwargs:
-            kwargs['flux_col'] = 'EMISSIVITY'
-
-        header, wavelengths, fluxes = specstio.read_spec(filename, **kwargs)
-        return cls(wavelengths, fluxes, temperature, beam_fill_factor,
-                   area=area, header=header)
 
 
 class ObservationSpectralElement(synspectrum.SpectralElement):
@@ -451,6 +314,12 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
             raise synexceptions.UndefinedBinset(
                 'No binwave specified for this passband.')
 
+    def _check_obsmode(self):
+        """All methods that use ``self.obsmode`` should call this first."""
+        if self.obsmode is None:
+            raise synexceptions.SynphotError(
+                'Calculation not possible due to missing obsmode.')
+
     def __len__(self):
         """Get the number of components in ``self.obsmode``."""
         if self.obsmode is None:
@@ -459,7 +328,7 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
             x = len(self.obsmode)
         return x
 
-    def showfiles(self):
+    def showfiles(self):  # pragma: no cover
         """Display ``self.obsmode`` optical component filenames.
         Does nothing if ``self.obsmode`` is undefined.
 
@@ -468,6 +337,42 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
         """
         if self.obsmode is not None:
             self.obsmode.showfiles()
+
+    def countrate(self, sp):
+        """Calculate count rate by multiplying passband sensitivity
+        with the given source spectrum.
+
+        Also see :func:`synphot.observation.Observation.countrate`.
+
+        Parameters
+        ----------
+        sp : `synphot.spectrum.SourceSpectrum`
+            Source spectrum.
+
+        Returns
+        -------
+        ct_rate : `astropy.units.quantity.Quantity`
+            Count rate in :math:`\\textnormal{count} \\; s^{-1} \\; cm^{-2}`.
+
+        Raises
+        ------
+        synphot.exceptions.SynphotError
+            Calculation failed.
+
+        """
+        self._check_obsmode()
+
+        if not isinstance(sp, synspectrum.SourceSpectrum):
+            raise synexceptions.SynphotError(
+                '{0} is not a source spectrum.'.format(sp))
+
+        in_sp = deepcopy(sp)  # To convert flux unit without changing input
+        in_sp.convert_flux(units.FLAM)
+
+        sp_ct = in_sp * self.obsmode.sensitivity
+        ct_rate = sp_ct.integrate()
+
+        return u.Quantity(ct_rate.value, u.count / (u.s * units.AREA))
 
     def thermback(self, thermtable=None):
         """Calculate thermal background count rate for
@@ -504,11 +409,9 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
             Calculation failed.
 
         """
-        if self.obsmode is None:
-            raise synexceptions.SynphotError(
-                'Calculation not possible due to missing obsmode.')
+        self._check_obsmode()
 
-        if self.obsmode.pixscale is None:
+        if self.obsmode.pixscale is None:  # pragma: no cover
             raise synexceptions.SynphotError(
                 'Undefined pixel scale for {0}.'.format(self.obsmode))
 
@@ -561,10 +464,8 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
 
         w1, w2 = binning.wave_range(
             bin_wave.value, cenwave.value, npix, **kwargs)
-        wave1 = u.Quantity(w1, unit=cenwave.unit)
-        wave2 = u.Quantity(w2, unit=cenwave.unit)
 
-        return wave1, wave2
+        return u.Quantity([w1, w2], unit=cenwave.unit)
 
     def pixel_range(self, waverange, **kwargs):
         """Calculate the number of pixels within the given wavelength
@@ -635,15 +536,17 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
 
         if self.obsmode is not None:
             bkeys.update(
-                {'grftable': (self.obsmode.gtname, 'graph table used'),
-                 'cmptable': (self.obsmode.ctname, 'component table used')})
+                {'grftable': (os.path.basename(self.obsmode.gtname),
+                              'graph table used'),
+                 'cmptable': (os.path.basename(self.obsmode.ctname),
+                              'component table used')})
 
         if 'ext_header' in kwargs:
             kwargs['ext_header'].update(bkeys)
         else:
             kwargs['ext_header'] = bkeys
 
-        specstio.write_fits_spec(filename, self.wave, self.thru, **kwargs)
+        specio.write_fits_spec(filename, self.wave, self.thru, **kwargs)
 
     @classmethod
     def from_obsmode(cls, obsmode, graphtable=None, comptable=None,
@@ -682,9 +585,9 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
 
         ob = ObservationMode(obsmode, graphtable=graphtable,
                              comptable=comptable, component_dict=component_dict)
-        sp = ob.throughput()
+        sp = ob.throughput
 
-        if sp is None:
+        if sp is None:  # pragma: no cover
             raise synexceptions.SynphotError(
                 '{0} has no throughput.'.format(obsmode))
 

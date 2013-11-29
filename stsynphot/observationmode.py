@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # STDLIB
+import os
 import re
 
 # THIRD-PARTY
@@ -13,7 +14,7 @@ from astropy import log
 from astropy import units as u
 
 # SYNPHOT
-from synphot import planck, units
+from synphot import thermal, units
 from synphot import exceptions as synexceptions
 from synphot import spectrum as synspectrum
 from synphot.utils import merge_wavelengths
@@ -28,18 +29,20 @@ __all__ = ['reset_cache', 'Component', 'ThermalComponent',
 
 _band_patt = re.compile(r'band\((.*?)\)', re.IGNORECASE)
 
-# Cache previously loaded graph, component, and thermal tables
+# Cache previously loaded graph, component, thermal, and detector tables
 _GRAPHDICT = {}
 _COMPDICT = {}
 _THERMDICT = {}
+_DETECTORDICT = {}
 
 
 def reset_cache():
     """Empty the table dictionaries cache."""
-    global _GRAPHDICT, _COMPDICT, _THERMDICT
+    global _GRAPHDICT, _COMPDICT, _THERMDICT, _DETECTORDICT
     _GRAPHDICT.clear()
     _COMPDICT.clear()
     _THERMDICT.clear()
+    _DETECTORDICT.clear()
 
 
 class Component(object):
@@ -85,6 +88,8 @@ class Component(object):
             if self._interpval is None:
                 self.throughput = synspectrum.SpectralElement.from_file(
                     self.throughput_name, area=self.primary_area)
+                self.throughput.metadata['expr'] = os.path.basename(
+                    self.throughput_name)
             else:
                 self.throughput = spectrum.interpolate_spectral_element(
                     self.throughput_name, self._interpval,
@@ -125,7 +130,7 @@ class ThermalComponent(Component):
     throughput : `synphot.spectrum.SpectralElement` or `None`
         Optical component spectrum object.
 
-    emissivity : `stsynphot.spectrum.ThermalSpectralElement` or `None`
+    emissivity : `synphot.thermal.ThermalSpectralElement` or `None`
         Thermal component spectrum object.
 
     primary_area : float or `astropy.units.quantity.Quantity`
@@ -135,8 +140,8 @@ class ThermalComponent(Component):
     """
     def __init__(self, throughput_name, thermal_name, interpval=None,
                  area=None):
-        Component.__init__(
-            self, throughput_name, interpval=interpval, area=area)
+        super(ThermalComponent, self).__init__(
+            throughput_name, interpval=interpval, area=area)
         self.thermal_name = thermal_name
         self._build_emissivity()
 
@@ -144,8 +149,10 @@ class ThermalComponent(Component):
         """Extract thermal spectrum unless component is a CLEAR filter."""
         if self.thermal_name != tables.CLEAR_FILTER:
             self._empty = False
-            self.emissivity = spectrum.ThermalSpectralElement.from_file(
+            self.emissivity = thermal.ThermalSpectralElement.from_file(
                 self.thermal_name, area=self.primary_area)
+            self.emissivity.metadata['expr'] = os.path.basename(
+                self.thermal_name)
         else:
             self.emissivity = None
 
@@ -293,7 +300,16 @@ class BaseObservationMode(object):
         If multiple matches found, only first match is used.
 
         """
-        data = stio.read_detector_pars(stio.irafconvert(config.DETECTORFILE()))
+        global _DETECTORDICT
+
+        det_file = stio.irafconvert(config.DETECTORFILE())
+
+        if det_file in _DETECTORDICT:
+            data = _DETECTORDICT[det_file]
+        else:
+            data = stio.read_detector_pars(det_file)
+            _DETECTORDICT[det_file] = data
+
         obsmode = ','.join(self._obsmode.split(',')[:2])
         pixscales = data[data['OBSMODE'] == obsmode]['SCALE'].data
 
@@ -324,7 +340,7 @@ class BaseObservationMode(object):
             parkey = None
         return parkey
 
-    def showfiles(self):
+    def showfiles(self):  # pragma: no cover
         """Display optical component filenames.
 
         .. note:: Similar to IRAF SYNPHOT SHOWFILES.
@@ -362,6 +378,10 @@ class ObservationMode(BaseObservationMode):
         self._component_dict = component_dict
         self.components = self._get_components()
 
+        # These are calculated on demand, but only for the first time needed
+        self._total_thru = None
+        self._sensitivity = None
+
     def _get_components(self):
         """Get optical components."""
         components = []
@@ -385,54 +405,50 @@ class ObservationMode(BaseObservationMode):
     def _mul_thru(self, index):
         """Multiply all component spectra starting at given index."""
         product = self.components[index].throughput
+
         if len(self.components) > index:
             for component in self.components[index+1:]:
                 if not component.empty:
                     product = product * component.throughput
+
+        # Clear confusing metadata
+        for k in list(product.metadata.keys()):
+            if k != 'expr':
+                del product.metadata[k]
+
         return product
 
-    def sensitivity(self):
-        """Calculate sensitivity spectrum.
-
-        Calculation is done by combining the throughput curves
-        with :math:`\\frac{h \\; c}{\\lambda}` to convert
-        :math:`erg \\; cm^{-2} \\; s^{-1} \\; \\AA^{-1}` to
-        :math:`count s^{-1}`. Multiplying this by the flux in
-        :math:`erg \\; cm^{-2} \\; s^{-1} \\; \\AA^{-1}`
-        will give :math:`count s^{-1} \\AA^{-1}`.
-
-        Returns
-        -------
-        sp : `synphot.spectrum.SpectralElement`
-            Sensitivity spectrum.
-
-        """
-        product = self._mul_thru(0)
-        thru = product.thru.value * product.wave.value * self._constant.value
-        header = {'expr': 'Sensitivity for {0}'.format(self._obsmode)}
-        sp = synspectrum.SpectralElement(
-            product.wave, thru, area=self.primary_area, header=header)
-        return sp
-
+    @property
     def throughput(self):
-        """Calculate combined throughput spectrum.
-        Calculation is done by multiplying all the components together.
+        """Combined throughput from multiplying all the components together."""
+        if not isinstance(self._total_thru, synspectrum.SpectralElement):
+            try:
+                self._total_thru = self._mul_thru(0)
+            except IndexError as e:  # pragma: no cover
+                log.warn('Graph table is broken: {0}'.format(str(e)))
+            else:
+                self._total_thru.metadata['expr'] = '*'.join(
+                    [str(x) for x in self.components])
 
-        Returns
-        -------
-        sp : `synphot.spectrum.SpectralElement` or `None`
-            Combined throughput. `None` if calculation failed.
+        return self._total_thru
+
+    @property
+    def sensitivity(self):
+        """Sensitivity spectrum to convert flux in
+        :math:`erg \\; cm^{-2} \\; s^{-1} \\; \\AA^{-1}` to
+        :math:`count s^{-1} \\AA^{-1}`. Calculation is done by
+        combining the throughput curves with
+        :math:`\\frac{h \\; c}{\\lambda}` .
 
         """
-        try:
-            sp = self._mul_thru(0)
-        except IndexError as e:
-            log.warn('Graph table is broken: {0}'.format(str(e)))
-            sp = None
-        else:
-            sp.metadata['expr'] = '*'.join([str(x) for x in self.components])
+        if not isinstance(self._sensitivity, synspectrum.SpectralElement):
+            thru = (self.throughput.thru.value * self.throughput.wave.value *
+                    self._constant.value)
+            self._sensitivity = synspectrum.SpectralElement(
+                self.throughput.wave, thru, area=self.primary_area,
+                header={'expr': 'Sensitivity for {0}'.format(self._obsmode)})
 
-        return sp
+        return self._sensitivity
 
     def thermal_spectrum(self, thermtable=None):
         """Calculate thermal spectrum using
@@ -447,7 +463,7 @@ class ObservationMode(BaseObservationMode):
         Returns
         -------
         sp : `synphot.spectrum.SourceSpectrum`
-            Thermal spectrum.
+            Thermal spectrum in PHOTLAM.
 
         Raises
         ------
@@ -461,7 +477,7 @@ class ObservationMode(BaseObservationMode):
 
         try:
             sp = thom.to_spectrum()
-        except IndexError as e:
+        except IndexError as e:  # pragma: no cover
             raise synexceptions.SynphotError(
                 'Broken graph table: {0}'.format(str(e)))
 
@@ -614,26 +630,20 @@ class ThermalObservationMode(BaseObservationMode):
         The calculations start with zero-flux spectrum.
         Then for each component:
             #. Multiply with optical throughput.
-            #. For thermal component:
-                #. Calculate blackbody radiation (per square
-                   arcsec) for given temperature.
-                #. Multiply blackbody with emissivity and
-                   beam fill factor.
-                #. Add the result to output spectrum.
+            #. Add in thermal source spectrum from
+               :func:`synphot.thermal.ThermalSpectralElement.to_thermal_source`.
 
         Returns
         -------
         sp : `synphot.spectrum.SourceSpectrum`
-            Thermal spectrum.
+            Thermal spectrum in PHOTLAM.
 
         """
         # Create zero-flux spectrum
         wave = self._get_wave_intersection()
         flux = u.Quantity(np.zeros(wave.shape, dtype=np.float64),
                           unit=units.PHOTLAM)
-        sp = synspectrum.SourceSpectrum(
-            wave, flux, area=self.primary_area,
-            header={'expr': '{0}'.format(str(self))})
+        sp = synspectrum.SourceSpectrum(wave, flux, area=self.primary_area)
 
         minw = sp.wave.value[0]
         maxw = sp.wave.value[-1]
@@ -645,20 +655,12 @@ class ThermalObservationMode(BaseObservationMode):
 
             # Thermal section
             if component.emissivity is not None:
-                # Blackbody from temperature
-                t = component.emissivity.temperature
-                bbflux = planck.bb_photlam_arcsec(sp.wave, t)
-                sp_bb = synspectrum.SourceSpectrum(
-                    sp.wave, bbflux.value, flux_unit=units.PHOTLAM,
-                    area=self.primary_area,
-                    header={'expr': 'bb_per_arcsec({0})'.format(t)})
-
-                # Thermal spectrum to add
-                sp_comp = (sp_bb * component.emissivity *
-                           component.emissivity.beam_fill_factor)
-                sp = sp + sp_comp
+                sp = sp + component.emissivity.to_thermal_source(
+                    wavelengths=sp.wave)
 
                 # Trim spectrum
                 sp = sp.trim_spectrum(minw, maxw)
+
+        sp.metadata['expr'] = '{0} ThermalSpectrum'.format(str(self._obsmode))
 
         return sp
