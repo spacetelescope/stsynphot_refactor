@@ -399,7 +399,7 @@ class Interpreter(spark.GenericASTMatcher):
                     '{1}'.format(fname, repr(args))
 
 
-def tokens_info(tlist):
+def tokens_info(tlist):  # pragma: no cover
     """Print tokens for debugging.
 
     Parameters

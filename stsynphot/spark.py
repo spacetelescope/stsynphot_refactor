@@ -38,7 +38,7 @@ def _namelist(instance):
     return namelist
 
 
-def _dump(tokens, states):
+def _dump(tokens, states):  # pragma: no cover
     out_str = '\n'
     for i in range(len(states)):
         out_str += 'state {0}\n'.format(i)

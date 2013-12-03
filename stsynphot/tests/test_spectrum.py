@@ -226,7 +226,8 @@ class TestObservationSpectralElement(object):
 
     def test_std_filter(self):
         obs1 = spectrum.band('johnson,v')
-        obs2 = synspectrum.SpectralElement.from_filter('johnson_v')
+        obs2 = synspectrum.SpectralElement.from_filter(
+            'johnson_v', encoding='binary')
         np.testing.assert_allclose(obs1.thru.value, obs2.thru.value)
 
     def test_no_obsmode(self):
