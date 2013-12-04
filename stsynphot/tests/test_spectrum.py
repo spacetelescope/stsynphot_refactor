@@ -26,9 +26,9 @@ from synphot.utils import trapezoid_integration
 from .. import config, observationmode, spectrum
 
 
-GT_FILE = get_pkg_data_filename('data/tables_tmg.fits')
-CP_FILE = get_pkg_data_filename('data/tables_tmc.fits')
-TH_FILE = get_pkg_data_filename('data/tables_tmt.fits')
+GT_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmg.fits'))
+CP_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmc.fits'))
+TH_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmt.fits'))
 
 
 class TestInterpolateSpectrum(object):
@@ -160,7 +160,8 @@ class TestObservationSpectralElement(object):
 
     def test_other_graph_table(self):
         """Using the graph table with PRIMAREA."""
-        gt_file = get_pkg_data_filename('data/tables_primarea_tmg.fits')
+        gt_file = get_pkg_data_filename(
+            os.path.join('data', 'tables_primarea_tmg.fits'))
         obs = spectrum.band(
             'acs,hrc,f555w', graphtable=gt_file, comptable=CP_FILE)
 
@@ -230,6 +231,10 @@ class TestObservationSpectralElement(object):
             'johnson_v', encoding='binary')
         np.testing.assert_allclose(obs1.thru.value, obs2.thru.value)
 
+        # No pixel scale
+        with pytest.raises(synexceptions.SynphotError):
+            a = obs1.thermback()
+
     def test_no_obsmode(self):
         """Spectrum without obsmode."""
         obs = spectrum.ObservationSpectralElement([1000, 9000], [1, 1])
@@ -266,6 +271,17 @@ class TestObservationSpectralElement(object):
 
     def teardown_class(self):
         shutil.rmtree(self.outdir)
+
+
+def test_obs_negflux():
+    """Count rate for observation with negative flux."""
+    bp = spectrum.band(
+        'cos,fuv,g130m,c1309,psa', graphtable=GT_FILE, comptable=CP_FILE)
+    sp = synspectrum.SourceSpectrum.from_file(
+        get_pkg_data_filename(os.path.join('data', 'us7.txt')),
+        area=bp.primary_area)
+    c = bp.countrate(sp)
+    np.testing.assert_allclose(c.value, 1627.824995577284, rtol=1e-5)
 
 
 class TestEbmvx(object):

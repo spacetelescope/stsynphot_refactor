@@ -411,7 +411,7 @@ class ObservationSpectralElement(synspectrum.SpectralElement):
         """
         self._check_obsmode()
 
-        if self.obsmode.pixscale is None:  # pragma: no cover
+        if self.obsmode.pixscale is None:
             raise synexceptions.SynphotError(
                 'Undefined pixel scale for {0}.'.format(self.obsmode))
 

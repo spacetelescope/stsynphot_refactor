@@ -242,7 +242,7 @@ class BaseObservationMode(object):
             self._obsmode = obsmode.lower()
 
         # Split obsmode and separate parameterized modes
-        modes = self._obsmode.split(',')
+        modes = self._obsmode.replace(' ', '').split(',')
         self.pardict = {}
         if '#' in self._obsmode:
             self.modes = []

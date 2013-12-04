@@ -191,9 +191,12 @@ class TestObservationMode(object):
         assert obsmode.pardict['fr459m'] == 4610
 
     def test_thermal_spec(self):
-        """Also see TestThermalObservationMode."""
+        """Also see TestThermalObservationMode.
+        Whitespace in obsmode should not matter.
+
+        """
         obsmode = observationmode.ObservationMode(
-            'wfc3,ir,f153m', graphtable=GT_FILE, comptable=CP_FILE)
+            'wfc3, ir, f153m', graphtable=GT_FILE, comptable=CP_FILE)
         thsp = obsmode.thermal_spectrum(thermtable=TH_FILE)
         assert isinstance(thsp, synspectrum.SourceSpectrum)
         assert thsp.wave.unit == u.AA

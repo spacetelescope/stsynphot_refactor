@@ -129,12 +129,12 @@ def irafconvert(iraf_filename, sep='$'):
     if not isinstance(iraf_filename, six.string_types):
         raise TypeError('{0} is not a string.'.format(iraf_filename))
 
-    # Remove duplicate separators and extraneous relative paths.
-    iraf_filename = os.path.normpath(iraf_filename)
-
     # Nothing needs to be done
     if sep not in iraf_filename:
         return iraf_filename
+
+    # Remove duplicate separators and extraneous relative paths.
+    iraf_filename = os.path.normpath(iraf_filename)
 
     # $var/file
     if iraf_filename.startswith(sep):
