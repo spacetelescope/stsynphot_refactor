@@ -44,9 +44,6 @@ _SYFUNCTIONS = ('band', 'bb', 'box', 'ebmvx', 'em', 'icat', 'pl', 'rn', 'spec',
 _SYFORMS = ('abmag', 'counts', 'flam', 'fnu', 'jy', 'mjy', 'obmag', 'photlam',
              'photnu', 'stmag', 'vegamag')
 
-# Filelist is not supported yet. Should be handled in :func:`interpret`.
-#_ZZZ = """ top ::= FILELIST """
-
 
 def _convertstr(value):
     """Convert given filename to source spectrum or passband.
@@ -71,8 +68,14 @@ class Token(object):
         self.type = token_type
         self.attr = attr
 
-    def __cmp__(self, o):
+    def __cmp__(self, o):  # pragma: py2
         return cmp(self.type, o)
+
+    def __eq__(self, o):  # pragma: py3
+        return self.type == o
+
+    def __lt__(self, o):  # pragma: py3
+        return self.type < o
 
     def __repr__(self):
         if self.attr is not None:
@@ -90,14 +93,23 @@ class AST(object):
     def __getitem__(self, i):
         return self._kids[i]
 
+    def __setitem__(self, i, seq):  # pragma: py3
+        self._kids[i] = seq
+
     def __len__(self):
         return len(self._kids)
 
-    def __setslice__(self, low, high, seq):
+    def __setslice__(self, low, high, seq):  # pragma: py2
         self._kids[low:high] = seq
 
-    def __cmp__(self, o):
+    def __cmp__(self, o):  # pragma: py2
         return cmp(self.type, o)
+
+    def __eq__(self, o):  # pragma: py3
+        return self.type == o
+
+    def __lt__(self, o):  # pragma: py3
+        return self.type < o
 
 
 class BaseScanner(spark.GenericScanner):
@@ -266,7 +278,7 @@ class Interpreter(spark.GenericASTMatcher):
         else:
             tree.value = [tree[0].value, tree[2].value]
         try:
-            tree.svalue = "%s,%s" % (tree[0].svalue, tree[2].svalue)
+            tree.svalue = '{0:s},{1:s}'.format(tree[0].svalue, tree[2].svalue)
         except AttributeError:
             pass  # We only care about this for relatively simple constructs.
 

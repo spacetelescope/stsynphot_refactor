@@ -11,7 +11,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 # STDLIB
 import re
-import string
 
 # ASTROPY
 from astropy import log
@@ -44,7 +43,7 @@ def _dump(tokens, states):  # pragma: no cover
         out_str += 'state {0}\n'.format(i)
         for (lhs, rhs), pos, parent in states[i]:
             out_str += '\t{0}::={1}.{2},{3}'.format(
-                lhs, string.join(rhs[:pos]), string.join(rhs[pos:]), parent)
+                lhs, ' '.join(rhs[:pos]), ' '.join(rhs[pos:]), parent)
         if i < len(tokens):
             out_str += '\ntoken {0}\n'.format(tokens[i])
     log.info(out_str)
@@ -61,7 +60,7 @@ class GenericScanner(object):
 
     def makeRE(self, name):
         doc = getattr(self, name).__doc__
-        rv = '(?P<%s>%s)' % (name[2:], doc)
+        rv = '(?P<{0:s}>{1:s})'.format(name[2:], doc)
         return rv
 
     def reflect(self):
@@ -71,7 +70,7 @@ class GenericScanner(object):
                 rv.append(self.makeRE(name))
 
         rv.append(self.makeRE('t_default'))
-        return string.join(rv, '|')
+        return '|'.join(rv)
 
     def error(self, s, pos):
         raise ParserError('Lexical error at position {0}'.format(pos))
@@ -114,7 +113,7 @@ class GenericParser(object):
         return rule, func
 
     def addRule(self, doc, func):
-        rules = string.split(doc)
+        rules = doc.split()
 
         index = []
         for i in range(len(rules)):
@@ -204,7 +203,7 @@ class GenericParser(object):
         if self.ruleschanged:
             self.makeFIRST()
 
-        for i in xrange(len(tokens)):
+        for i in range(len(tokens)):
             states[i+1] = []
 
             if states[i] == []:
@@ -283,9 +282,8 @@ class GenericParser(object):
                     continue
                 predicted[nextSym] = 1
 
-                ttype = token is not self._EOF and \
-                    self.typestring(token) or \
-                    None
+                ttype = (token is not self._EOF and self.typestring(token) or
+                         None)
                 if ttype is not None:
                     #
                     #  Even smarter predictor, when the
@@ -310,8 +308,7 @@ class GenericParser(object):
                                 state.append(new)
                                 continue
                         first = self.first[prhs0]
-                        if None not in first and \
-                           ttype not in first:
+                        if None not in first and ttype not in first:
                             continue
                         state.append(new)
                     continue
@@ -323,9 +320,8 @@ class GenericParser(object):
                     #  as good as FIRST sets though.
                     #
                     prhs = prule[1]
-                    if len(prhs) > 0 and \
-                       prhs[0] not in self.rules and \
-                       token != prhs[0]:
+                    if (len(prhs) > 0 and prhs[0] not in self.rules and
+                            token != prhs[0]):
                         continue
                     state.append((prule, 0, i))
 
@@ -448,7 +444,7 @@ class GenericASTBuilder(GenericParser):
 
     def nonterminal(self, type, args):
         rv = self.AST(type)
-        rv[:len(args)] = args
+        rv[slice(0, len(args))] = args
         return rv
 
 
