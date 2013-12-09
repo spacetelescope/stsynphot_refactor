@@ -1,186 +1,175 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""
-Objects that represent comp tables and graph tables.
+"""This module handles graph and component (optical or thermal) tables.
+
+.. warning::
+
+    Use this module, *not* `stsynphot.graphtab`.
 
 """
-from __future__ import division, print_function
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # THIRD-PARTY
 import numpy as np
 
 # ASTROPY
-from astropy.io import fits
+from astropy import log
+
+# SYNPHOT
+from synphot import exceptions as synexceptions
+
+# LOCAL
+from . import exceptions, stio
 
 
-#Flag to control verbosity
-DEBUG = False
+__all__ = ['CLEAR_FILTER', 'GraphTable', 'CompTable']
 
-
-class CompTable(object):
-    """
-    CompTable class; opens the specified comptable and populates 1-d
-    arrays of component names and file names in the members compnames
-    and filenames
-    """
-
-    def __init__(self, CFile=None):
-        """
-        __init__ instantiates the CompTable object, given the comptable
-        file name as an input string.
-
-        Parameters
-        -----------
-        Input :  ndarray of chars
-            string CFile containing comptable name
-        Effect : ndarray of chars
-            populates two data members: compnames and filenames
-
-        """
-
-        # None is common for various errors.
-        # the default value of None is not useful; fits.open(None)
-        # does not work.
-        if CFile is None:
-            raise TypeError(
-                'initializing CompTable with CFile=None; possible bad/missing'
-                ' CDBS')
-
-        with fits.open(CFile) as cp:
-            self.compnames = cp[1].data.field('compname')
-            self.filenames = cp[1].data.field('filename')
-            compdict = {}
-            for i in range(len(self.compnames)):
-                compdict[self.compnames[i]] = self.filenames[i]
-
-        self.name = CFile
+CLEAR_FILTER = 'clear'
 
 
 class GraphTable(object):
-    """
-    GraphTable class; opens the specified graph table and populates
-    1-d arrays of keyword names, innodes, outnodes and component names
-    in the members keywords, innodes, outnodes and compnames
+    """Class to handle graph table.
+
+    Table is parsed with :func:`~stsynphot.stio.read_graphtable`.
+    All string entries will be converted to lower case.
+    Comment column is ignored.
+
+    Parameters
+    ----------
+    graphfile : str
+        Graph table name.
+
+    ext : int, optional
+        FITS extension index of the data table.
+
+    Attributes
+    ----------
+    keywords : array of str
+        Keyword names.
+
+    compnames, thcompnames : array of str
+        Components names (optical and thermal).
+
+    innodes, outnodes : array of int
+        Input and output nodes.
+
+    primary_area : float or `None`
+        Value of PRIMAREA keyword in primary header in :math:`cm^{2}`.
 
     """
+    def __init__(self, graphfile, ext=1):
+        self.primary_area, data = stio.read_graphtable(graphfile, tab_ext=ext)
 
-    def __init__(self, GFile=None):
-        """
-         __init__ instantiates the GraphTable object, given the graph
-        table name as an input string.
+        # Convert all strings to lowercase
+        self.keywords = np.array([s.lower() for s in data['KEYWORD']])
+        self.compnames = np.array([s.lower() for s in data['COMPNAME']])
+        self.thcompnames = np.array([s.lower() for s in data['THCOMPNAME']])
+
+        # Already int
+        self.innodes = data['INNODE']
+        self.outnodes = data['OUTNODE']
+
+    def get_next_node(self, modes, innode):
+        """Return the output node that matches an element from
+        given list of modes, starting at the given input node.
+
+        If no match found for the given modes, output node
+        corresponding to default mode is used.
+        If multiple matches are found, only the result for the
+        latest matched mode is stored.
+
+        .. note::
+
+            This is only used for debugging.
 
         Parameters
         ----------
-        Input :  string
-            GFile containing graph table name
-        Effect : dict
-            populates four data members::
+        modes : list of str
+            List of modes.
 
-                keywords: CharArray of keyword names
-                innodes:  Int32 array of innodes
-                outnodes: Int32 array of outnodes
-                compnames:CharArray of components names
+        innode : int
+            Starting input node.
+
+        Returns
+        -------
+        outnode : int
+            Matching output node, or -1 if given input node not found.
+
         """
+        nodes = np.where(self.innodes == innode)[0]
 
-        # None is common for various errors.
-        # the default value of None is not useful;
-        # fits.open(None) does not work.
-        if GFile is None:
-            raise TypeError(
-                'initializing GraphTable with GFile=None; '
-                'possible bad/missing CDBS')
-
-        with fits.open(GFile) as gp:
-            if 'PRIMAREA' in gp[0].header:
-                self.primary_area = gp[0].header['PRIMAREA']
-
-            self.keywords = gp[1].data.field('keyword')
-            self.innodes = gp[1].data.field('innode')
-            self.outnodes = gp[1].data.field('outnode')
-            self.compnames = gp[1].data.field('compname')
-            self.thcompnames = gp[1].data.field('thcompname')
-
-            # keywords must be forced to lower case (STIS keywords are
-            # mixed mode %^&^(*^*^%%%@#$!!!)
-            for i in xrange(len(self.keywords)):
-                self.keywords[i] = self.keywords[i].lower()
-
-            ##        for comp in self.compnames:
-            ##            try:
-            ##                if comp.index('nic') == 0:
-            ##                    print(comp)
-            ##            except:
-            ##                pass
-
-            # prints components associated with a given keyword
-            ##        i = -1
-            ##        for keyword in self.keywords:
-            ##            i = i + 1
-            ##            if keyword == 'acs':
-            ##                print(self.compnames[i])
-
-    def GetNextNode(self, modes, innode):
-        '''GetNextNode returns the outnode that matches an element from
-        the modes list, starting at the given innode.
-        This method isnt actually used, its just a helper method for
-        debugging purposes'''
-        nodes = np.where(self.innodes == innode)
-
-        ## If there's no entry for the given innode, return -1
-        if nodes[0].size == 0:
+        # No match
+        if len(nodes) == 0:
             return -1
 
-        ## If we don't match anything in the modes list, we find the
-        ## outnode corresponding the the string 'default'
-        defaultindex = np.where(self.keywords[nodes] == 'default')
+        # Output node for default mode
+        defaultindex = np.where(self.keywords[nodes] == 'default')[0]
 
-        if len(defaultindex[0]) != 0:
-            outnode = self.outnodes[nodes[0][defaultindex[0]]]
+        if len(defaultindex) != 0:
+            outnode = self.outnodes[nodes[defaultindex]]
 
-        ## Now try and match one of the strings in the modes list with
-        ## the keywords corresponding to the list of entries with the given
-        ## innode
         for mode in modes:
-            result = self.keywords[nodes].count(mode)
-            if result != 0:
-                index = np.where(self.keywords[nodes] == mode)
-                outnode = self.outnodes[nodes[0][index[0]]]
+            index = np.where(self.keywords[nodes] == mode)[0]
+            if len(index) > 0:
+                outnode = self.outnodes[nodes[index]]
 
-        ## Return the outnode corresponding either to the matched mode,
-        ## or to 'default'
-        return outnode
+        return outnode[0]
 
-    def GetComponentsFromGT(self, modes, innode):
+    def get_comp_from_gt(self, modes, innode):
+        """Return component names for the given modes by traversing
+        the graph table, starting at the given input node.
+
+        .. note::
+
+            Extra debug messages available by setting logger to
+            debug mode.
+
+        Parameters
+        ----------
+        modes : list of str
+            List of modes.
+
+        innode : int
+            Starting input node.
+
+        Returns
+        -------
+        components, thcomponents : list of str
+            Optical and thermal components.
+
+        Raises
+        ------
+        stsynphot.exceptions.AmbiguousObsmode
+            Ambiguous mode.
+
+        stsynphot.exceptions.IncompleteObsmode
+            Incomplete mode.
+
+        stsynphot.exceptions.UnusedKeyword
+            Unused keyword in mode.
+
         """
-        GetComponentsFromGT returns two lists of component names
-        corresponding to those obtained by waling down the graph
-        table starting at innode. The first list contains the optical
-        components, the second list, the thermal components.
-
-        """
-
         components = []
         thcomponents = []
         outnode = 0
         inmodes = set(modes)
         used_modes = set()
         count = 0
+
         while outnode >= 0:
-            if (DEBUG and (outnode < 0)):
-                print("outnode == {0:d}: stop condition".fortmat(outnode))
+            if outnode < 0:  # pragma: no cover
+                log.debug('outnode={0} (stop condition).'.format(outnode))
 
             previous_outnode = outnode
-
             nodes = np.where(self.innodes == innode)
 
             # If there are no entries with this innode, we're done
-            if nodes[0].size == 0:
-                if DEBUG:
-                    print("no such innode {0:d}: stop condition".format(innode))
-                    #return (components,thcomponents)
+            if len(nodes[0]) == 0:
+                log.debug(
+                    'innode={0} not found (stop condition).'.format(innode))
                 break
 
             # Find the entry corresponding to the component named
-            # 'default', bacause thats the one we'll use if we don't
+            # 'default', because thats the one we'll use if we don't
             # match anything in the modes list
             defaultindex = np.where(self.keywords[nodes] == 'default')
 
@@ -191,55 +180,114 @@ class GraphTable(object):
                 thcomponent = self.thcompnames[nodes[0][dfi]]
                 used_default = True
             else:
-                #There's no default, so fail if you don't match anything
-                # in the keyword matching step.
+                # There's no default, so fail if nothing found in the
+                # keyword matching step.
                 outnode = -2
                 component = thcomponent = None
 
-            # Now try and match something from the modes list
+            # Match something from the modes list
             for mode in modes:
-
                 if mode in self.keywords[nodes]:
                     used_modes.add(mode)
                     index = np.where(self.keywords[nodes] == mode)
-                    if len(index[0]) > 1:
-                        raise KeyError(
-                            '%d matches found for %s' % (len(index[0]), mode))
+                    n_match = len(index[0])
+                    if n_match > 1:
+                        raise exceptions.AmbiguousObsmode(
+                            '{0} matches found for {1}'.format(n_match, mode))
                     idx = index[0][0]
                     component = self.compnames[nodes[0][idx]]
                     thcomponent = self.thcompnames[nodes[0][idx]]
                     outnode = self.outnodes[nodes[0][idx]]
                     used_default = False
 
-            if DEBUG:
-                print("Innode {0:d}  Outnode {1:d}  Compname {2:s}".format(
-                    innode, outnode, component))
+            log.debug('innode={0} outnode={1} compname={2}'.format(
+                innode, outnode, component))
             components.append(component)
             thcomponents.append(thcomponent)
-
             innode = outnode
 
             if outnode == previous_outnode:
-                if DEBUG:
-                    print("Innode: {0:d}  Outnode:{1:d}  "
-                          "Used default: {2:s}".format(innode,
-                                                       outnode,
-                                                       used_default))
+                log.debug('innode={0} outnode={1} used_default={2}'.format(
+                    innode, outnode, used_default))
                 count += 1
                 if count > 3:
-                    if DEBUG:
-                        print("same outnode {0:d} > 3 times: stop "
-                              "condition".format(outnode))
+                    log.debug('Same outnode={0} over 3 times (stop '
+                              'condition)'.format(outnode))
                     break
 
         if outnode < 0:
-            if DEBUG:
-                print("outnode == {0:d}: stop condition".format(outnode))
-            raise ValueError("Incomplete obsmode {0:s}".format(modes))
+            log.debug('outnode={0} (stop condition)'.format(outnode))
+            raise exceptions.IncompleteObsmode('{0}'.format(modes))
 
-        #Check for unused modes
         if inmodes != used_modes:
-            unused = str(inmodes.difference(used_modes))
-            raise ValueError("Warning: unused keywords {0:s}".format(unused))
+            raise exceptions.UnusedKeyword(
+                '{0}'.format(str(inmodes.difference(used_modes))))
 
         return components, thcomponents
+
+
+class CompTable(object):
+    """Class to handle component table (optical or thermal).
+
+    Table is parsed with :func:`~stsynphot.stio.read_comptable`.
+    Only component names and filenames are kept.
+    Component throughput filenames are parsed with
+    :func:`~stsynphot.stio.irafconvert`.
+
+    Parameters
+    ----------
+    compfile : str
+        Component table filename.
+
+    ext : int, optional
+        FITS extension index of the data table.
+
+    Attributes
+    ----------
+    name : str
+        Component table filename.
+
+    compnames, filenames : array of str
+        Component names and corresponding filenames.
+
+    """
+    def __init__(self, compfile, ext=1):
+        data = stio.read_comptable(compfile, tab_ext=ext)
+        self.name = compfile
+        self.compnames = np.array([s.lower() for s in data['COMPNAME']])
+        self.filenames = np.array(map(stio.irafconvert, data['FILENAME']))
+
+    def get_filenames(self, compnames):
+        """Get filenames of given component names.
+
+        For multiple matches, only the first match is kept.
+
+        Parameters
+        ----------
+        compnames : list of str
+            List of component names to search. Case-sensitive.
+
+        Returns
+        -------
+        files : list of str
+            List of matched filenames.
+
+        Raises
+        ------
+        synphot.exceptions.SynphotError
+            Unmatched component name.
+
+        """
+        files = []
+
+        for compname in compnames:
+            if compname not in (None, '', CLEAR_FILTER):
+                index = np.where(self.compnames == compname)[0]
+                if len(index) < 1:
+                    raise synexceptions.SynphotError(
+                        'Cannot find {0} in {1}.'.format(compname, self.name))
+                files.append(self.filenames[index[0]].lstrip())
+            else:
+                files.append(CLEAR_FILTER)
+
+        return files
