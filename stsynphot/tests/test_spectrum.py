@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # STDLIB
 import os
 import shutil
+import sys
 import tempfile
 
 # THIRD-PARTY
@@ -26,6 +27,7 @@ from synphot.utils import trapezoid_integration
 from .. import config, observationmode, spectrum
 
 
+_IS_PY32 = (sys.version_info >= (3,2)) & (sys.version_info < (3,3))
 GT_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmg.fits'))
 CP_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmc.fits'))
 TH_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmt.fits'))
@@ -80,7 +82,14 @@ class TestInterpolateSpectrum(object):
         is required.
 
         """
-        sp = spectrum.interpolate_spectral_element(self.fname_stis, 51000)
+        try:
+            sp = spectrum.interpolate_spectral_element(self.fname_stis, 51000)
+        except RuntimeError:
+            if _IS_PY32:
+                pytest.xfail('python3.2 urllib bug')
+            else:
+                raise
+
         np.testing.assert_array_equal(sp.wave.value[::25], self.wave_stis)
         np.testing.assert_allclose(
             sp.thru.value[:10],
@@ -94,7 +103,15 @@ class TestInterpolateSpectrum(object):
          (60000, [0, 0.09322135, 0.04873522, 0.01732031, 0.00407352, 0])])
     def test_extrap_mjd(self, interpval, ans):
         """Test extrapolation without using default column."""
-        sp = spectrum.interpolate_spectral_element(self.fname_cos, interpval)
+        try:
+            sp = spectrum.interpolate_spectral_element(
+                self.fname_cos, interpval)
+        except RuntimeError:
+            if _IS_PY32:
+                pytest.xfail('python3.2 urllib bug')
+            else:
+                raise
+
         np.testing.assert_allclose(sp.thru.value[400:3000:500], ans, rtol=1e-5)
 
     def test_interp_ramp(self):
@@ -188,7 +205,14 @@ class TestObservationSpectralElement(object):
          ('wfpc2,f555w', 4.8967453103320938e-19)])
     def test_uresp(self, obsmode, ans):
         """Unit response for different detector settings."""
-        obs = spectrum.band(obsmode, graphtable=GT_FILE, comptable=CP_FILE)
+        try:
+            obs = spectrum.band(obsmode, graphtable=GT_FILE, comptable=CP_FILE)
+        except RuntimeError:
+            if _IS_PY32:
+                pytest.xfail('python3.2 urllib bug')
+            else:
+                raise
+
         np.testing.assert_allclose(obs.unit_response().value, ans, rtol=1e-4)
 
     def test_countrate(self):
