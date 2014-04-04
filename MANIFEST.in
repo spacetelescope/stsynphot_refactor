@@ -1,12 +1,13 @@
 include README.rst
-include setup.cfg
-include distribute_setup.py
+
+include ez_setup.py
+include setuptools_bootstrap.py
 
 recursive-include docs *
 recursive-include licenses *
 
 recursive-exclude archived_docs *
-recursive-exclude old_tests *
+exclude old_tests.tar.gz
 exclude *.pyc *.o
 prune docs/_build
 prune build

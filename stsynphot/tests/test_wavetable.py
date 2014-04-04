@@ -22,13 +22,14 @@ from ..wavetable import WAVECAT
      ('stis,fuvmama,g140l,s52x2', WAVECAT['stis,g140l']),
      ('stis,nuvmama,e230h,c2263,s02x02', WAVECAT['stis,e230h,c2263'])])
 def test_getitem(obsmode, ans):
+    """Waveset catalog access."""
     assert WAVECAT[obsmode] == ans
 
 
 def test_getitem_exceptions():
+    """Waveset catalog exceptions."""
     with pytest.raises(KeyError):
         x = WAVECAT['johnson,v']
-
     with pytest.raises(exceptions.AmbiguousObsmode):
         x = WAVECAT['acs,wfc1,wfc2']
 

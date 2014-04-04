@@ -22,14 +22,23 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from astropy import log
 from astropy import units as u
 from astropy.extern import six
+#from astropy.modeling import models
+
+# STSCI
+from jwst_lib.modeling import models
 
 # SYNPHOT
-from synphot import analytic, reddening
 from synphot import exceptions as synexceptions
-from synphot import spectrum as synspectrum
+from synphot import units
+from synphot.models import BlackBody1D, ConstFlux1D, PowerLawFlux1D
+from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
-from . import catalog, config, exceptions, stio, spark, spectrum
+from . import exceptions, spectrum
+from .catalog import grid_to_spec
+from .config import conf
+from .spark import GenericScanner, GenericASTBuilder, GenericASTMatcher
+from .stio import irafconvert
 
 
 __all__ = ['Token', 'AST', 'BaseScanner', 'Scanner', 'BaseParser',
@@ -42,7 +51,7 @@ _SYFUNCTIONS = ('band', 'bb', 'box', 'ebmvx', 'em', 'icat', 'pl', 'rn', 'spec',
 
 # IRAF SYNPHOT flux units
 _SYFORMS = ('abmag', 'counts', 'flam', 'fnu', 'jy', 'mjy', 'obmag', 'photlam',
-             'photnu', 'stmag', 'vegamag')
+            'photnu', 'stmag', 'vegamag')
 
 
 def _convertstr(value):
@@ -54,11 +63,11 @@ def _convertstr(value):
     """
     if not isinstance(value, six.string_types):
         return value
-    value = stio.irafconvert(value)
+    value = irafconvert(value)
     try:
-        sp = synspectrum.SourceSpectrum.from_file(value)
+        sp = SourceSpectrum.from_file(value)
     except KeyError:
-        sp = synspectrum.SpectralElement.from_file(value)
+        sp = SpectralElement.from_file(value)
     return sp
 
 
@@ -112,12 +121,12 @@ class AST(object):
         return self.type < o
 
 
-class BaseScanner(spark.GenericScanner):
+class BaseScanner(GenericScanner):
     # Base class to handle language scanner.
     def tokenize(self, s):
         # Tokenize string.
         self.rv = []
-        spark.GenericScanner.tokenize(self, s)
+        GenericScanner.tokenize(self, s)
         return self.rv
 
     def t_whitespace(self, s):
@@ -174,7 +183,7 @@ class Scanner(BaseScanner):
         self.rv.append(Token(token_type='/'))
 
 
-class BaseParser(spark.GenericASTBuilder):
+class BaseParser(GenericASTBuilder):
     # Base class to handle language parser.
     def __init__(self, ASTclass, start='top'):
         super(BaseParser, self).__init__(ASTclass, start)
@@ -214,11 +223,11 @@ class BaseParser(spark.GenericASTBuilder):
         if len(args) == 1:
             rv = args[0]
         else:
-            rv = spark.GenericASTBuilder.nonterminal(self, intype, args)
+            rv = GenericASTBuilder.nonterminal(self, intype, args)
         return rv
 
 
-class Interpreter(spark.GenericASTMatcher):
+class Interpreter(GenericASTMatcher):
     # Class to handle language interpreter.
     def __init__(self, ast):
         super(Interpreter, self).__init__('V', ast)
@@ -287,66 +296,77 @@ class Interpreter(spark.GenericASTMatcher):
         # Note that things that should only be done at the top level
         # are performed in :func:`interpret` defined below.
         """ V ::= function_call ( V LPAREN V RPAREN ) """
-        if type(tree[2].value)!=type([]):
+        if not isinstance(tree[2].value, list):
             args = [tree[2].value]
         else:
             args = tree[2].value
 
         fname = tree[0].value
+        metadata = {'expr': '{0}{1}'.format(fname, tuple(args))}
 
         if fname not in _SYFUNCTIONS:
             log.error('Unknown function: {0}'.format(fname))
             self.error(fname)
 
         else:
-            area = config.PRIMARY_AREA()
-
             # Constant spectrum
             if fname == 'unit':
                 if args[1] not in _SYFORMS:
                     log.error('Unrecognized unit: {0}'.format(args[1]))
                     self.error(fname)
-                tree.value = analytic.Const1DSpectrum(
-                    args[0], flux_unit=args[1], area=area)
+                try:
+                    tree.value = SourceSpectrum(
+                        ConstFlux1D, amplitude=u.Quantity(args[0], args[1]),
+                        metadata=metadata)
+                except NotImplementedError as e:
+                    log.error(str(e))
+                    self.error(fname)
 
             # Black body
             elif fname == 'bb':
-                tree.value = analytic.BlackBody1DSpectrum(args[0], area=area)
+                tree.value = SourceSpectrum.from_blackbody(args[0])
 
             # Power law
             elif fname == 'pl':
                 if args[2] not in _SYFORMS:
                     log.error('Unrecognized unit: {0}'.format(args[2]))
                     self.error(fname)
-                tree.value = analytic.PowerLaw1DSpectrum(
-                    1.0, args[0], -1.0 * args[1], flux_unit=args[2], area=area)
+                try:
+                    tree.value = SourceSpectrum(
+                        PowerLawFlux1D, amplitude=u.Quantity(1, args[2]),
+                        x_0=args[0], alpha=-args[1], metadata=metadata)
+                except (synexceptions.SynphotError, NotImplementedError) as e:
+                    log.error(str(e))
+                    self.error(fname)
 
             # Box throughput
             elif fname == 'box':
-                tree.value = analytic.Box1DSpectrum(
-                    1.0, args[0], args[1], area=area)
+                tree.value = SpectralElement(
+                    models.Box1D, amplitude=1, x_0=args[0], width=args[1],
+                    metadata=metadata)
 
             # Source spectrum from file
             elif fname == 'spec':
-                tree.value = synspectrum.SourceSpectrum.from_file(
-                    stio.irafconvert(args[0]), area=area)
+                tree.value = SourceSpectrum.from_file(irafconvert(args[0]))
+                tree.value.metadata.update(metadata)
 
             # Passband
             elif fname == 'band':
                 tree.value = spectrum.band(tree[2].svalue)
+                tree.value.metadata.update(metadata)
 
             # Gaussian emission line
             elif fname == 'em':
                 if args[3] not in _SYFORMS:
                     log.error('Unrecognized unit: {0}'.format(args[3]))
                     self.error(fname)
-                totflux = u.Quantity(args[2], args[3])
-                tree.value = analytic.gaussian_spectrum(
-                    totflux, args[0], args[1], area=area)
+                tree.value = SourceSpectrum.from_gaussian(
+                    u.Quantity(args[2], args[3]), args[0], args[1],
+                    area=conf.area, vegaspec=spectrum.Vega)
 
             # Catalog interpolation
             elif fname == 'icat':
-                tree.value = catalog.grid_to_spec(*args, area=area)
+                tree.value = grid_to_spec(*args)
 
             # Renormalize source spectrum
             elif fname == 'rn':
@@ -354,17 +374,11 @@ class Interpreter(spark.GenericASTMatcher):
                 bp = args[1]
                 rnval = u.Quantity(args[2], args[3])
 
-                if isinstance(sp, analytic.BaseMixinAnalytic):
-                    sp = sp.to_spectrum(config._DEFAULT_WAVESET())
-                elif not isinstance(sp, synspectrum.SourceSpectrum):
-                    sp = synspectrum.SourceSpectrum.from_file(
-                        stio.irafconvert(sp), area=area)
+                if not isinstance(sp, SourceSpectrum):
+                    sp = SourceSpectrum.from_file(irafconvert(sp))
 
-                if isinstance(bp, analytic.BaseMixinAnalytic):
-                    bp = bp.to_spectrum(config._DEFAULT_WAVESET())
-                elif not isinstance(bp, synspectrum.SpectralElement):
-                    bp = synspectrum.SpectralElement.from_file(
-                        stio.irafconvert(bp), area=area)
+                if not isinstance(bp, SpectralElement):
+                    bp = SpectralElement.from_file(irafconvert(bp))
 
                 # Always force the renormalization to occur: prevent exceptions
                 # in case of partial overlap. Less robust but duplicates
@@ -372,14 +386,16 @@ class Interpreter(spark.GenericASTMatcher):
                 # overlap, but raise an exception if the spectrum and bandpass
                 # are entirely disjoint.
                 try:
-                    tree.value = sp.renorm(rnval, bp, vegaspec=spectrum.Vega)
+                    tree.value = sp.normalize(
+                        rnval, band=bp, area=conf.area, vegaspec=spectrum.Vega)
                 except synexceptions.PartialOverlap:
-                    tree.value = sp.renorm(rnval, bp, vegaspec=spectrum.Vega,
-                                           force=True)
-                    tree.value.warnings['force_renorm'] = \
-                        'Renormalization of {0}, to {1} and {2}, ' \
-                        'exceeds the limit of the specified passband.'.format(
-                        str(sp), rnval, str(bp))
+                    tree.value = sp.normalize(
+                        rnval, band=bp, area=conf.area, vegaspec=spectrum.Vega,
+                        force=True)
+                    tree.value.warnings['force_renorm'] = (
+                        'Renormalization exceeds the limit of the specified '
+                        'passband.')
+                tree.value.metadata.update(metadata)
 
             # Redshift source spectrum (flat spectrum if fails)
             elif fname == 'z':
@@ -387,28 +403,29 @@ class Interpreter(spark.GenericASTMatcher):
 
                 # ETC generates junk (i.e., 'null') sometimes
                 if isinstance(sp, six.string_types) and sp != 'null':
-                    sp = synspectrum.SourceSpectrum.from_file(
-                        stio.irafconvert(sp), area=area)
-                elif isinstance(sp, analytic.BaseMixinAnalytic):
-                    sp = sp.to_spectrum(config._DEFAULT_WAVESET())
+                    sp = SourceSpectrum.from_file(irafconvert(sp))
 
-                if isinstance(sp, synspectrum.SourceSpectrum):
-                    tree.value = sp.apply_redshift(args[1])
+                if isinstance(sp, SourceSpectrum):
+                    tree.value = sp
+                    tree.value.z = args[1]
                 else:
-                    tree.value = analytic.flat_spectrum('photlam', area=area)
+                    tree.value = SourceSpectrum(ConstFlux1D, amplitude=1)
+
+                tree.value.metadata.update(metadata)
 
             # Extinction
             elif fname == 'ebmvx':
                 try:
-                    tree.value = spectrum.ebmvx(args[1], args[0], area=area)
+                    tree.value = spectrum.ebmvx(args[1], args[0])
                 except synexceptions.SynphotError as e:
                     log.error(str(e))
                     self.error(fname)
+                tree.value.metadata.update(metadata)
 
             # Default
             else:
-                tree.value = 'would call {0} with the following args: ' \
-                    '{1}'.format(fname, repr(args))
+                tree.value = ('would call {0} with the following args: '
+                              '{1}'.format(fname, repr(args)))
 
 
 def tokens_info(tlist):  # pragma: no cover

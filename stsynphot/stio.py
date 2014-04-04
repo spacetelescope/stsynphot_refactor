@@ -8,27 +8,29 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # STDLIB
+import fnmatch
 import re
 import os
+import warnings
 
 # THIRD-PARTY
 import numpy as np
 
 # ASTROPY
-from astropy import log
 from astropy import units as u
 from astropy.extern import six
 from astropy.io import ascii, fits
-from astropy.utils.compat.odict import OrderedDict
-from astropy.utils.data import _find_pkg_data_path, get_pkg_data_filename
+from astropy.utils.data import _find_pkg_data_path
+from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
+from synphot import units
 
 
-__all__ = ['irafconvert', 'read_graphtable', 'read_comptable', 'read_catalog',
-           'read_wavecat', 'read_waveset', 'read_detector_pars',
-           'read_interp_spec']
+__all__ = ['irafconvert', 'get_latest_file', 'read_graphtable',
+           'read_comptable', 'read_catalog', 'read_wavecat', 'read_waveset',
+           'read_detector_pars', 'read_interp_spec']
 
 _irafconvpat = re.compile('\$(\w*)')
 _irafconvdata = None
@@ -36,7 +38,7 @@ _irafconvdata = None
 
 def _iraf_decode(irafdir):
     """Decode IRAF dir shortcut."""
-    from . import config  # Put here to avoid circular import error
+    from .config import conf  # Put here to avoid circular import error
     global _irafconvdata
 
     irafdir = irafdir.lower()
@@ -44,33 +46,18 @@ def _iraf_decode(irafdir):
     if irafdir == 'synphot':  # Local data
         path = _find_pkg_data_path('data')
     elif irafdir == 'crrefer':  # Root dir
-        path = config.ROOTDIR()
-    elif irafdir == 'mtab':  # Graph/comp tables dir
-        path = config.MTABDIR()
-    elif irafdir.startswith('crgrid'):  # Catalogs dir
-        path = config.CATDIR()
-        catcode = irafdir[len('crgrid'):]
-        if catcode == 'gs':
-            path = os.path.join(path, 'gunnstryker')
-        elif catcode == 'jac':
-            path = os.path.join(path, 'jacobi')
-        elif catcode == 'bk':
-            path = os.path.join(path, 'bkmodels')
-        elif catcode == 'k93':
-            path = os.path.join(path, 'k93models')
-        else:
-            path = os.path.join(path, catcode)
+        path = conf.rootdir
     else:  # Read from file
-        # Avoid repeated I/O
+        # Avoid repeated I/O but do not load if not used
         if _irafconvdata is None:
-            _irafconvdata = ascii.read(irafconvert(config.IRAFSHORTCUTFILE()))
+            _irafconvdata = ascii.read(irafconvert(conf.irafshortcutfile))
 
         mask = _irafconvdata['IRAFNAME'] == irafdir
         if not np.any(mask):
             raise KeyError('IRAF shortcut {0} not found in '
-                           '{1}.'.format(irafdir, config.IRAFSHORTCUTFILE()))
+                           '{1}.'.format(irafdir, conf.irafshortcutfile))
         relpath = os.path.normpath(_irafconvdata['RELPATH'][mask][0])
-        path = os.path.join(config.ROOTDIR(), relpath)
+        path = os.path.join(conf.rootdir, relpath)
 
     return path
 
@@ -87,20 +74,12 @@ def irafconvert(iraf_filename, sep='$'):
     Notes on special IRAF shortcut:
 
         * ``synphot`` points to software data directory.
-        * ``crrefer`` points to ``stsynphot.config.ROOTDIR``.
-        * ``mtab`` points to ``stsynphot.config.MTABDIR``.
-        * ``crgrid`` points to ``stsynphot.config.CATDIR``.
-        * ``crgridXXX`` points to a sub-directory in
-          ``stsynphot.config.CATDIR`` name ``XXX``, *except* for:
-            * ``gs`` - gunnstryker
-            * ``jac`` - jacobi
-            * ``bk`` - bkmodels
-            * ``k93`` - k93models
-        * Otherwise, decoded based on ``stsynphot.config.IRAFSHORTCUTFILE``
+        * ``crrefer`` points to ``stsynphot.config.conf.rootdir``.
+        * Otherwise, decoded based on ``stsynphot.config.conf.irafshortcutfile``
           that must contain the following named columns:
             #. ``IRAFNAME`` - The shortcut for look-up. If multiple matches
                are found, the first match is used.
-            #. ``RELPATH`` - Path relative to ``stsynphot.config.ROOTDIR``.
+            #. ``RELPATH`` - Path relative to ``stsynphot.config.conf.rootdir``.
 
     If separator is not found, input is returned as-is.
 
@@ -150,6 +129,73 @@ def irafconvert(iraf_filename, sep='$'):
     return os.path.join(path, fname)
 
 
+# TODO: Use CRDS instead.
+def get_latest_file(template, raise_error=False, err_msg=''):
+    """Find the filename that appears last in sorted order
+    based on given template.
+
+    Parameters
+    ----------
+    template : str
+        Search template in the form of ``path/pattern``
+        where pattern is acceptable by :py:mod:`fnmatch`.
+
+    raise_error : bool, optional
+        Raise an error when no files found.
+        Otherwise, will issue warning only.
+
+    err_msg : str
+        Alternate message for when no files found.
+        If not given, generic message is used.
+
+    Returns
+    -------
+    filename : str
+        Latest filename.
+
+    Raises
+    ------
+    IOError
+        No files found.
+
+    """
+    path, pattern = os.path.split(irafconvert(template))
+
+    # Remote FTP directory
+    if path.lower().startswith('ftp:'):
+        from astropy.extern.six.moves.urllib import request
+
+        response = request.urlopen(path).read().decode('utf-8').splitlines()
+        allfiles = list(set([x.split()[-1] for x in response]))  # Rid symlink
+
+    # Local directory
+    elif os.path.isdir(path):
+        allfiles = os.listdir(path)
+
+    # Bogus directory
+    else:
+        allfiles = []
+
+    matched_files = sorted(fnmatch.filter(allfiles, pattern))
+
+    # Last file in sorted listing
+    if matched_files:
+        filename = os.path.join(path, matched_files[-1])
+
+    # No files found
+    else:
+        if not err_msg:
+            err_msg = 'No files found for {0}'.format(template)
+
+        if raise_error:
+            raise IOError(err_msg)
+        else:
+            warnings.warn(err_msg, AstropyUserWarning)
+            filename = ''
+
+    return filename
+
+
 def _read_table(filename, ext, dtypes):
     """Generic table reader.
 
@@ -163,7 +209,7 @@ def _read_table(filename, ext, dtypes):
         Data extension.
         This is ignored for ASCII file.
 
-    dtypes : OrderedDict
+    dtypes : dict
         Dictionary that maps column names to data types.
 
     Returns
@@ -180,7 +226,7 @@ def _read_table(filename, ext, dtypes):
     # FITS
     if filename.endswith('.fits') or filename.endswith('.fit'):
         with fits.open(filename) as f:
-            data = f[ext].data
+            data = f[ext].data.copy()
 
         err_str = ''
         for key, val in dtypes.items():
@@ -192,8 +238,8 @@ def _read_table(filename, ext, dtypes):
 
     # ASCII
     else:  # pragma: no cover
-        converters = OrderedDict([[k, ascii.convert_numpy(v)]
-                                  for k, v in dtypes.items()])
+        converters = dict(
+            [[k, ascii.convert_numpy(v)] for k, v in dtypes.items()])
         data = ascii.read(filename, converters=converters)
 
     return data
@@ -235,7 +281,7 @@ def read_graphtable(filename, tab_ext=1):
 
     Returns
     -------
-    primary_area : float or `None`
+    primary_area : `astropy.units.quantity.Quantity` or `None`
         Value of PRIMAREA keyword in primary header.
         Always `None` for ASCII file.
 
@@ -248,12 +294,9 @@ def read_graphtable(filename, tab_ext=1):
         Failure to parse graph table.
 
     """
-    # Enforced data types
-    graph_dtypes = OrderedDict([
-        ['COMPNAME', np.str], ['KEYWORD', np.str], ['INNODE', np.int],
-        ['OUTNODE', np.int], ['THCOMPNAME', np.str], ['COMMENT', np.str]])
-
-    # Get table data
+    graph_dtypes = {
+        'COMPNAME': np.str, 'KEYWORD': np.str, 'INNODE': np.int,
+        'OUTNODE': np.int, 'THCOMPNAME': np.str, 'COMMENT': np.str}
     data = _read_table(filename, tab_ext, graph_dtypes)
 
     # Get primary area
@@ -262,6 +305,9 @@ def read_graphtable(filename, tab_ext=1):
             primary_area = f[str('PRIMARY')].header.get('PRIMAREA', None)
     else:  # pragma: no cover
         primary_area = None
+
+    if primary_area is not None:
+        primary_area = u.Quantity(primary_area, units.AREA)
 
     # Check for segmented graph table
     if np.any([x.lower().endswith('graph')
@@ -312,19 +358,10 @@ def read_comptable(filename, tab_ext=1):
     data : `astropy.io.fits.fitsrec.FITS_rec` or `astropy.table.table.Table`
         Data table.
 
-    Raises
-    ------
-    synphot.exceptions.SynphotError
-        Failure to parse component table.
-
     """
-    # Enforced data types
-    comp_types = OrderedDict([
-        ['TIME', np.str], ['COMPNAME', np.str], ['FILENAME', np.str],
-        ['COMMENT', np.str]])
-
-    # Get table data
-    return _read_table(filename, tab_ext, comp_types)
+    return _read_table(filename, tab_ext,
+                       {'TIME': np.str, 'COMPNAME': np.str,
+                        'FILENAME': np.str, 'COMMENT': np.str})
 
 
 def read_catalog(filename, tab_ext=1):
@@ -362,17 +399,8 @@ def read_catalog(filename, tab_ext=1):
     data : `astropy.io.fits.fitsrec.FITS_rec` or `astropy.table.table.Table`
         Data table.
 
-    Raises
-    ------
-    synphot.exceptions.SynphotError
-        Failure to parse catalog table.
-
     """
-    # Enforced data types
-    cat_types = OrderedDict([['INDEX', np.str], ['FILENAME', np.str]])
-
-    # Get table data
-    return _read_table(filename, tab_ext, cat_types)
+    return _read_table(filename, tab_ext, {'INDEX': np.str, 'FILENAME': np.str})
 
 
 def read_wavecat(filename):
@@ -411,7 +439,7 @@ def read_wavecat(filename):
         converters={'OBSMODE': np.str, 'FILENAME': np.str})
 
 
-def read_waveset(filename, wave_unit='angstrom'):
+def read_waveset(filename, wave_unit=u.AA):
     """Read wavelength table from ASCII file.
 
     Table must contain a single column without header.
@@ -441,10 +469,11 @@ def read_waveset(filename, wave_unit='angstrom'):
         Wavelength set array.
 
     """
+    wave_unit = units.validate_wave_unit(wave_unit)
     data = ascii.read(
         filename, header_start=None, data_start=0, names=(str('WAVELENGTH'), ),
         converters={'WAVELENGTH': np.float})
-    return u.Quantity(data['WAVELENGTH'].data, unit=wave_unit)
+    return u.Quantity(data['WAVELENGTH'].data, wave_unit)
 
 
 def read_detector_pars(filename):
@@ -479,12 +508,11 @@ def read_detector_pars(filename):
         Data table.
 
     """
-    converters = OrderedDict([['OBSMODE', np.str], ['SCALE', np.float],
-                              ['NX', np.int], ['NY', np.int]])
     return ascii.read(
         filename, header_start=None,
         names=(str('OBSMODE'), str('SCALE'), str('NX'), str('NY')),
-        converters=converters)
+        converters={'OBSMODE': np.str, 'SCALE': np.float,
+                    'NX': np.int, 'NY': np.int})
 
 
 def read_interp_spec(filename, tab_ext=1):
@@ -553,6 +581,6 @@ def read_interp_spec(filename, tab_ext=1):
             allow_extrap = False
 
         wave_unit = f[tab_ext].header['TUNIT1'].lower()
-        data = f[tab_ext].data
+        data = f[tab_ext].data.copy()
 
     return data, wave_unit, do_wave_shift, allow_extrap

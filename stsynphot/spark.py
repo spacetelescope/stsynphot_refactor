@@ -14,6 +14,7 @@ import re
 
 # ASTROPY
 from astropy import log
+from astropy.extern import six
 
 # LOCAL
 from .exceptions import ParserError, GenericASTTraversalPruningException
@@ -131,7 +132,7 @@ class GenericParser(object):
             if lhs in self.rules:
                 self.rules[lhs].append(rule)
             else:
-                self.rules[lhs] = [ rule ]
+                self.rules[lhs] = [rule]
             self.rule2func[rule] = fn
             self.rule2name[rule] = func.__name__[2:]
         self.ruleschanged = 1
@@ -149,9 +150,9 @@ class GenericParser(object):
         #  to self.addRule() because the start rule shouldn't
         #  be subject to preprocessing.
         #
-        startRule = (self._START, ( start, self._EOF ))
+        startRule = (self._START, (start, self._EOF))
         self.rule2func[startRule] = lambda args: args[0]
-        self.rules[self._START] = [ startRule ]
+        self.rules[self._START] = [startRule]
         self.rule2name[startRule] = ''
         return startRule
 
@@ -198,7 +199,7 @@ class GenericParser(object):
     def parse(self, tokens):
         tree = {}
         tokens.append(self._EOF)
-        states = { 0: [ (self.startRule, 0, 0) ] }
+        states = {0: [(self.startRule, 0, 0)]}
 
         if self.ruleschanged:
             self.makeFIRST()
@@ -369,9 +370,7 @@ class GenericParser(object):
                 else:
                     child = children[0]
 
-                tokpos = self.buildTree_r(stack,
-                              tokens, tokpos,
-                              tree, child)
+                tokpos = self.buildTree_r(stack, tokens, tokpos, tree, child)
                 pos = pos - 1
                 (crule, cpos, cparent), cstate = child
                 state = cparent
@@ -398,8 +397,8 @@ class GenericParser(object):
             sortlist.append((len(rhs), name))
             name2index[name] = i
         sortlist.sort()
-        list = map(lambda ab: ab[1], sortlist)
-        return children[name2index[self.resolve(list)]]
+        outlist = list(six.moves.map(lambda ab: ab[1], sortlist))
+        return children[name2index[self.resolve(outlist)]]
 
     def resolve(self, list):
         #
@@ -410,14 +409,12 @@ class GenericParser(object):
         return list[0]
 
 
-#
 #  GenericASTBuilder automagically constructs a concrete/abstract syntax tree
 #  for a given input.  The extra argument is a class (not an instance!)
 #  which supports the "__setslice__" and "__len__" methods.
 #
 #  XXX - silently overrides any user code in methods.
 #
-
 class GenericASTBuilder(GenericParser):
     def __init__(self, AST, start):
         super(GenericASTBuilder, self).__init__(start)
@@ -425,8 +422,8 @@ class GenericASTBuilder(GenericParser):
 
     def preprocess(self, rule, func):
         rebind = lambda lhs, self=self: \
-                lambda args, lhs=lhs, self=self: \
-                    self.buildASTNode(args, lhs)
+            lambda args, lhs=lhs, self=self: \
+            self.buildASTNode(args, lhs)
         lhs, rhs = rule
         return rule, rebind(lhs)
 
@@ -448,7 +445,6 @@ class GenericASTBuilder(GenericParser):
         return rv
 
 
-#
 #  GenericASTTraversal is a Visitor pattern according to Design Patterns.  For
 #  each node it attempts to invoke the method n_<node type>, falling
 #  back onto the default() method if the n_* can't be found.  The preorder
@@ -457,7 +453,6 @@ class GenericASTBuilder(GenericParser):
 #  of a subtree, call the prune() method -- this only makes sense for a
 #  preorder traversal.  Node type is determined via the typestring() method.
 #
-
 class GenericASTTraversal(object):
     def __init__(self, ast):
         self.ast = ast
@@ -504,18 +499,15 @@ class GenericASTTraversal(object):
         else:
             self.default(node)
 
-
     def default(self, node):
         pass
 
 
-#
 #  GenericASTMatcher.  AST nodes must have "__getitem__" and "__cmp__"
 #  implemented.
 #
 #  XXX - makes assumptions about how GenericParser walks the parse tree.
 #
-
 class GenericASTMatcher(GenericParser):
     def __init__(self, start, ast):
         super(GenericASTMatcher, self).__init__(start)
@@ -523,8 +515,8 @@ class GenericASTMatcher(GenericParser):
 
     def preprocess(self, rule, func):
         rebind = lambda func, self=self: \
-                lambda args, func=func, self=self: \
-                    self.foundMatch(args, func)
+            lambda args, func=func, self=self: \
+            self.foundMatch(args, func)
         lhs, rhs = rule
         rhslist = list(rhs)
         rhslist.reverse()

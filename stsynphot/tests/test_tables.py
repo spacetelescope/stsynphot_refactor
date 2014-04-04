@@ -27,7 +27,7 @@ from ..tables import GraphTable, CompTable
 def test_custom_primarea():
     """Test reading non-default PRIMAREA from graph table."""
     gt = GraphTable(get_pkg_data_filename('data/tables_primarea_tmg.fits'))
-    assert gt.primary_area == 100
+    assert gt.primary_area.value == 100
 
 
 class TestGraphTable(object):
@@ -40,7 +40,7 @@ class TestGraphTable(object):
 
     @pytest.mark.parametrize(
         ('modes', 'innode', 'ans'),
-        [(['acs'], 1, 20) ,
+        [(['acs'], 1, 20),
          (['wfc1'], 20, 30),
          (['acs'], 0, -1),
          (['foo'], 1, 100)])
@@ -49,7 +49,7 @@ class TestGraphTable(object):
 
     def test_comp(self):
         comp, thcomp = self.gt.get_comp_from_gt(
-            ['wfc3','ir','f098m', 'mjd#'], 1)
+            ['wfc3', 'ir', 'f098m', 'mjd#'], 1)
         assert (set(comp) == set(
             ['wfc3_ir_mask', 'wfc3_ir_primary', 'clear', 'wfc3_ir_secondary',
              'wfc3_ir_fold', 'wfc3_pom', 'wfc3_ir_mir1', 'wfc3_ir_mir2',

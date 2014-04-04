@@ -1,3 +1,5 @@
+.. doctest-skip-all
+
 .. _stsynphot_index:
 
 *************************************************
@@ -90,16 +92,9 @@ Reference/API
 
 .. automodapi:: stsynphot.exceptions
 
-.. automodapi:: stsynphot.graphtab
-   :no-inheritance-diagram:
-
 .. automodapi:: stsynphot.observationmode
 
-.. automodapi:: stsynphot.spark
-
 .. automodapi:: stsynphot.spectrum
-
-.. automodapi:: stsynphot.spparser
 
 .. automodapi:: stsynphot.stio
    :no-inheritance-diagram:
@@ -108,8 +103,3 @@ Reference/API
 
 .. automodapi:: stsynphot.wavetable
 
-
-Version
-=======
-
-.. autodata:: stsynphot.__version__
