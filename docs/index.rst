@@ -11,7 +11,7 @@ HST/JWST-specific synthetic photometry. Currently, ``stsynphot`` is an
 astropy-affiliated package. It depends on the following external packages:
 
 * `Astropy-affiliated package synphot <http://www.github.com/spacetelescope/pysynphot>`_
-* Astropy <http://astropy.org>`_ - Currently requires a special version that
+* `Astropy <http://astropy.org>`_ - Currently requires a special version that
   has ``modeling`` that handles composite models and ``sampleset`` property.
 * `numpy <http://www.numpy.org/>`_
 * `matplotlib <http://matplotlib.org/>`_ (optional, for plotting)
