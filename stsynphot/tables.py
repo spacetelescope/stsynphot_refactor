@@ -13,17 +13,18 @@ import numpy as np
 
 # ASTROPY
 from astropy import log
+from astropy.extern import six
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
 
 # LOCAL
 from . import exceptions, stio
+from .config import conf
+from .stio import get_latest_file, irafconvert
 
 
-__all__ = ['CLEAR_FILTER', 'GraphTable', 'CompTable']
-
-CLEAR_FILTER = 'clear'
+__all__ = ['GraphTable', 'CompTable']
 
 
 class GraphTable(object):
@@ -52,12 +53,17 @@ class GraphTable(object):
     innodes, outnodes : array of int
         Input and output nodes.
 
-    primary_area : float or `None`
-        Value of PRIMAREA keyword in primary header in :math:`cm^{2}`.
+    primary_area : `astropy.units.quantity.Quantity` or `None`
+        Value of PRIMAREA keyword in primary header.
 
     """
     def __init__(self, graphfile, ext=1):
-        self.primary_area, data = stio.read_graphtable(graphfile, tab_ext=ext)
+        self.primary_area, data = stio.read_graphtable(
+            get_latest_file(
+                irafconvert(graphfile),
+                err_msg=('No graph tables found; functionality will be '
+                         'SEVERELY crippled.')),
+            tab_ext=ext)
 
         # Convert all strings to lowercase
         self.keywords = np.array([s.lower() for s in data['KEYWORD']])
@@ -252,10 +258,16 @@ class CompTable(object):
 
     """
     def __init__(self, compfile, ext=1):
-        data = stio.read_comptable(compfile, tab_ext=ext)
+        data = stio.read_comptable(
+            get_latest_file(
+                irafconvert(compfile),
+                err_msg=('No component tables found; functionality will be '
+                         'SEVERELY crippled.')),
+            tab_ext=ext)
         self.name = compfile
         self.compnames = np.array([s.lower() for s in data['COMPNAME']])
-        self.filenames = np.array(map(stio.irafconvert, data['FILENAME']))
+        self.filenames = np.array(
+            list(six.moves.map(stio.irafconvert, data['FILENAME'])))
 
     def get_filenames(self, compnames):
         """Get filenames of given component names.
@@ -281,13 +293,13 @@ class CompTable(object):
         files = []
 
         for compname in compnames:
-            if compname not in (None, '', CLEAR_FILTER):
+            if compname not in (None, '', conf.clear_filter):
                 index = np.where(self.compnames == compname)[0]
                 if len(index) < 1:
                     raise synexceptions.SynphotError(
                         'Cannot find {0} in {1}.'.format(compname, self.name))
                 files.append(self.filenames[index[0]].lstrip())
             else:
-                files.append(CLEAR_FILTER)
+                files.append(conf.clear_filter)
 
         return files

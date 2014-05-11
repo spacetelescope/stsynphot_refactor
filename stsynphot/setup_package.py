@@ -8,8 +8,8 @@ def get_package_data():
             str('data/*.txt'), str('data/*.dat'), str('data/wavecats/*.dat'),
             str('data/wavecats/*.txt')],
         str('stsynphot.tests'):
-            [str('data/*.txt'), str('data/*.fits')]}
+            [str('data/*.txt'), str('data/*.fits'), str('coveragerc')]}
 
 
 def requires_2to3():
-    return True
+    return False

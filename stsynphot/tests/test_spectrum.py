@@ -14,20 +14,27 @@ import numpy as np
 # ASTROPY
 from astropy import units as u
 from astropy.io import fits
+#from astropy.modeling import models
 from astropy.tests.helper import pytest
 from astropy.utils.data import get_pkg_data_filename
 
+# STSCI
+from jwst_lib.modeling import models
+
 # SYNPHOT
-from synphot import analytic, reddening, units
+from synphot import units
 from synphot import exceptions as synexceptions
-from synphot import spectrum as synspectrum
-from synphot.utils import trapezoid_integration
+from synphot.integrator import TrapezoidIntegrator
+from synphot.models import ConstFlux1D
+from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
-from .. import config, observationmode, spectrum
+from .. import spectrum
+from ..config import conf
+from ..stio import irafconvert
 
 
-_IS_PY32 = (sys.version_info >= (3,2)) & (sys.version_info < (3,3))
+_IS_PY32 = (sys.version_info >= (3, 2)) & (sys.version_info < (3, 3))
 GT_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmg.fits'))
 CP_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmc.fits'))
 TH_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmt.fits'))
@@ -36,15 +43,14 @@ TH_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmt.fits'))
 class TestInterpolateSpectrum(object):
     """Test spectrum interpolation."""
     def setup_class(self):
-        self.comp_path = os.path.join(config.ROOTDIR(), 'comp')
-        self.fname_acs = os.path.join(
-            self.comp_path, 'acs', 'acs_wfc_aper_002_syn.fits[aper#]')
-        self.fname_cos = os.path.join(
-            self.comp_path, 'cos', 'cos_mcp_g140lc1230_mjd_013_syn.fits[mjd#]')
-        self.fname_ramp = os.path.join(
-            self.comp_path, 'acs', 'acs_fr656n_005_syn.fits[fr656n#]')
-        self.fname_stis = os.path.join(
-            self.comp_path, 'stis', 'stis_nm16_mjd_010_syn.fits[MJD#]')
+        self.fname_acs = irafconvert(
+            'cracscomp$acs_wfc_aper_002_syn.fits[aper#]')
+        self.fname_cos = irafconvert(
+            'crcoscomp$cos_mcp_g140lc1230_mjd_013_syn.fits[mjd#]')
+        self.fname_ramp = irafconvert(
+            'cracscomp$acs_fr656n_005_syn.fits[fr656n#]')
+        self.fname_stis = irafconvert(
+            'crstiscomp$stis_nm16_mjd_010_syn.fits[MJD#]')
         self.wave_stis = [1049, 2250, 3500, 4750, 6000, 7250, 8500, 9750, 11000]
 
     def test_no_interp_first_col(self):
@@ -55,11 +61,10 @@ class TestInterpolateSpectrum(object):
 
         """
         sp = spectrum.interpolate_spectral_element(self.fname_acs, 0)
-        np.testing.assert_array_equal(
-            sp.wave.value,
-            [3500, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000])
+        w = [3500, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000]
+        np.testing.assert_allclose(sp.waveset.value, w)
         np.testing.assert_allclose(
-            sp.thru.value,
+            sp(w).value,
             [0.28, 0.22, 0.20999999, 0.22, 0.22, 0.2, 0.15000001, 0.1, 0.04])
         assert 'acs_wfc_aper_002_syn.fits#0' in sp.metadata['expr']
 
@@ -70,9 +75,9 @@ class TestInterpolateSpectrum(object):
 
         """
         sp = spectrum.interpolate_spectral_element(self.fname_stis, 51252)
-        np.testing.assert_array_equal(sp.wave.value[::25], self.wave_stis)
+        np.testing.assert_allclose(sp.waveset[::25].value, self.wave_stis)
         np.testing.assert_allclose(
-            sp.thru.value[:10],
+            sp(sp.waveset[:10]).value,
             [0, 0.965065, 0.965065, 0.965065, 0.963328, 0.976245, 0.983497,
              0.984206, 0.976436, 0.963131])
 
@@ -90,12 +95,12 @@ class TestInterpolateSpectrum(object):
             else:
                 raise
 
-        np.testing.assert_array_equal(sp.wave.value[::25], self.wave_stis)
+        np.testing.assert_array_equal(sp.waveset[::25].value, self.wave_stis)
         np.testing.assert_allclose(
-            sp.thru.value[:10],
+            sp(sp.waveset[:10]).value,
             [0, 0.97830353, 0.97830353, 0.97830353, 0.97722476, 0.98524689,
              0.98975077, 0.99019109, 0.98536552, 0.97710241])
-        assert sp.thru.value[0] == sp.thru.value[-1]
+        assert sp(sp.waveset[0]) == sp(sp.waveset[-1])
 
     @pytest.mark.parametrize(
         ('interpval', 'ans'),
@@ -112,17 +117,19 @@ class TestInterpolateSpectrum(object):
             else:
                 raise
 
-        np.testing.assert_allclose(sp.thru.value[400:3000:500], ans, rtol=1e-5)
+        w = sp.waveset[400:3000:500]
+        np.testing.assert_allclose(sp(w).value, ans, rtol=1e-5)
 
     def test_interp_ramp(self):
         """Test ramp filter interpolation with wavelength shift."""
         sp = spectrum.interpolate_spectral_element(self.fname_ramp, 6480)
+        w = sp.waveset[:100:10]
         np.testing.assert_allclose(
-            sp.wave.value[:100:10],
+            w.value,
             [3499.99902344, 5686, 5736, 5786, 5836, 5886, 5936, 5986, 6036,
              6086])
         np.testing.assert_allclose(
-            sp.thru.value[:100:10],
+            sp(w).value,
             [5.88854514e-07, 1.00120149e-06, 1.00202179e-06, 1.00353753e-06,
              1.00710832e-06, 1.03335088e-06, 1.34637005e-06, 3.78240595e-06,
              1.53430929e-05, 5.09230156e-05])
@@ -130,7 +137,7 @@ class TestInterpolateSpectrum(object):
     def test_default_ramp(self):
         """Test ramp filter using default THROUGHPUT with warning."""
         sp = spectrum.interpolate_spectral_element(self.fname_ramp, -5)
-        np.testing.assert_array_equal(sp.thru, 0)
+        np.testing.assert_array_equal(sp(sp.waveset), 0)
         assert sp.warnings['DefaultThroughput']
 
     def test_exceptions(self):
@@ -141,8 +148,7 @@ class TestInterpolateSpectrum(object):
         # Invalid interpolation column name
         with pytest.raises(synexceptions.SynphotError):
             sp = spectrum.interpolate_spectral_element(
-                os.path.join(self.comp_path, 'acs',
-                             'acs_wfc_aper_002_syn.fits[mjd#]'), 51252)
+                irafconvert('cracscomp$acs_wfc_aper_002_syn.fits[mjd#]'), 51252)
 
         # Cannot extrapolate and no default throughput
         with pytest.raises(synexceptions.ExtrapolationNotAllowed):
@@ -150,30 +156,31 @@ class TestInterpolateSpectrum(object):
 
 
 class TestObservationSpectralElement(object):
-    """Test ObservationSpectralElement and band() convenience function."""
+    """Test ``ObservationSpectralElement`` and ``band()``."""
     def setup_class(self):
         self.outdir = tempfile.mkdtemp()
         self.obs = spectrum.band(
             'acs,hrc,f555w', graphtable=GT_FILE, comptable=CP_FILE)
-        self.sp = analytic.flat_spectrum(
-            'flam', area=self.obs.primary_area).to_spectrum(self.obs.wave)
+        self.sp = SourceSpectrum(ConstFlux1D, amplitude=1*units.FLAM)
 
     def test_attributes(self):
-        assert isinstance(self.obs, synspectrum.SpectralElement)
-        assert isinstance(self.obs.obsmode, observationmode.ObservationMode)
-        assert str(self.obs) == 'acs,hrc,f555w'
+        assert (str(self.obs.obsmode) == self.obs.metadata['expr'] ==
+                'acs,hrc,f555w')
         assert len(self.obs) == 6
-        assert self.obs.primary_area.value == config.PRIMARY_AREA()
+        assert self.obs.area.value == conf.area
         np.testing.assert_array_equal(
-            [self.obs.binwave.value[0], self.obs.binwave.value[-1]],
-            [1000, 11000])
+            self.obs.waveset[::self.obs.waveset.size-1].value, [500, 30010])
+        np.testing.assert_array_equal(
+            self.obs.binset[::self.obs.binset.size-1].value, [1000, 11000])
 
     def test_config_primary_area(self):
         """Changing config after init should have no effect"""
-        config.setref(area=1)
-        assert config.PRIMARY_AREA() == 1
-        assert self.obs.primary_area.value != 1
-        config.setref()
+        conf.area = 1
+        assert conf.area == 1 and self.obs.area.value != 1
+        conf.reset('area')
+
+    def test_no_zero_bound(self):
+        assert not self.obs.bounded_by_zero(wavelengths=[5000, 6000])
 
     def test_other_graph_table(self):
         """Using the graph table with PRIMAREA."""
@@ -183,12 +190,14 @@ class TestObservationSpectralElement(object):
             'acs,hrc,f555w', graphtable=gt_file, comptable=CP_FILE)
 
         # Primary area should be from graph table
-        assert obs.primary_area.value == 100
+        assert obs.area.value == 100
+
+        x = obs.waveset.value
+        y = obs(obs.waveset).value
 
         # Unit response
-        a = obs.unit_response()
-        b = units.HC / (100 * trapezoid_integration(
-            obs.wave.value, obs.thru.value * obs.wave.value))
+        a = obs.unit_response(obs.area)
+        b = units.HC * 0.01 / TrapezoidIntegrator()._raw_math(x, x * y)
         np.testing.assert_allclose(a.value, b.value)
 
     @pytest.mark.parametrize(
@@ -213,70 +222,55 @@ class TestObservationSpectralElement(object):
             else:
                 raise
 
-        np.testing.assert_allclose(obs.unit_response().value, ans, rtol=1e-4)
-
-    def test_countrate(self):
-        c = self.obs.countrate(self.sp)
-        assert c.unit == u.count / (u.s * units.AREA)
-        np.testing.assert_allclose(c.value, 3.357E+18, rtol=1e-5)
-
-        # Invalid source spectrum
-        with pytest.raises(synexceptions.SynphotError):
-            c = self.obs.countrate(1)
+        np.testing.assert_allclose(
+            obs.unit_response(obs.area).value, ans, rtol=1e-4)
 
     def test_thermback(self):
         obs = spectrum.band(
             'wfc3,ir,f153m', graphtable=GT_FILE, comptable=CP_FILE)
         bg = obs.thermback(thermtable=TH_FILE)
-        assert bg.unit == u.count / u.s / u.pix
-        np.testing.assert_allclose(bg.value, 5.9774451061328011e-2, rtol=5e-3)
+
+        # 5% difference!
+        np.testing.assert_allclose(
+            bg, 5.9774451061328011e-2 * (u.count / u.s / u.pix), rtol=5e-2)
 
         # ACS has no thermal background
         with pytest.raises(NotImplementedError):
             bg = self.obs.thermback(thermtable=TH_FILE)
 
     @pytest.mark.parametrize(
-        ('cenwave', 'out_unit', 'ans'),
-        [(u.Quantity(500, u.nm), u.nm, [499.9, 500.1]),
-         (5000, u.AA, [4999, 5001])])
-    def test_wave_range(self, cenwave, out_unit, ans):
-        w1, w2 = self.obs.wave_range(cenwave, 2, mode='none')
-        assert w1.unit == w2.unit == out_unit
-        np.testing.assert_allclose([w1.value, w2.value], ans)
+        ('cenwave', 'ans'),
+        [(500 * u.nm, [499.9, 500.1] * u.nm),
+         (5000, [4999, 5001] * u.AA)])
+    def test_binned_waverange(self, cenwave, ans):
+        np.testing.assert_allclose(
+            self.obs.binned_waverange(cenwave, 2, mode='none'), ans)
 
-    def test_pixel_range(self):
-        npix = self.obs.pixel_range(
-            u.Quantity([499.95, 500.05], u.nm), mode='round')
-        assert npix == 1
+    def test_binned_pixelrange(self):
+        assert self.obs.binned_pixelrange(
+            [499.95, 500.05] * u.nm, mode='round') == 1
 
     def test_std_filter(self):
         obs1 = spectrum.band('johnson,v')
-        obs2 = synspectrum.SpectralElement.from_filter(
-            'johnson_v', encoding='binary')
-        np.testing.assert_allclose(obs1.thru.value, obs2.thru.value)
+        obs2 = SpectralElement.from_filter('johnson_v', encoding='binary')
+        w = obs1.waveset
+        np.testing.assert_allclose(obs1(w), obs2(w))
 
         # No pixel scale
         with pytest.raises(synexceptions.SynphotError):
             a = obs1.thermback()
 
+        # No binset
+        with pytest.raises(synexceptions.UndefinedBinset):
+            a = obs1.binned_waverange(5000, 2)
+        with pytest.raises(synexceptions.UndefinedBinset):
+            a = obs1.binned_pixelrange([5000, 5002])
+
     def test_no_obsmode(self):
         """Spectrum without obsmode."""
-        obs = spectrum.ObservationSpectralElement([1000, 9000], [1, 1])
-        assert obs.obsmode is None
-        assert obs.binwave is None
-        assert len(obs) == 0
-
         with pytest.raises(synexceptions.SynphotError):
-            a = obs.countrate(self.sp)
-
-        with pytest.raises(synexceptions.SynphotError):
-            a = obs.thermback(thermtable=TH_FILE)
-
-        with pytest.raises(synexceptions.UndefinedBinset):
-            a = obs.wave_range(5000, 2)
-
-        with pytest.raises(synexceptions.UndefinedBinset):
-            a = obs.pixel_range([4000, 5000])
+            obs = spectrum.ObservationSpectralElement(
+                models.Const1D, amplitude=1)
 
     def test_write_fits(self):
         outfile = os.path.join(self.outdir, 'outspec1.fits')
@@ -289,23 +283,21 @@ class TestObservationSpectralElement(object):
             assert (pf[1].header['cmptable'] ==
                     os.path.basename(self.obs.obsmode.ctname))
 
-        obs = synspectrum.SpectralElement.from_file(outfile)
-        np.testing.assert_allclose(obs.wave.value, self.obs.wave.value)
-        np.testing.assert_allclose(obs.thru.value, self.obs.thru.value)
+        obs = SpectralElement.from_file(outfile)
+        w = self.obs.waveset
+        np.testing.assert_allclose(obs.waveset, w)
+        np.testing.assert_allclose(obs(w), self.obs(w))
+
+    def test_disabled_methods(self):
+        with pytest.raises(NotImplementedError):
+            obs = self.obs.taper()
+        with pytest.raises(NotImplementedError):
+            obs = self.obs.from_file('dummy.fits')
+        with pytest.raises(NotImplementedError):
+            obs = self.obs.from_filter('johnson_v')
 
     def teardown_class(self):
         shutil.rmtree(self.outdir)
-
-
-def test_obs_negflux():
-    """Count rate for observation with negative flux."""
-    bp = spectrum.band(
-        'cos,fuv,g130m,c1309,psa', graphtable=GT_FILE, comptable=CP_FILE)
-    sp = synspectrum.SourceSpectrum.from_file(
-        get_pkg_data_filename(os.path.join('data', 'us7.txt')),
-        area=bp.primary_area)
-    c = bp.countrate(sp)
-    np.testing.assert_allclose(c.value, 1627.824995577284, rtol=1e-5)
 
 
 class TestEbmvx(object):
@@ -315,25 +307,26 @@ class TestEbmvx(object):
 
     def test_mwavg(self):
         """No check on data quality, which is dependent on reference file."""
-        assert isinstance(self.ec_mwavg, reddening.ExtinctionCurve)
-        assert isinstance(spectrum._REDLAWS['mwavg'], reddening.ReddeningLaw)
+        assert spectrum._REDLAWS['mwavg'].metadata['expr'] == 'mwavg'
 
     @pytest.mark.parametrize('m', ['gal3', None])
     def test_dummy(self, m):
+        """Dummy values should default to 'mwavg'."""
         ec_test = spectrum.ebmvx(m, 0.3)
-        np.testing.assert_array_equal(
-            ec_test.thru.value, self.ec_mwavg.thru.value)
+        w = self.ec_mwavg.waveset
+        np.testing.assert_array_equal(ec_test(w), self.ec_mwavg(w))
 
     def teardown_class(self):
         spectrum.reset_cache()
         assert spectrum._REDLAWS == {}
 
 
-class TestVega(object):
+def test_vega():
     """Test that Vega spectrum is loaded properly."""
-    def test_default(self):
-        assert isinstance(spectrum.Vega, synspectrum.SourceSpectrum)
+    # Dummy
+    spectrum.load_vega(vegafile='dummyfile.fits', encoding='binary')
+    assert spectrum.Vega is None
 
-    def test_failed_load(self):
-        spectrum.load_vega('dummyfile')
-        assert spectrum.Vega is None
+    # Default
+    spectrum.load_vega(encoding='binary')
+    assert 'Vega' in spectrum.Vega.metadata['expr']

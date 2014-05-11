@@ -1,3 +1,5 @@
+.. doctest-skip-all
+
 .. _synphot_tables:
 
 ******
@@ -7,31 +9,43 @@ Tables
 Graph Lookup Tables
 ===================
 
-`stsynphot.tables` is awesome and has ``DEBUG``.
+`stsynphot.tables` handles graph lookup tables.
 
-Software uses (some names and locations have changed):
+Software uses `astropy.config` for the following;
+also overwrites ``synphot.config`` file locations with ``rootdir``:
 
-    * ``_default_waveset``
-    * ``_default_waveset_str``
-    * ``GRAPHTABLE``
-    * ``GRAPHDICT``
-    * ``COMPTABLE``
-    * ``COMPDICT``
-    * ``THERMTABLE``
-    * ``THERMDICT``
-    * ``PRIMARY_AREA``
+    * ``stsynphot.config.conf.rootdir``
+    * ``stsynphot.config.conf.graphtable``
+    * ``stsynphot.config.conf.comptable``
+    * ``stsynphot.config.conf.thermtable``
+    * ``stsynphot.config.conf.area``
+    * ``stsynphot.config.conf.waveset_array``
+    * ``stsynphot.config.conf.waveset``
+    * ``stsynphot.config.conf.clear_filter``
+    * ``stsynphot.config.conf.wavecatfile``
+    * ``stsynphot.config.conf.detectorfile``
+    * ``stsynphot.config.conf.irafshortcutfile``
 
-Explain these (names have changed):
+Software caches the following:
 
-    * ``rootdir``
-    * ``specdir``
+    * ``stsynphot.catalog._CACHE``
+    * ``stsynphot.observationmode._GRAPHDICT``
+    * ``stsynphot.observationmode._COMPDICT``
+    * ``stsynphot.observationmode._THERMDICT``
+    * ``stsynphot.observationmode._DETECTORDICT``
+    * ``stsynphot.spectrum._REDLAWS``
+    * ``stsynphot.spectrum.Vega``
+    * ``stsynphot.stio._irafconvdata``
+    * ``stsynphot.wavetable.WAVECAT``
+
+These are not used anymore:
+
+    * ``setref``
     * ``CAT_TEMPLATE``
     * ``KUR_TEMPLATE``
-    * ``VegaFile``
-    * ``EXTDIR``
-    * ``RedLaws``
-    * ``wavecat``
-    * ``CONVERTDICT``
+
+Maybe use a table to map ``stsynphot`` to ASTROLIB PYSYNPHOT?
+Need to reorganize sections in this doc.
 
 
 Wave Tables
@@ -39,5 +53,5 @@ Wave Tables
 
 `stsynphot.wavetable` uses:
 
-    * ``wavecat_file``
-    * ``wavetable``
+    * ``stsynphot.config.conf.wavecatfile``
+    * ``stsynphot.wavetable.WAVECAT``

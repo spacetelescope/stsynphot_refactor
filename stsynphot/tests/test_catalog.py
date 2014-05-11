@@ -19,13 +19,16 @@ from .. import catalog, exceptions
 
 def test_grid_to_spec():
     """Test creating spectrum from grid, and related cache."""
-    sp = catalog.grid_to_spec('k93models', 6440, 0, 4.3)
+    sp = catalog.grid_to_spec('k93', 6440, 0, 4.3)
+    w = sp.waveset
+    w_first_50 = w[:50]
+    y_first_50 = units.convert_flux(w_first_50, sp(w_first_50), units.FLAM)
+    w_last_50 = w[-50:]
+    y_last_50 = units.convert_flux(w_last_50, sp(w_last_50), units.FLAM)
 
-    assert 'k93models' in sp.metadata['expr']
-    assert sp.wave.unit == u.AA
-    assert sp.flux.unit == units.FLAM
+    assert 'k93' in sp.metadata['expr']
     np.testing.assert_allclose(
-        sp.wave.value[:50],
+        w_first_50.value,
         [90.90000153, 93.50000763, 96.09999847, 97.70000458, 99.59999847, 102,
          103.80000305, 105.6000061, 107.70000458, 110.40000153, 114,
          117.79999542, 121.30000305, 124.79999542, 127.09999847, 128.40000916,
@@ -35,17 +38,17 @@ def test_grid_to_spec():
          180.20001221, 181.69999695, 186.1000061, 191, 193.8999939,
          198.40000916, 201.80000305, 205, 210.5, 216.20001221, 219.80000305,
          223, 226.80000305, 230, 234, 240, 246.5, 252.3999939, 256.80001831])
+    np.testing.assert_array_equal(y_first_50.value, 0)
     np.testing.assert_allclose(
-        sp.wave.value[-50:],
+        w_last_50.value,
         [83800, 84200, 84600, 85000, 85400, 85800, 86200, 86600, 87000, 87400,
          87800, 88200, 88600, 89000, 89400, 89800, 90200, 90600, 91000, 91400,
          91800, 92200, 92600, 93000, 93400, 93800, 94200, 94600, 95000, 95400,
          95800, 96200, 96600, 97000, 97400, 97800, 98200, 98600, 99000, 99400,
          99800, 100200, 200000, 400000, 600000, 800000, 1000000, 1200000,
          1400000,  1600000])
-    np.testing.assert_array_equal(sp.flux.value[:50], 0)
     np.testing.assert_allclose(
-        sp.flux.value[-50:],
+        y_last_50.value,
         [2.52510792e+03, 2.47883842e+03, 2.43311637e+03, 2.38843415e+03,
          2.34455095e+03, 2.30190141e+03, 2.25982266e+03, 2.21930715e+03,
          2.17950029e+03, 2.14031198e+03, 2.10216378e+03, 2.06411734e+03,
@@ -81,7 +84,7 @@ def test_grid_to_spec():
 def test_grid_to_spec_bounds_check(t, m, g):
     """Test out of bounds check."""
     with pytest.raises(exceptions.ParameterOutOfBounds):
-        sp = catalog.grid_to_spec('k93models', t, m, g)
+        sp = catalog.grid_to_spec('k93', t, m, g)
 
 
 def test_grid_to_spec_exceptions():
@@ -92,6 +95,6 @@ def test_grid_to_spec_exceptions():
 
     # Quantity is not acceptable for log values
     with pytest.raises(synexceptions.SynphotError):
-        sp = catalog.grid_to_spec('k93models', 6440, u.Quantity(0), 4.3)
+        sp = catalog.grid_to_spec('k93', 6440, u.Quantity(0), 4.3)
     with pytest.raises(synexceptions.SynphotError):
-        sp = catalog.grid_to_spec('k93models', 6440, 0, u.Quantity(4.3))
+        sp = catalog.grid_to_spec('k93', 6440, 0, u.Quantity(4.3))

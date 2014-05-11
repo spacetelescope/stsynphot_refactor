@@ -1,5 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""Module to handle ``stsynphot.config.WAVECATFILE`` table,
+"""Module to handle ``stsynphot.config.conf.wavecatfile`` table,
 which is used by ETC to select an appropriate wavelength set
 for a given observation mode for count rate calculations.
 
@@ -7,17 +7,21 @@ for a given observation mode for count rate calculations.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # STDLIB
-import re
+import warnings
 
 # THIRD-PARTY
 import numpy as np
 
 # ASTROPY
-from astropy import log
 from astropy import units as u
+from astropy.utils.exceptions import AstropyUserWarning
+
+# SYNPHOT
+from synphot import units
 
 # LOCAL
-from . import config, exceptions, stio
+from . import exceptions, stio
+from .config import conf
 
 
 __all__ = ['WAVECAT', 'WaveCatalog', 'load_wavecat']
@@ -32,11 +36,10 @@ WAVECAT = None
 
 
 class WaveCatalog(object):
-    """Class to handle ``stsynphot.config.WAVECATFILE`` initialization
+    """Class to handle ``stsynphot.config.conf.wavecatfile`` initialization
     and access.
 
-    Input is parsed with :func:`stsynphot.stio.read_wavecat`.
-    Wavelengths assumed to be always in Angstrom.
+    Input file is parsed with :func:`stsynphot.stio.read_wavecat`.
 
     For each observation mode, its wavelength table is defined
     by filename or parameter string. When it is accessed with
@@ -49,7 +52,7 @@ class WaveCatalog(object):
     fname : str
         Wavecat filename.
 
-    wave_unit : str or `astropy.units.core.Unit`, optional
+    wave_unit : str or `astropy.units.core.Unit`
         Wavelength unit.
 
     Attributes
@@ -57,7 +60,7 @@ class WaveCatalog(object):
     file : str
         Wavecat filename.
 
-    wave_unit : str or `astropy.units.core.Unit`
+    wave_unit : `astropy.units.core.Unit`
         Wavelength unit.
 
     lookup : dict
@@ -69,11 +72,11 @@ class WaveCatalog(object):
         string. Used for partial matching.
 
     """
-    def __init__(self, fname, wave_unit='angstrom'):
+    def __init__(self, fname, wave_unit=u.AA):
         data = stio.read_wavecat(stio.irafconvert(fname))
 
         self.file = fname
-        self.wave_unit = wave_unit
+        self.wave_unit = units.validate_wave_unit(wave_unit)
         self.lookup = {}
         self.setlookup = {}
 
@@ -141,13 +144,13 @@ class WaveCatalog(object):
         b = c2
         a = (c3 * c3 - c2 * c2) * 0.25 / (c1 - c0)
 
-        return (a, b, c, nwave)
+        return a, b, c, nwave
 
     def _waveset_from_parstring(self, coeff):
         """Get wavelengths array from parameter string."""
         a, b, c, nwave = self._calc_quadratic_coeff(coeff)
         i = np.arange(nwave, dtype=np.float64)
-        return u.Quantity(((a * i) + b) * i + c, unit=self.wave_unit)
+        return u.Quantity(((a * i) + b) * i + c, self.wave_unit)
 
     def load_waveset(self, obsmode):
         """Load wavelength table by observation mode.
@@ -177,22 +180,24 @@ class WaveCatalog(object):
         return par, waveset
 
 
-def load_wavecat(wave_unit='angstrom'):
+def load_wavecat(wave_unit=u.AA):
     """Convenience function to update ``stsynphot.wavetable.WAVECAT``
-    global variable with the latest ``stsynphot.config.WAVECATFILE``.
+    global variable with the latest ``stsynphot.config.conf.wavecatfile``.
 
     Parameters
     ----------
-    wave_unit : str or `astropy.units.core.Unit`, optional
-        Wavelength unit.
+    wave_unit : str or `astropy.units.core.Unit`
+        See `WaveCatalog`.
 
     """
     global WAVECAT
-    WAVECAT = WaveCatalog(config.WAVECATFILE(), wave_unit=wave_unit)
+    WAVECAT = WaveCatalog(conf.wavecatfile, wave_unit=wave_unit)
 
 
 # Load default wavecat file in Angstrom.
 try:
     load_wavecat()
 except Exception as e:
-    log.warn('Failed to load {0}: {1}'.format(config.WAVECATFILE(), str(e)))
+    warnings.warn(
+        'Failed to load {0}: {1}'.format(conf.wavecatfile, str(e)),
+        AstropyUserWarning)

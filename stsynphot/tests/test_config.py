@@ -8,80 +8,61 @@ import os
 # THIRD-PARTY
 import numpy as np
 
+# ASTROPY
+from astropy.tests.helper import pytest
+
 # SYNPHOT
-from synphot import config as synconfig
+from synphot.config import conf as synconf
+from synphot.utils import generate_wavelengths
 
 # LOCAL
 from .. import config
 
 
-def _compare_synconfig(root):
-    """Make sure `synphot` config is overwritten."""
-    # This differs from SYNPHOT default in Travis
-    assert synconfig.STDSTAR_DIR() == os.path.join(root, 'calspec')
+def test_overwrite_synphot():
+    """Test if overwriting ``synphot`` defaults is successful."""
 
-    # These are same in Travis but can differ in local testing
-    assert synconfig.EXTINCTION_DIR() == os.path.join(root, 'extinction')
-    assert synconfig.PASSBAND_DIR() == os.path.join(root, 'comp/nonhst')
+    # For some reason, this does not automatically execute during testing.
+    config._overwrite_synphot_config()
 
-
-def test_setdir():
-    """Test setdir convenience function."""
-    def_dict = config.getdir()
-
-    _compare_synconfig(def_dict[config.ROOTDIR.name])
-
-    # Set to non-default values
-
-    new_root = '/foo/path/'
-    config.setdir(root=new_root)
-
-    assert config.ROOTDIR() == new_root
-    assert config.CATDIR() == os.path.join(new_root, 'grid')
-    assert config.MTABDIR() == os.path.join(new_root, 'mtab')
-    _compare_synconfig(new_root)
-
-    # Set back to defaults
-
-    config.setdir()
-
-    for x in (config.ROOTDIR, config.CATDIR, config.MTABDIR,
-              synconfig.STDSTAR_DIR, synconfig.EXTINCTION_DIR,
-              synconfig.PASSBAND_DIR):
-        assert x() == def_dict[x.name]
+    vegafile = synconf.vega_file
+    assert vegafile.startswith(config.conf.rootdir)
+    assert os.path.isfile(vegafile)
 
 
-def test_setref():
-    """Test setref convenience function."""
-    def_dict = config.getref()
+class TestConfigChanges(object):
+    def setup_class(self):
+        self.def_dict = config.getref()
 
-    assert def_dict[config.GRAPHTABLE.name].endswith('.fits')
+    @pytest.mark.parametrize(
+        ('cfgname', 'new_val'),
+        [('graphtable', 'mtab$n9i1408hm_tmg.fits'),
+         ('comptable', 'mtab$n9i1408im_tmc.fits'),
+         ('thermtable', 'mtab$n5k15531m_tmt.fits'),
+         ('area', 1)])
+    def test_tables_area(self, cfgname, new_val):
+        # Same as config.conf.cfgname = new_val
+        setattr(config.conf, cfgname, new_val)
+        assert getattr(config.conf, cfgname) == new_val
 
-    # Set to non-default values
+        # Reset to default
+        config.conf.reset(cfgname)
+        assert getattr(config.conf, cfgname) == self.def_dict[cfgname]
 
-    new_graph = 'n9i1408hm_tmg.fits'
-    new_comp = 'n9i1408im_tmc.fits'
-    new_therm = 'n5k15531m_tmt.fits'
-    config.setref(
-        graphtable='mtab$'+new_graph, comptable='mtab$'+new_comp,
-        thermtable='mtab$'+new_therm, area=1.0,
-        waveset=(3000, 5000, 100, 'linear'))
+    def test_waveset(self):
+        w = generate_wavelengths(minwave=3000, maxwave=5000, num=100, log=False)
+        config.conf.waveset_array = w[0].tolist()
+        config.conf.waveset = w[1]
+        np.testing.assert_allclose(
+            [config.conf.waveset_array[0], config.conf.waveset_array[-1]],
+            [3000, 4980])
+        assert (config.conf.waveset ==
+                'Min: 3000, Max: 5000, Num: 100, Delta: None, Log: False')
 
-    assert config.GRAPHTABLE() == os.path.join(config.MTABDIR(), new_graph)
-    assert config.COMPTABLE() == os.path.join(config.MTABDIR(), new_comp)
-    assert config.THERMTABLE() == os.path.join(config.MTABDIR(), new_therm)
-    assert config.PRIMARY_AREA() == 1
-
-    wave = config._DEFAULT_WAVESET()
-    np.testing.assert_allclose([wave[0], wave[-1]], [3000, 4980])
-
-    # Set back to defaults
-
-    config.setref()
-
-    for x in (config.GRAPHTABLE, config.COMPTABLE, config.THERMTABLE,
-              config.PRIMARY_AREA, config._DEFAULT_WAVESET_STR):
-        assert x() == def_dict[x.name]
-
-    wave = config._DEFAULT_WAVESET()
-    np.testing.assert_allclose([wave[0], wave[-1]], [500, 25989.72879567])
+        # Reset to default
+        config.conf.reset('waveset_array')
+        config.conf.reset('waveset')
+        np.testing.assert_allclose(
+            [config.conf.waveset_array[0], config.conf.waveset_array[-1]],
+            [500, 25989.72879567])
+        assert config.conf.waveset == self.def_dict['waveset']

@@ -18,7 +18,9 @@ from synphot import spectrum as synspectrum
 from synphot import thermal, units
 
 # LOCAL
-from .. import config, observationmode
+from .. import observationmode
+from ..config import conf
+from ..stio import irafconvert
 
 
 GT_FILE = get_pkg_data_filename('data/tables_tmg.fits')
@@ -29,27 +31,27 @@ TH_FILE = get_pkg_data_filename('data/tables_tmt.fits')
 class TestComponent(object):
     """Test optical component."""
     def setup_class(self):
-        self.path = os.path.join(config.ROOTDIR(), 'comp', 'acs')
+        self.path = irafconvert('cracscomp$')
 
     def test_no_interp(self):
         c = observationmode.Component(
             os.path.join(self.path, 'acs_f814w_wfc_006_syn.fits'))
+        w = c.throughput.waveset[::2000]
         assert not c.empty
-        assert c.primary_area is None
-        assert str(c).endswith('acs_f814w_wfc_006_syn.fits')
+        assert c.throughput_name.endswith('acs_f814w_wfc_006_syn.fits')
         np.testing.assert_allclose(
-            c.throughput.thru.value[::2000],
+            c.throughput(w).value,
             [0, 9.02462432e-07, 4.29190891e-07, 2.05288604e-01, 9.57082033e-01,
              9.38818634e-01, 4.94621272e-05, 0])
 
     def test_interp(self):
         c = observationmode.Component(
             os.path.join(self.path, 'acs_fr656n_006_syn.fits[fr656n#]'),
-            interpval=6500, area=100)
+            interpval=6500)
+        w = c.throughput.waveset[::50]
         assert not c.empty
-        assert c.primary_area == 100
         np.testing.assert_allclose(
-            c.throughput.thru.value[::50],
+            c.throughput(w).value,
             [9.37283281e-07, 1.01895410e-06, 1.20653385e-04, 7.53533347e-03,
              2.38073540e-03, 3.75275078e-04, 3.00504590e-06, 1.00051425e-06])
 
@@ -62,16 +64,16 @@ class TestComponent(object):
 class TestThermalComponent(object):
     """Test thermal component."""
     def setup_class(self):
-        path = os.path.join(config.ROOTDIR(), 'comp', 'wfc3')
-        self.cp_name = os.path.join(path, 'wfc3_ir_win_001_syn.fits')
-        self.th_name = os.path.join(path, 'wfc3_ir_win_001_th.fits')
+        self.cp_name = irafconvert('crwfc3comp$wfc3_ir_win_001_syn.fits')
+        self.th_name = irafconvert('crwfc3comp$wfc3_ir_win_001_th.fits')
 
     def test_no_interp(self):
         c = observationmode.ThermalComponent(self.cp_name, self.th_name)
-        assert c.thermal_name.endswith('wfc3_ir_win_001_th.fits')
+        w = c.emissivity.waveset[6200:6350:10]
         assert not c.empty
+        assert c.thermal_name.endswith('wfc3_ir_win_001_th.fits')
         np.testing.assert_allclose(
-            c.emissivity.thru.value[6200:6350:10],
+            c.emissivity(w).value,
             [0.03222001, 0.03887004, 0.02471, 0.02999997, 0.01115, 0.03276998,
              0.05794001], rtol=1e-6)
 
@@ -83,7 +85,7 @@ class TestThermalComponent(object):
 
     def test_thermal_empty(self):
         c = observationmode.ThermalComponent(self.cp_name, 'clear')
-        assert not c.empty
+        assert c.empty
         assert c.throughput is not None
         assert c.emissivity is None
 
@@ -99,15 +101,14 @@ class TestProcessGraphTable(object):
     def test_default(self):
         gt, gtname, area = observationmode._process_graphtable(None)
         assert gtname.endswith('tmg.fits')  # Latest from CDBS
-        assert area.value == config.PRIMARY_AREA()
-        assert area.unit == units.AREA
+        assert area == conf.area * units.AREA
 
     def test_other_logic(self):
         gt_file = get_pkg_data_filename('data/tables_primarea_tmg.fits')
         gt, gtname, area = observationmode._process_graphtable(gt_file)
-        assert area.value == 100
-        assert area.unit == units.AREA
+        assert area == 100 * units.AREA
 
+        # Cached data
         gt2, gtname2, area2 = observationmode._process_graphtable(gt_file)
         assert gt2 is gt
         assert gtname2 == gtname
@@ -140,45 +141,35 @@ class TestObservationMode(object):
         assert self.obsmode.modes == ['acs', 'wfc1', 'f555w', 'mjd#']
         assert self.obsmode.pardict == {'mjd': 56597}
         assert self.obsmode.ctname.endswith('tables_tmc.fits')
-        assert self.obsmode.pixscale.value == 0.05
-        assert self.obsmode.pixscale.unit == u.arcsec
+        assert self.obsmode.pixscale == 0.05 * u.arcsec
         assert str(self.obsmode) == 'acs,wfc1,f555w,mjd#56597'
         assert len(self.obsmode) == 5
         np.testing.assert_allclose(
             self.obsmode._constant.value, 2277381155648.759, rtol=1e-6)
 
     def test_components(self):
-        ans = ['hst_ota_007_syn.fits',
-               'acs_wfc_im123_004_syn.fits',
-               'acs_f555w_wfc_005_syn.fits',
-               'acs_wfc_ebe_win12f_005_syn.fits',
-               'acs_wfc_ccd1_mjd_021_syn.fits#56597']
-        for c, a in zip(self.obsmode.components, ans):
-            s = str(c)
-            assert s.endswith(a)
-            assert isinstance(c.throughput, synspectrum.SpectralElement)
+        for c in self.obsmode.components:
+            assert not c.empty
 
     def test_throughput(self):
         t = self.obsmode.throughput
-        assert isinstance(t, synspectrum.SpectralElement)
-        assert t.wave.unit == u.AA
+        w = t.waveset[::1000]
         np.testing.assert_allclose(
-            t.wave.value[::1000],
+            w.value,
             [500, 3797, 4797, 5797, 6797, 7797, 8797, 9797, 10796])
         np.testing.assert_allclose(
-            t.thru.value[::1000],
+            t(w).value,
             [0, 6.87477055e-06, 2.14807644e-01, 2.85725420e-01, 7.34488102e-07,
              2.96078061e-08, 3.57507695e-08, 9.99538418e-07, 0], rtol=1e-3)
 
     def test_sensitivity(self):
         sens = self.obsmode.sensitivity
-        assert isinstance(sens, synspectrum.SpectralElement)
-        assert sens.wave.unit == u.AA
+        w = sens.waveset[::1000]
         np.testing.assert_allclose(
-            sens.wave.value[::1000],
+            w.value,
             [500, 3797, 4797, 5797, 6797, 7797, 8797, 9797, 10796])
         np.testing.assert_allclose(
-            sens.thru.value[::1000],
+            sens(w).value,
             [0, 5.94476276e+10, 2.34668703e+15, 3.77214087e+15, 1.13694055e+10,
              5.25738140e+08, 7.16235278e+08, 2.23012046e+10, 0], rtol=1e-3)
 
@@ -198,17 +189,12 @@ class TestObservationMode(object):
         obsmode = observationmode.ObservationMode(
             'wfc3, ir, f153m', graphtable=GT_FILE, comptable=CP_FILE)
         thsp = obsmode.thermal_spectrum(thermtable=TH_FILE)
-        assert isinstance(thsp, synspectrum.SourceSpectrum)
-        assert thsp.wave.unit == u.AA
-        assert thsp.flux.unit == units.PHOTLAM
+        w = [6898, 7192, 7486, 7780, 8630, 11190, 13790, 15670, 17954.90234375]
         np.testing.assert_allclose(
-            thsp.wave.value[5000:7500:300],
-            [6898, 7192, 7486, 7780, 8630, 11190, 13790, 15670, 17954.90234375])
-        np.testing.assert_allclose(
-            thsp.flux.value[5000:7500:300],
-            [0, 9.52169734e-29, 2.32066138e-27, 4.38458258e-26, 1.86992102e-21,
-             2.90270160e-15, 3.42776339e-11, 2.15179717e-08, 7.24300676e-09],
-            5e-3)
+            thsp(w).value,
+            [0, 8.38847197e-29, 2.04416858e-27, 3.86172895e-26, 1.61682936e-21,
+             2.49276497e-15, 2.81005993e-11, 1.82601857e-08, 8.58820308e-09],
+            rtol=1e-6)
 
 
 class TestThermalObservationMode(object):
@@ -249,14 +235,10 @@ class TestThermalObservationMode(object):
         for c, a in zip(self.thmode.components, ans):
             s = c.thermal_name
             assert s.endswith(a)
-
-            if c.throughput is not None:
-                assert isinstance(c.throughput, synspectrum.SpectralElement)
-
-            if s != 'clear':
-                assert isinstance(c.emissivity, thermal.ThermalSpectralElement)
-            else:
+            if s == 'clear':
                 assert c.emissivity is None
+            else:
+                assert c.emissivity is not None
 
     def test_exceptions(self):
         with pytest.raises(NotImplementedError):

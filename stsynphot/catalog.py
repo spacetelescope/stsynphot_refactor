@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # STDLIB
+import numbers
 import os
 
 # THIRD-PARTY
@@ -10,20 +11,18 @@ import numpy as np
 
 # ASTROPY
 from astropy import units as u
-from astropy.extern import six
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
-from synphot import SourceSpectrum, units
+from synphot import units
+from synphot.spectrum import SourceSpectrum
 
 # LOCAL
-from . import config, exceptions, stio
+from . import exceptions, stio
 
 
-__all__ = ['reset_cache', 'grid_to_spec']
+__all__ = ['grid_to_spec']
 
-_CAT_TEMPLATE = os.path.join(config.ROOTDIR(), 'grid', '*', 'catalog.fits')
-_KUR_TEMPLATE = os.path.join(config.ROOTDIR(), 'grid', '*')
 _PARAM_NAMES = ['T_eff', 'metallicity', 'log_g']
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.
 
@@ -36,18 +35,9 @@ def reset_cache():
 
 def _par_from_parser(x):
     """Convert parser string to parameter value."""
-    if isinstance(x, six.string_types):
-        y = float(x)
-    else:
-        y = x
-    return y
-
-
-def _validate_par(x, par_name=''):
-    """Make sure parameter value is a number."""
-    if not isinstance(x, (int, long, float)):
-        raise synexceptions.SynphotError(
-            '{0} {1} is not a number.'.format(par_name, x))
+    if not isinstance(x, (numbers.Real, u.Quantity)):
+        x = float(x)
+    return x
 
 
 def _break_list(in_list, index, parameter):
@@ -80,14 +70,14 @@ def _break_list(in_list, index, parameter):
     return upper_list, lower_list
 
 
-def _get_spectrum(parlist, basename):
+def _get_spectrum(parlist, catdir):
     """Get list of spectra for given parameter list and base name."""
     name = parlist[3]
 
     filename = name.split('[')[0]
     column = name.split('[')[1][:-1]
 
-    filename = _KUR_TEMPLATE.replace('*', os.path.join(basename, filename))
+    filename = os.path.join(catdir, filename)
     sp = SourceSpectrum.from_file(filename, flux_col=column)
 
     result = [member for member in parlist]
@@ -117,12 +107,9 @@ def _interpolate_spectrum(sp1, sp2, par):
     return result
 
 
-def grid_to_spec(catdir, t_eff, metallicity, log_g, area=None):
+def grid_to_spec(gridname, t_eff, metallicity, log_g):
     """Extract spectrum from given catalog grid parameters.
     Interpolate if necessary.
-
-    Grid must be defined by ``catdir/catalog.fits``, which
-    is parsed with :func:`stsynphot.stio.read_catalog`.
 
     Grid parameters are only read once and then cached.
     Until the cache is cleared explicitly using
@@ -130,36 +117,29 @@ def grid_to_spec(catdir, t_eff, metallicity, log_g, area=None):
 
     Parameters
     ----------
-    catdir : {'ck04models', 'k93models', 'phoenix'}
-        Name of directory holding the catalogs, relative
-        to ``stsynphot.config.CATDIR``.
-
-            * ``ck04models`` - Castelli & Kurucz (2004)
-            * ``k93models`` - Kurucz (1993)
+    gridname : {'ck04', 'k93', 'phoenix'}
+        Model to use:
+            * ``ck04`` - Castelli & Kurucz (2004)
+            * ``k93`` - Kurucz (1993)
             * ``phoenix`` - Allard et al. (2009)
 
     t_eff : str, float or `astropy.units.quantity.Quantity`
-        Effective temperature of model. If not Quantity,
-        assumed to be in Kelvin. If string (from parser),
-        convert to Quantity.
+        Effective temperature of model.
+        If not Quantity, assumed to be in Kelvin.
+        If string (from parser), convert to Quantity.
 
-    metallicity : str, float
-        Metallicity of model. Quantity not supported for now.
+    metallicity : str or float
+        Metallicity of model.
         If string (from parser), convert to float.
 
-    log_g : str, float
-        Log surface gravity for model. Quantity not supported for now.
+    log_g : str or float
+        Log surface gravity for model.
         If string (from parser), convert to float.
-
-    area : float or `astropy.units.quantity.Quantity`, optional
-        Area that fluxes cover. Usually, this is the area of
-        the primary mirror of the observatory of interest.
-        If not a Quantity, assumed to be in cm^2.
 
     Returns
     -------
     sp : `synphot.spectrum.SourceSpectrum`
-        Extracted spectrum.
+        Empirical source spectrum.
 
     Raises
     ------
@@ -170,24 +150,29 @@ def grid_to_spec(catdir, t_eff, metallicity, log_g, area=None):
         Invalid inputs.
 
     """
-    if catdir not in ('ck04models', 'k93models', 'phoenix'):
+    if gridname == 'ck04':
+        catdir = 'crgridck04$'
+    elif gridname == 'k93':
+        catdir = 'crgridk93$'
+    elif gridname == 'phoenix':
+        catdir = 'crgridphoenix$'
+    else:
         raise synexceptions.SynphotError(
-            '{0} is not a supported catalog grid.'.format(catdir))
+            '{0} is not a supported catalog grid.'.format(gridname))
 
-    # Temperature must be in Kelvin
-    t_eff = _par_from_parser(t_eff)
-    t_eff = units.validate_quantity(t_eff, u.K)
-    _validate_par(t_eff.value, par_name='T_eff')
-
-    # Metallicity (Quantity not supported yet)
     metallicity = _par_from_parser(metallicity)
-    _validate_par(metallicity, par_name='Metallicity')
+    if isinstance(metallicity, u.Quantity):
+        raise synexceptions.SynphotError(
+            'Quantity is not supported for metallicity.')
 
-    # Log gravity (Quantity not supported yet)
     log_g = _par_from_parser(log_g)
-    _validate_par(log_g, par_name='Log g')
+    if isinstance(log_g, u.Quantity):
+        raise synexceptions.SynphotError(
+            'Quantity is not supported for log surface gravity.')
 
-    filename = _CAT_TEMPLATE.replace('*', catdir)
+    t_eff = units.validate_quantity(_par_from_parser(t_eff), u.K).value
+    catdir = stio.irafconvert(catdir)
+    filename = os.path.join(catdir, 'catalog.fits')
 
     # If not cached, read from grid catalog and cache it
     if filename not in _CACHE:
@@ -198,7 +183,7 @@ def grid_to_spec(catdir, t_eff, metallicity, log_g, area=None):
 
     indices = _CACHE[filename]
 
-    list0, list1 = _break_list(indices, 0, t_eff.value)
+    list0, list1 = _break_list(indices, 0, t_eff)
 
     list2, list3 = _break_list(list0, 1, metallicity)
     list4, list5 = _break_list(list1, 1, metallicity)
@@ -225,10 +210,10 @@ def grid_to_spec(catdir, t_eff, metallicity, log_g, area=None):
     spa5 = _interpolate_spectrum(spa1, spa2, metallicity)
     spa6 = _interpolate_spectrum(spa3, spa4, metallicity)
 
-    spa7 = _interpolate_spectrum(spa5, spa6, t_eff.value)
+    spa7 = _interpolate_spectrum(spa5, spa6, t_eff)
+
     sp = spa7[0]
+    sp.metadata['expr'] = '{0}(T_eff={1:g},Z={2:g},log_g={3:g})'.format(
+        gridname, t_eff, metallicity, log_g)
 
-    header = {'expr': '{0}(T_eff={1:g},Z={2:g},log_g={3:g})'.format(
-        catdir, t_eff.value, metallicity, log_g)}
-
-    return SourceSpectrum(sp.wave, sp.flux, area=area, header=header)
+    return sp
