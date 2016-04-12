@@ -1,6 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """This module handles :ref:`catalog spectra <stsynphot_catalog>`."""
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 # STDLIB
 import numbers
@@ -13,13 +14,15 @@ import numpy as np
 from astropy import units as u
 
 # SYNPHOT
-from synphot import exceptions as synexceptions
-from synphot import units
-from synphot.spectrum import SourceSpectrum
+try:
+    from synphot import exceptions as synexceptions
+    from synphot import units
+    from synphot.spectrum import SourceSpectrum
+except ImportError:  # This is so RTD would build successfully
+    pass
 
 # LOCAL
 from . import exceptions, stio
-
 
 __all__ = ['grid_to_spec']
 

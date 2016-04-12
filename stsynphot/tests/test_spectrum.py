@@ -1,6 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Test spectrum.py module."""
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 # STDLIB
 import os
@@ -32,7 +33,6 @@ from synphot.spectrum import SourceSpectrum, SpectralElement
 from .. import spectrum
 from ..config import conf
 from ..stio import irafconvert
-
 
 _IS_PY32 = (sys.version_info >= (3, 2)) & (sys.version_info < (3, 3))
 GT_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmg.fits'))

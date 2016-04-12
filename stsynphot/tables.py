@@ -6,23 +6,26 @@
     Use this module, *not* `stsynphot.graphtab`.
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+from astropy.extern import six
 
 # THIRD-PARTY
 import numpy as np
 
 # ASTROPY
 from astropy import log
-from astropy.extern import six
 
 # SYNPHOT
-from synphot import exceptions as synexceptions
+try:
+    from synphot import exceptions as synexceptions
+except ImportError:  # This is so RTD would build successfully
+    pass
 
 # LOCAL
 from . import exceptions, stio
 from .config import conf
 from .stio import get_latest_file, irafconvert
-
 
 __all__ = ['GraphTable', 'CompTable']
 

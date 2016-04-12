@@ -1,6 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Test observationmode.py module."""
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 # STDLIB
 import os
@@ -21,7 +22,6 @@ from synphot import thermal, units
 from .. import observationmode
 from ..config import conf
 from ..stio import irafconvert
-
 
 GT_FILE = get_pkg_data_filename('data/tables_tmg.fits')
 CP_FILE = get_pkg_data_filename('data/tables_tmc.fits')

@@ -102,4 +102,3 @@ Reference/API
 .. automodapi:: stsynphot.tables
 
 .. automodapi:: stsynphot.wavetable
-
