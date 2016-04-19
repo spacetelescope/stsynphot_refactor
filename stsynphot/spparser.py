@@ -16,7 +16,8 @@ See :ref:`stsynphot-parser` for more details and
     IRAF SYNPHOT extinction names are obsolete and no longer supported.
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 # ASTROPY
 from astropy import log
@@ -25,13 +26,19 @@ from astropy.extern import six
 #from astropy.modeling import models
 
 # STSCI
-from jwst_lib.modeling import models
+try:
+    from jwst_lib.modeling import models
+except ImportError:  # This is so RTD would build successfully
+    pass
 
 # SYNPHOT
-from synphot import exceptions as synexceptions
-from synphot import units
-from synphot.models import BlackBody1D, ConstFlux1D, PowerLawFlux1D
-from synphot.spectrum import SourceSpectrum, SpectralElement
+try:
+    from synphot import exceptions as synexceptions
+    from synphot import units
+    from synphot.models import BlackBody1D, ConstFlux1D, PowerLawFlux1D
+    from synphot.spectrum import SourceSpectrum, SpectralElement
+except ImportError:  # This is so RTD would build successfully
+    pass
 
 # LOCAL
 from . import exceptions, spectrum
@@ -39,7 +46,6 @@ from .catalog import grid_to_spec
 from .config import conf
 from .spark import GenericScanner, GenericASTBuilder, GenericASTMatcher
 from .stio import irafconvert
-
 
 __all__ = ['Token', 'AST', 'BaseScanner', 'Scanner', 'BaseParser',
            'Interpreter', 'tokens_info', 'scan', 'parse', 'interpret',

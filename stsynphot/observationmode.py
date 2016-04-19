@@ -1,6 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Module to handle observations based on observation modes."""
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 # STDLIB
 import re
@@ -16,12 +17,15 @@ from astropy.utils.exceptions import AstropyUserWarning
 from astropy.utils.misc import lazyproperty
 
 # SYNPHOT
-from synphot import exceptions as synexceptions
-from synphot import units
-from synphot.models import Empirical1D
-from synphot.spectrum import SourceSpectrum, SpectralElement
-from synphot.thermal import ThermalSpectralElement
-from synphot.utils import merge_wavelengths
+try:
+    from synphot import exceptions as synexceptions
+    from synphot import units
+    from synphot.models import Empirical1D
+    from synphot.spectrum import SourceSpectrum, SpectralElement
+    from synphot.thermal import ThermalSpectralElement
+    from synphot.utils import merge_wavelengths
+except ImportError:  # This is so RTD would build successfully
+    pass
 
 # LOCAL
 from . import exceptions, stio
@@ -29,7 +33,6 @@ from .config import conf
 from .spectrum import Vega, interpolate_spectral_element
 from .tables import GraphTable, CompTable
 from .wavetable import WAVECAT
-
 
 __all__ = ['Component', 'ThermalComponent', 'BaseObservationMode',
            'ObservationMode', 'ThermalObservationMode']

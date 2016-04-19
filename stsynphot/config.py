@@ -10,7 +10,10 @@ directories to be configured properly. It also overwrites
 ``synphot`` configurable items.
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+from astropy.extern.six import itervalues
+from astropy.extern.six.moves import map
 
 # STDLIB
 import os
@@ -18,30 +21,32 @@ import os
 # ASTROPY
 from astropy import log
 from astropy.config import ConfigNamespace, ConfigItem
-from astropy.extern import six
 
 # SYNPHOT
-from synphot.config import conf as synconf
-from synphot.utils import generate_wavelengths
-
+try:
+    from synphot.config import Conf as synconf
+    from synphot.utils import generate_wavelengths
+except ImportError:  # This is so RTD would build successfully
+    pass
 
 __all__ = ['conf', 'getref', 'showref']
 
 
-# Set up default wavelength
-_temp = generate_wavelengths(
-    minwave=500, maxwave=26000, num=10000, delta=None, log=True,
-    wave_unit='angstrom')
-_wave = _temp[0].tolist()
-_wave_str = _temp[1]
-del _temp
-
-
 class Conf(ConfigNamespace):
     """Configuration parameters."""
+
+    # Set up default wavelength
+    _wave, _wave_str = generate_wavelengths(
+        minwave=500, maxwave=26000, num=10000, delta=None, log=True,
+        wave_unit='angstrom')
+
+    # Root directory
     rootdir = ConfigItem(
         os.environ.get('PYSYN_CDBS', '/grp/hst/cdbs/'),
         'CDBS data root directory')
+
+    # Override SYNPHOT configuration
+    _overwrite_synphot_config(rootdir)
 
     # Graph, optical component, and thermal component tables
     graphtable = ConfigItem('mtab$*_tmg.fits', 'Graph table')
@@ -50,7 +55,7 @@ class Conf(ConfigNamespace):
 
     # Default wavelength in Angstrom and its description
     waveset_array = ConfigItem(
-        _wave, 'Default wavelength set in Angstrom', cfgtype='float_list')
+        _wave.tolist(), 'Default wavelength set in Angstrom', 'float_list')
     waveset = ConfigItem(_wave_str, 'Default wavelength set description')
 
     # Telescope primary mirror collecting area in cm^2
@@ -72,21 +77,44 @@ class Conf(ConfigNamespace):
         'synphot$irafshortcuts.txt',
         'col1=shortcut_name col2=relpath_to_rootdir, has header.')
 
+    # Clean up
+    del _wave
+    del _wave_str
+
 
 conf = Conf()
 
 
-def _overwrite_synphot_config():
+def _get_synphot_cfgitems():
+    """Iterator for ``synphot`` configuration items."""
+    for c in itervalues(synconf.__dict__):
+        if isinstance(c, ConfigItem):
+            yield c
+
+
+def _overwrite_synphot_config(root):
     """Silently overwrite ``synphot`` configurable items to point to
-    ``rootdir``.
+    given root directory.
 
     """
-    for c in six.itervalues(synconf.__class__.__dict__):
-        if isinstance(c, ConfigItem):
-            c.set(c().replace('ftp://ftp.stsci.edu/cdbs/', conf.rootdir))
+    subdir_keys = ['calspec', 'extinction', 'comp/nonhst']
+
+    for cfgitem in _get_synphot_cfgitems():
+        path, fname = os.path.split(cfgitem())
+
+        i = np.where(list(map(path.__contains__, subdir_keys)))[0]
+        if len(i) == 0:
+            continue
+
+        subdir = subdir_keys[i[0]]
+        cfgitem.set(os.path.join(root, subdir, fname))
 
 
-_overwrite_synphot_config()
+def _get_ref_cfgitems():
+    """Iterator for configuration items to be displayed."""
+    for cfgitem in (Conf.graphtable, Conf.comptable, Conf.thermtable,
+                    Conf.area, Conf.waveset):
+        yield cfgitem
 
 
 def getref():
@@ -97,13 +125,12 @@ def getref():
     refdict : dict
 
     """
-    return dict([[x, getattr(conf, x)] for x in
-        ('graphtable', 'comptable', 'thermtable', 'area', 'waveset')])
+    return dict([[x.name, x()] for x in _get_ref_cfgitems()])
 
 
 def showref():  # pragma: no cover
     """Show the values of select configurable items."""
     info_str = '\n'
-    for x in ('graphtable', 'comptable', 'thermtable', 'area', 'waveset'):
-        info_str += '{0:10s}: {1}\n'.format(x, getattr(conf, x))
+    for x in _get_ref_cfgitems():
+        info_str += '{0:10s}: {1}\n'.format(x.name, x())
     log.info(info_str)

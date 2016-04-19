@@ -5,7 +5,9 @@
     * Basic ASCII - See `astropy.io.ascii`
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+from astropy.extern import six
 
 # STDLIB
 import fnmatch
@@ -18,15 +20,16 @@ import numpy as np
 
 # ASTROPY
 from astropy import units as u
-from astropy.extern import six
 from astropy.io import ascii, fits
 from astropy.utils.data import _find_pkg_data_path
 from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
-from synphot import exceptions as synexceptions
-from synphot import units
-
+try:
+    from synphot import exceptions as synexceptions
+    from synphot import units
+except ImportError:  # This is so RTD would build successfully
+    pass
 
 __all__ = ['irafconvert', 'get_latest_file', 'read_graphtable',
            'read_comptable', 'read_catalog', 'read_wavecat', 'read_waveset',

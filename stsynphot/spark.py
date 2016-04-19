@@ -7,7 +7,8 @@
 # The parser builds its internal tables by reading the docstring,
 # so you cannot put documentation here.
 #
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 # STDLIB
 import re
@@ -18,7 +19,6 @@ from astropy.extern import six
 
 # LOCAL
 from .exceptions import ParserError, GenericASTTraversalPruningException
-
 
 __all__ = ['GenericScanner', 'GenericParser', 'GenericASTBuilder',
            'GenericASTTraversal', 'GenericASTMatcher']
