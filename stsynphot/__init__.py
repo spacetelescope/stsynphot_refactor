@@ -12,12 +12,9 @@ from ._astropy_init import *
 
 # For egg_info test builds to pass, put package imports here.
 if not _ASTROPY_SETUP_:
-    #from example_mod import *
-    pass
-
-#--------------#
-# STSYNPHOT UI #
-#--------------#
-from .config import getref, showref
-from .spectrum import band, ebmvx
-from .spparser import parse_spec
+    #--------------#
+    # STSYNPHOT UI #
+    #--------------#
+    from .config import getref, showref
+    from .spectrum import band, ebmvx
+    from .spparser import parse_spec
