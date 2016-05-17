@@ -10,8 +10,7 @@ directories to be configured properly. It also overwrites
 ``synphot`` configurable items.
 
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 from astropy.extern.six import itervalues
 from astropy.extern.six.moves import map
 

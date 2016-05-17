@@ -25,7 +25,8 @@ env:
         # overridden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
         - NUMPY_VERSION=stable
-        - ASTROPY_VERSION=stable
+        #- ASTROPY_VERSION=stable
+        - ASTROPY_VERSION=development
         - SYNPHOT_VERSION=development
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
@@ -52,14 +53,15 @@ matrix:
         # DISABLED FOR NOW
         # Check for sphinx doc build warnings - we do this first because it
         # may run for a long time
-        - python: 2.7
-          env: SETUP_CMD='build_sphinx -w'
+        #- python: 2.7
+        #  env: SETUP_CMD='build_sphinx -w'
 
+        # DISABLED FOR NOW
         # Try Astropy development version
-        - python: 2.7
-          env: ASTROPY_VERSION=development
-        - python: 3.5
-          env: ASTROPY_VERSION=development
+        #- python: 2.7
+        #  env: ASTROPY_VERSION=development
+        #- python: 3.5
+        #  env: ASTROPY_VERSION=development
 
 before_install:
 

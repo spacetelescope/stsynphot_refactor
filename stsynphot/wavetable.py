@@ -4,8 +4,7 @@ which is used by ETC to select an appropriate wavelength set
 for a given observation mode for count rate calculations.
 
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import warnings

@@ -16,8 +16,7 @@ See :ref:`stsynphot-parser` for more details and
     IRAF SYNPHOT extinction names are obsolete and no longer supported.
 
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 # ASTROPY
 from astropy import log
