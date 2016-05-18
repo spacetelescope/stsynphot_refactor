@@ -41,6 +41,7 @@ env:
         #- SETUP_CMD='egg_info'
         # Try all python versions with the latest numpy
         - SETUP_CMD='test'
+        #- SETUP_CMD='test --remote-data'
 
 matrix:
     include:
@@ -99,6 +100,7 @@ install:
     - if [[ $SYNPHOT_VERSION == development ]]; then pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot_refactor; fi
 
 script:
+    #- if [[ $SETUP_CMD == 'test --remote-data' ]]; then export PYSYN_CDBS="ftp://ftp.stsci.edu/cdbs/"; fi
     - python setup.py $SETUP_CMD
 
 after_success:

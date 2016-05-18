@@ -10,7 +10,7 @@ import numpy as np
 
 # ASTROPY
 from astropy import units as u
-from astropy.tests.helper import pytest
+from astropy.tests.helper import pytest, remote_data
 from astropy.utils.data import get_pkg_data_filename
 
 # SYNPHOT
@@ -27,6 +27,7 @@ CP_FILE = get_pkg_data_filename('data/tables_tmc.fits')
 TH_FILE = get_pkg_data_filename('data/tables_tmt.fits')
 
 
+@remote_data
 class TestComponent(object):
     """Test optical component."""
     def setup_class(self):
@@ -60,6 +61,7 @@ class TestComponent(object):
         assert c.throughput is None
 
 
+@remote_data
 class TestThermalComponent(object):
     """Test thermal component."""
     def setup_class(self):
@@ -97,6 +99,7 @@ class TestThermalComponent(object):
 
 class TestProcessGraphTable(object):
     """Test graph table processing logic."""
+    @remote_data
     def test_default(self):
         gt, gtname, area = observationmode._process_graphtable(None)
         assert gtname.endswith('tmg.fits')  # Latest from CDBS
@@ -114,6 +117,7 @@ class TestProcessGraphTable(object):
         assert area2 == area
 
 
+@remote_data
 class TestObservationMode(object):
     """Test observation mode."""
     def setup_class(self):
@@ -196,6 +200,7 @@ class TestObservationMode(object):
              8.58820308e-09], rtol=1e-6)
 
 
+@remote_data
 class TestThermalObservationMode(object):
     """Test thermal observation mode.
 

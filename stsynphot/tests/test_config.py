@@ -9,7 +9,7 @@ import os
 import numpy as np
 
 # ASTROPY
-from astropy.tests.helper import pytest
+from astropy.tests.helper import pytest, remote_data
 
 # SYNPHOT
 from synphot.config import conf as synconf
@@ -19,15 +19,20 @@ from synphot.utils import generate_wavelengths
 from .. import config
 
 
-def test_overwrite_synphot():
+class TestOverwriteSynphot(object):
     """Test if overwriting ``synphot`` defaults is successful."""
+    def setup_class(self):
+        # For some reason, this does not automatically execute during testing.
+        config._overwrite_synphot_config(config.conf.rootdir)
 
-    # For some reason, this does not automatically execute during testing.
-    config._overwrite_synphot_config(config.conf.rootdir)
+        self.vegafile = synconf.vega_file
 
-    vegafile = synconf.vega_file
-    assert vegafile.startswith(config.conf.rootdir)
-    assert os.path.isfile(vegafile)
+    def test_dirname(self):
+        assert self.vegafile.startswith(config.conf.rootdir)
+
+    @remote_data
+    def test_isfile(self):
+        assert os.path.isfile(self.vegafile)
 
 
 class TestConfigChanges(object):
