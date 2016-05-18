@@ -13,15 +13,12 @@ from __future__ import absolute_import, division, print_function
 import os
 
 # ASTROPY
-#from astropy.modeling import models
 from astropy.tests.helper import pytest
-
-# STSCI
-from jwst_lib.modeling import models
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
-from synphot.models import ConstFlux1D, Empirical1D, PowerLawFlux1D
+from synphot.models import (Box1D, ConstFlux1D, Empirical1D, Gaussian1D,
+                            PowerLawFlux1D)
 from synphot.reddening import ExtinctionCurve
 from synphot.spectrum import SourceSpectrum, SpectralElement
 
@@ -35,10 +32,10 @@ from ..config import conf
     [('unit(1, flam)', SourceSpectrum, ConstFlux1D),
      ('bb(5000)', SourceSpectrum, None),
      ('pl(5000, 1, flam)', SourceSpectrum, PowerLawFlux1D),
-     ('box(5000, 1)', SpectralElement, models.Box1D),
+     ('box(5000, 1)', SpectralElement, Box1D),
      ('spec(crcalspec$alpha_lyr_stis_007.fits)', SourceSpectrum, Empirical1D),
      ('band(v)', spectrum.ObservationSpectralElement, Empirical1D),
-     ('em(5000, 25, 1, flam)', SourceSpectrum, models.Gaussian1D),
+     ('em(5000, 25, 1, flam)', SourceSpectrum, Gaussian1D),
      ('icat(k93, 5000, 0.5, 0)', SourceSpectrum, None),
      ('ebmvx(0.3, mwavg)', ExtinctionCurve, Empirical1D),
      ('rn(crcalspec$gd71_mod_005.fits, box(5000, 10), 17, vegamag)',

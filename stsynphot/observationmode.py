@@ -12,8 +12,8 @@ import numpy as np
 # ASTROPY
 from astropy import log
 from astropy import units as u
+from astropy.utils.decorators import lazyproperty
 from astropy.utils.exceptions import AstropyUserWarning
-from astropy.utils.misc import lazyproperty
 
 # SYNPHOT
 try:

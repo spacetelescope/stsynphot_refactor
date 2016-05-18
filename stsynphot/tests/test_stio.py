@@ -63,8 +63,8 @@ class TestGetLatestFile(object):
     @remote_data
     def test_ftp(self):
         """Remote FTP path."""
-        template = 'ftp://ftp.stsci.edu/cdbs/mtab/n*tmg.fits'
-        ans = 'ftp://ftp.stsci.edu/cdbs/mtab/n9i1408hm_tmg.fits'
+        template = 'ftp://ftp.stsci.edu/cdbs/mtab/OLD_FILES/n*tmg.fits'
+        ans = 'ftp://ftp.stsci.edu/cdbs/mtab/OLD_FILES/n9i1408hm_tmg.fits'
         filename = stio.get_latest_file(template, raise_error=True)
         assert filename == ans
 

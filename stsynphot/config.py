@@ -17,7 +17,8 @@ from astropy.extern.six.moves import map
 # STDLIB
 import os
 
-# ASTROPY
+# THIRD-PARTY
+import numpy as np
 from astropy import log
 from astropy.config import ConfigNamespace, ConfigItem
 
@@ -44,9 +45,6 @@ class Conf(ConfigNamespace):
         os.environ.get('PYSYN_CDBS', '/grp/hst/cdbs/'),
         'CDBS data root directory')
 
-    # Override SYNPHOT configuration
-    _overwrite_synphot_config(rootdir)
-
     # Graph, optical component, and thermal component tables
     graphtable = ConfigItem('mtab$*_tmg.fits', 'Graph table')
     comptable = ConfigItem('mtab$*_tmc.fits', 'Component table')
@@ -54,7 +52,8 @@ class Conf(ConfigNamespace):
 
     # Default wavelength in Angstrom and its description
     waveset_array = ConfigItem(
-        _wave.tolist(), 'Default wavelength set in Angstrom', 'float_list')
+        _wave.value.tolist(),
+        'Default wavelength set in Angstrom', 'float_list')
     waveset = ConfigItem(_wave_str, 'Default wavelength set description')
 
     # Telescope primary mirror collecting area in cm^2
@@ -81,9 +80,6 @@ class Conf(ConfigNamespace):
     del _wave_str
 
 
-conf = Conf()
-
-
 def _get_synphot_cfgitems():
     """Iterator for ``synphot`` configuration items."""
     for c in itervalues(synconf.__dict__):
@@ -107,6 +103,12 @@ def _overwrite_synphot_config(root):
 
         subdir = subdir_keys[i[0]]
         cfgitem.set(os.path.join(root, subdir, fname))
+
+
+conf = Conf()
+
+# Override SYNPHOT configuration
+_overwrite_synphot_config(conf.rootdir)
 
 
 def _get_ref_cfgitems():

@@ -14,12 +14,9 @@ import numpy as np
 # ASTROPY
 from astropy import units as u
 from astropy.io import fits
-#from astropy.modeling import models
-from astropy.tests.helper import pytest
+from astropy.modeling.models import Const1D
+from astropy.tests.helper import pytest, remote_data
 from astropy.utils.data import get_pkg_data_filename
-
-# STSCI
-from jwst_lib.modeling import models
 
 # SYNPHOT
 from synphot import units
@@ -269,7 +266,7 @@ class TestObservationSpectralElement(object):
         """Spectrum without obsmode."""
         with pytest.raises(synexceptions.SynphotError):
             obs = spectrum.ObservationSpectralElement(
-                models.Const1D, amplitude=1)
+                Const1D, amplitude=1)
 
     def test_write_fits(self):
         outfile = os.path.join(self.outdir, 'outspec1.fits')
@@ -299,6 +296,7 @@ class TestObservationSpectralElement(object):
         shutil.rmtree(self.outdir)
 
 
+@remote_data
 class TestEbmvx(object):
     """Test extinction curve and related cache."""
     def setup_class(self):

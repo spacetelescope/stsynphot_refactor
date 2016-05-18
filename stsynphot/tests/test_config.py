@@ -23,7 +23,7 @@ def test_overwrite_synphot():
     """Test if overwriting ``synphot`` defaults is successful."""
 
     # For some reason, this does not automatically execute during testing.
-    config._overwrite_synphot_config()
+    config._overwrite_synphot_config(config.conf.rootdir)
 
     vegafile = synconf.vega_file
     assert vegafile.startswith(config.conf.rootdir)
@@ -51,7 +51,7 @@ class TestConfigChanges(object):
 
     def test_waveset(self):
         w = generate_wavelengths(minwave=3000, maxwave=5000, num=100, log=False)
-        config.conf.waveset_array = w[0].tolist()
+        config.conf.waveset_array = w[0].value.tolist()
         config.conf.waveset = w[1]
         np.testing.assert_allclose(
             [config.conf.waveset_array[0], config.conf.waveset_array[-1]],
