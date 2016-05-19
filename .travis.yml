@@ -40,8 +40,8 @@ env:
         # Make sure that egg_info works without dependencies
         #- SETUP_CMD='egg_info'
         # Try all python versions with the latest numpy
-        - SETUP_CMD='test'
-        #- SETUP_CMD='test --remote-data'
+        #- SETUP_CMD='test'
+        - SETUP_CMD='test --remote-data'
 
 matrix:
     include:
@@ -87,6 +87,10 @@ install:
     - git clone git://github.com/astropy/ci-helpers.git
     - source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh
 
+    # Upgrade to the latest version of pip to avoid it displaying warnings
+    # about it being out of date.
+    - pip install --upgrade pip
+
     # As described above, using ci-helpers, you should be able to set up an
     # environment with dependencies installed using conda and pip, but in some
     # cases this may not provide enough flexibility in how to install a
@@ -100,7 +104,7 @@ install:
     - if [[ $SYNPHOT_VERSION == development ]]; then pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot_refactor; fi
 
 script:
-    #- if [[ $SETUP_CMD == 'test --remote-data' ]]; then export PYSYN_CDBS="ftp://ftp.stsci.edu/cdbs/"; fi
+    - if [[ $SETUP_CMD == 'test --remote-data' ]]; then export PYSYN_CDBS="ftp://ftp.stsci.edu/cdbs/"; fi
     - python setup.py $SETUP_CMD
 
 after_success:
