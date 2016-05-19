@@ -43,7 +43,7 @@ class TestIRAFConvert(object):
 
     def test_irafconvert_data(self):
         out_str = stio.irafconvert('synphot$detectors.dat')
-        assert out_str.endswith('data/detectors.dat')
+        assert out_str.endswith(os.path.join('data', 'detectors.dat'))
 
     def test_exceptions(self):
         with pytest.raises(TypeError):

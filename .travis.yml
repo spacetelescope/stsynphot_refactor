@@ -40,8 +40,8 @@ env:
         # Make sure that egg_info works without dependencies
         #- SETUP_CMD='egg_info'
         # Try all python versions with the latest numpy
-        #- SETUP_CMD='test'
-        - SETUP_CMD='test --remote-data'
+        - SETUP_CMD='test'
+        #- SETUP_CMD='test --remote-data'
 
 matrix:
     include:
