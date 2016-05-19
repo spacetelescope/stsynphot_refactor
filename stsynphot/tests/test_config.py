@@ -32,7 +32,11 @@ class TestOverwriteSynphot(object):
 
     @remote_data
     def test_isfile(self):
-        assert os.path.isfile(self.vegafile)
+        if self.vegafile.startswith('ftp'):
+            # This is the case on Travis CI
+            pytest.xfail('Cannot test this over FTP')
+        else:
+            assert os.path.isfile(self.vegafile)
 
 
 class TestConfigChanges(object):
