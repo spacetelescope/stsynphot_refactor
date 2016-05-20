@@ -39,7 +39,7 @@ install:
 
     # Upgrade to the latest version of pip to avoid it displaying warnings
     # about it being out of date.
-    - "python -m pip install --upgrade pip"
+    - "%CMD_IN_ENV% pip install --upgrade --no-deps pip"
 
     # SYNPHOT (DEV)
     - "pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot_refactor"
