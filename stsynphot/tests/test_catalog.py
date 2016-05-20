@@ -1,14 +1,13 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Test catalog.py module."""
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 # THIRD-PARTY
 import numpy as np
 
 # ASTROPY
 from astropy import units as u
-from astropy.tests.helper import pytest
+from astropy.tests.helper import pytest, remote_data
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
@@ -18,6 +17,7 @@ from synphot import units
 from .. import catalog, exceptions
 
 
+@remote_data
 def test_grid_to_spec():
     """Test creating spectrum from grid, and related cache."""
     sp = catalog.grid_to_spec('k93', 6440, 0, 4.3)
@@ -74,6 +74,7 @@ def test_grid_to_spec():
     assert catalog._CACHE == {}
 
 
+@remote_data
 @pytest.mark.parametrize(
     ('t', 'm', 'g'),
     [(3499, 0, 4.3),

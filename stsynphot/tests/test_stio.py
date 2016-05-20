@@ -6,7 +6,7 @@
     ``read_*()`` functions are tested in other modules where they are used.
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os
@@ -43,7 +43,7 @@ class TestIRAFConvert(object):
 
     def test_irafconvert_data(self):
         out_str = stio.irafconvert('synphot$detectors.dat')
-        assert out_str.endswith('data/detectors.dat')
+        assert out_str.endswith(os.path.join('data', 'detectors.dat'))
 
     def test_exceptions(self):
         with pytest.raises(TypeError):
@@ -63,8 +63,8 @@ class TestGetLatestFile(object):
     @remote_data
     def test_ftp(self):
         """Remote FTP path."""
-        template = 'ftp://ftp.stsci.edu/cdbs/mtab/n*tmg.fits'
-        ans = 'ftp://ftp.stsci.edu/cdbs/mtab/n9i1408hm_tmg.fits'
+        template = 'ftp://ftp.stsci.edu/cdbs/mtab/OLD_FILES/n*tmg.fits'
+        ans = 'ftp://ftp.stsci.edu/cdbs/mtab/OLD_FILES/n9i1408hm_tmg.fits'
         filename = stio.get_latest_file(template, raise_error=True)
         assert filename == ans
 

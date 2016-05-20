@@ -1,7 +1,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Module to handle observations based on observation modes."""
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import re
@@ -13,8 +12,8 @@ import numpy as np
 # ASTROPY
 from astropy import log
 from astropy import units as u
+from astropy.utils.decorators import lazyproperty
 from astropy.utils.exceptions import AstropyUserWarning
-from astropy.utils.misc import lazyproperty
 
 # SYNPHOT
 try:

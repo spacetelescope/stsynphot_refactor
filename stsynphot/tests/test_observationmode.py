@@ -1,7 +1,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Test observationmode.py module."""
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os
@@ -11,7 +10,7 @@ import numpy as np
 
 # ASTROPY
 from astropy import units as u
-from astropy.tests.helper import pytest
+from astropy.tests.helper import pytest, remote_data
 from astropy.utils.data import get_pkg_data_filename
 
 # SYNPHOT
@@ -28,6 +27,7 @@ CP_FILE = get_pkg_data_filename('data/tables_tmc.fits')
 TH_FILE = get_pkg_data_filename('data/tables_tmt.fits')
 
 
+@remote_data
 class TestComponent(object):
     """Test optical component."""
     def setup_class(self):
@@ -61,6 +61,7 @@ class TestComponent(object):
         assert c.throughput is None
 
 
+@remote_data
 class TestThermalComponent(object):
     """Test thermal component."""
     def setup_class(self):
@@ -98,6 +99,7 @@ class TestThermalComponent(object):
 
 class TestProcessGraphTable(object):
     """Test graph table processing logic."""
+    @remote_data
     def test_default(self):
         gt, gtname, area = observationmode._process_graphtable(None)
         assert gtname.endswith('tmg.fits')  # Latest from CDBS
@@ -115,6 +117,7 @@ class TestProcessGraphTable(object):
         assert area2 == area
 
 
+@remote_data
 class TestObservationMode(object):
     """Test observation mode."""
     def setup_class(self):
@@ -192,11 +195,12 @@ class TestObservationMode(object):
         w = [6898, 7192, 7486, 7780, 8630, 11190, 13790, 15670, 17954.90234375]
         np.testing.assert_allclose(
             thsp(w).value,
-            [0, 8.38847197e-29, 2.04416858e-27, 3.86172895e-26, 1.61682936e-21,
-             2.49276497e-15, 2.81005993e-11, 1.82601857e-08, 8.58820308e-09],
-            rtol=1e-6)
+            [2.556017e-30, 8.38847197e-29, 2.04416858e-27, 3.86172895e-26,
+             1.61682936e-21, 2.49276497e-15, 2.81005993e-11, 1.82601857e-08,
+             8.58820308e-09], rtol=1e-6)
 
 
+@remote_data
 class TestThermalObservationMode(object):
     """Test thermal observation mode.
 

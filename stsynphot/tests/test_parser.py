@@ -7,22 +7,18 @@
     objects. Quality of the data is tested in other modules.
 
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os
 
 # ASTROPY
-#from astropy.modeling import models
-from astropy.tests.helper import pytest
-
-# STSCI
-from jwst_lib.modeling import models
+from astropy.tests.helper import pytest, remote_data
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
-from synphot.models import ConstFlux1D, Empirical1D, PowerLawFlux1D
+from synphot.models import (Box1D, ConstFlux1D, Empirical1D, Gaussian1D,
+                            PowerLawFlux1D)
 from synphot.reddening import ExtinctionCurve
 from synphot.spectrum import SourceSpectrum, SpectralElement
 
@@ -31,33 +27,7 @@ from .. import catalog, exceptions, observationmode, spectrum, spparser
 from ..config import conf
 
 
-@pytest.mark.parametrize(
-    ('input_str', 'ans_cls', 'ans_model'),
-    [('unit(1, flam)', SourceSpectrum, ConstFlux1D),
-     ('bb(5000)', SourceSpectrum, None),
-     ('pl(5000, 1, flam)', SourceSpectrum, PowerLawFlux1D),
-     ('box(5000, 1)', SpectralElement, models.Box1D),
-     ('spec(crcalspec$alpha_lyr_stis_007.fits)', SourceSpectrum, Empirical1D),
-     ('band(v)', spectrum.ObservationSpectralElement, Empirical1D),
-     ('em(5000, 25, 1, flam)', SourceSpectrum, models.Gaussian1D),
-     ('icat(k93, 5000, 0.5, 0)', SourceSpectrum, None),
-     ('ebmvx(0.3, mwavg)', ExtinctionCurve, Empirical1D),
-     ('rn(crcalspec$gd71_mod_005.fits, box(5000, 10), 17, vegamag)',
-      SourceSpectrum, None),
-     ('rn(bb(5000), box(5000, 10), 17, abmag)', SourceSpectrum, None),
-     ('rn(icat(k93, 5000, 0.5, 0), cracscomp$acs_f814w_hrc_006_syn.fits, '
-      '17, obmag)', SourceSpectrum, None),
-     ('rn(pl(5000, 1, flam), band(v), 1, photlam)',
-      SourceSpectrum, None),
-     ('rn(unit(1,flam), band(acs, wfc1, fr388n#3881.0), 10, abmag)',
-      SourceSpectrum, None),
-     ('rn(crcalspec$bd_75d325_stis_002.fits, band(u), 9.5, vegamag) * '
-      'band(fos, blue, 4.3, g160l)', SourceSpectrum, None),
-     ('z(null, 0.1)', SourceSpectrum, ConstFlux1D),
-     ('z(crcalspec$alpha_lyr_stis_007.fits, 0.1)', SourceSpectrum, None),
-     ('z(em(5000, 25, 1, flam), 0.1)', SourceSpectrum, None)])
-def test_single_functioncall(input_str, ans_cls, ans_model):
-    """Test parser function calls."""
+def _single_functioncall(input_str, ans_cls, ans_model):
     sp = spparser.parse_spec(input_str)
     assert isinstance(sp, ans_cls)
 
@@ -66,6 +36,45 @@ def test_single_functioncall(input_str, ans_cls, ans_model):
         assert isinstance(sp.model, ans_model)
 
 
+@pytest.mark.parametrize(
+    ('input_str', 'ans_cls', 'ans_model'),
+    [('unit(1, flam)', SourceSpectrum, ConstFlux1D),
+     ('bb(5000)', SourceSpectrum, None),
+     ('pl(5000, 1, flam)', SourceSpectrum, PowerLawFlux1D),
+     ('box(5000, 1)', SpectralElement, Box1D),
+     ('em(5000, 25, 1, flam)', SourceSpectrum, Gaussian1D),
+     ('rn(bb(5000), box(5000, 10), 17, abmag)', SourceSpectrum, None),
+     ('z(null, 0.1)', SourceSpectrum, ConstFlux1D),
+     ('z(em(5000, 25, 1, flam), 0.1)', SourceSpectrum, None)])
+def test_single_functioncall(input_str, ans_cls, ans_model):
+    """Test parser function calls."""
+    _single_functioncall(input_str, ans_cls, ans_model)
+
+
+@remote_data
+@pytest.mark.parametrize(
+    ('input_str', 'ans_cls', 'ans_model'),
+    [('spec(crcalspec$alpha_lyr_stis_007.fits)', SourceSpectrum, Empirical1D),
+     ('band(v)', spectrum.ObservationSpectralElement, Empirical1D),
+     ('icat(k93, 5000, 0.5, 0)', SourceSpectrum, None),
+     ('ebmvx(0.3, mwavg)', ExtinctionCurve, Empirical1D),
+     ('rn(crcalspec$gd71_mod_005.fits, box(5000, 10), 17, vegamag)',
+      SourceSpectrum, None),
+     ('rn(icat(k93, 5000, 0.5, 0), cracscomp$acs_f814w_hrc_006_syn.fits, '
+      '17, obmag)', SourceSpectrum, None),
+     ('rn(pl(5000, 1, flam), band(v), 1, photlam)',
+      SourceSpectrum, None),
+     ('rn(unit(1,flam), band(acs, wfc1, fr388n#3881.0), 10, abmag)',
+      SourceSpectrum, None),
+     ('rn(crcalspec$bd_75d325_stis_002.fits, band(u), 9.5, vegamag) * '
+      'band(fos, blue, 4.3, g160l)', SourceSpectrum, None),
+     ('z(crcalspec$alpha_lyr_stis_007.fits, 0.1)', SourceSpectrum, None)])
+def test_single_functioncall_remote(input_str, ans_cls, ans_model):
+    """Test parser function calls with remote data."""
+    _single_functioncall(input_str, ans_cls, ans_model)
+
+
+@remote_data
 class TestRenormPartialOverlap(object):
     """Test handling of ``rn(...)`` syntax for partial overlap."""
     def setup_class(self):
@@ -86,6 +95,7 @@ class TestRenormPartialOverlap(object):
             sp = spparser.parse_spec(input_str)
 
 
+@remote_data
 class TestEnvVar(object):
     """Test syntax using PYSYN_CDBS environment variable."""
     def setup_class(self):

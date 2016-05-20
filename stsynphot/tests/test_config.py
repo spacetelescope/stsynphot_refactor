@@ -1,7 +1,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Test config.py module."""
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os
@@ -10,7 +9,7 @@ import os
 import numpy as np
 
 # ASTROPY
-from astropy.tests.helper import pytest
+from astropy.tests.helper import pytest, remote_data
 
 # SYNPHOT
 from synphot.config import conf as synconf
@@ -20,15 +19,24 @@ from synphot.utils import generate_wavelengths
 from .. import config
 
 
-def test_overwrite_synphot():
+class TestOverwriteSynphot(object):
     """Test if overwriting ``synphot`` defaults is successful."""
+    def setup_class(self):
+        # For some reason, this does not automatically execute during testing.
+        config.overwrite_synphot_config(config.conf.rootdir)
 
-    # For some reason, this does not automatically execute during testing.
-    config._overwrite_synphot_config()
+        self.vegafile = synconf.vega_file
 
-    vegafile = synconf.vega_file
-    assert vegafile.startswith(config.conf.rootdir)
-    assert os.path.isfile(vegafile)
+    def test_dirname(self):
+        assert self.vegafile.startswith(config.conf.rootdir)
+
+    @remote_data
+    def test_isfile(self):
+        if self.vegafile.startswith('ftp'):
+            # This is the case on Travis CI
+            pytest.xfail('Cannot test this over FTP')
+        else:
+            assert os.path.isfile(self.vegafile)
 
 
 class TestConfigChanges(object):
@@ -52,7 +60,7 @@ class TestConfigChanges(object):
 
     def test_waveset(self):
         w = generate_wavelengths(minwave=3000, maxwave=5000, num=100, log=False)
-        config.conf.waveset_array = w[0].tolist()
+        config.conf.waveset_array = w[0].value.tolist()
         config.conf.waveset = w[1]
         np.testing.assert_allclose(
             [config.conf.waveset_array[0], config.conf.waveset_array[-1]],

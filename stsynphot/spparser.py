@@ -16,26 +16,18 @@ See :ref:`stsynphot-parser` for more details and
     IRAF SYNPHOT extinction names are obsolete and no longer supported.
 
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
+from astropy.extern import six
 
 # ASTROPY
 from astropy import log
 from astropy import units as u
-from astropy.extern import six
-#from astropy.modeling import models
-
-# STSCI
-try:
-    from jwst_lib.modeling import models
-except ImportError:  # This is so RTD would build successfully
-    pass
 
 # SYNPHOT
 try:
     from synphot import exceptions as synexceptions
     from synphot import units
-    from synphot.models import BlackBody1D, ConstFlux1D, PowerLawFlux1D
+    from synphot.models import BlackBody1D, Box1D, ConstFlux1D, PowerLawFlux1D
     from synphot.spectrum import SourceSpectrum, SpectralElement
 except ImportError:  # This is so RTD would build successfully
     pass
@@ -348,7 +340,7 @@ class Interpreter(GenericASTMatcher):
             # Box throughput
             elif fname == 'box':
                 tree.value = SpectralElement(
-                    models.Box1D, amplitude=1, x_0=args[0], width=args[1],
+                    Box1D, amplitude=1, x_0=args[0], width=args[1],
                     metadata=metadata)
 
             # Source spectrum from file

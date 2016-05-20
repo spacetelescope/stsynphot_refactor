@@ -1,7 +1,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Test spectrum.py module."""
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os
@@ -15,12 +14,9 @@ import numpy as np
 # ASTROPY
 from astropy import units as u
 from astropy.io import fits
-#from astropy.modeling import models
-from astropy.tests.helper import pytest
+from astropy.modeling.models import Const1D
+from astropy.tests.helper import pytest, remote_data
 from astropy.utils.data import get_pkg_data_filename
-
-# STSCI
-from jwst_lib.modeling import models
 
 # SYNPHOT
 from synphot import units
@@ -40,6 +36,7 @@ CP_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmc.fits'))
 TH_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmt.fits'))
 
 
+@remote_data
 class TestInterpolateSpectrum(object):
     """Test spectrum interpolation."""
     def setup_class(self):
@@ -155,6 +152,7 @@ class TestInterpolateSpectrum(object):
             sp = spectrum.interpolate_spectral_element(self.fname_acs, -5)
 
 
+@remote_data
 class TestObservationSpectralElement(object):
     """Test ``ObservationSpectralElement`` and ``band()``."""
     def setup_class(self):
@@ -270,7 +268,7 @@ class TestObservationSpectralElement(object):
         """Spectrum without obsmode."""
         with pytest.raises(synexceptions.SynphotError):
             obs = spectrum.ObservationSpectralElement(
-                models.Const1D, amplitude=1)
+                Const1D, amplitude=1)
 
     def test_write_fits(self):
         outfile = os.path.join(self.outdir, 'outspec1.fits')
@@ -300,6 +298,7 @@ class TestObservationSpectralElement(object):
         shutil.rmtree(self.outdir)
 
 
+@remote_data
 class TestEbmvx(object):
     """Test extinction curve and related cache."""
     def setup_class(self):
@@ -321,12 +320,16 @@ class TestEbmvx(object):
         assert spectrum._REDLAWS == {}
 
 
-def test_vega():
+def test_vega_dummy():
     """Test that Vega spectrum is loaded properly."""
     # Dummy
     spectrum.load_vega(vegafile='dummyfile.fits', encoding='binary')
     assert spectrum.Vega is None
 
+
+@remote_data
+def test_vega_default():
+    """Test that Vega spectrum is loaded properly."""
     # Default
     spectrum.load_vega(encoding='binary')
     assert 'Vega' in spectrum.Vega.metadata['expr']

@@ -25,7 +25,8 @@ env:
         # overridden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
         - NUMPY_VERSION=stable
-        - ASTROPY_VERSION=stable
+        #- ASTROPY_VERSION=stable
+        - ASTROPY_VERSION=development
         - SYNPHOT_VERSION=development
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
@@ -40,6 +41,7 @@ env:
         #- SETUP_CMD='egg_info'
         # Try all python versions with the latest numpy
         - SETUP_CMD='test'
+        #- SETUP_CMD='test --remote-data'
 
 matrix:
     include:
@@ -52,14 +54,15 @@ matrix:
         # DISABLED FOR NOW
         # Check for sphinx doc build warnings - we do this first because it
         # may run for a long time
-        - python: 2.7
-          env: SETUP_CMD='build_sphinx -w'
+        #- python: 2.7
+        #  env: SETUP_CMD='build_sphinx -w'
 
+        # DISABLED FOR NOW
         # Try Astropy development version
-        - python: 2.7
-          env: ASTROPY_VERSION=development
-        - python: 3.5
-          env: ASTROPY_VERSION=development
+        #- python: 2.7
+        #  env: ASTROPY_VERSION=development
+        #- python: 3.5
+        #  env: ASTROPY_VERSION=development
 
 before_install:
 
@@ -84,6 +87,10 @@ install:
     - git clone git://github.com/astropy/ci-helpers.git
     - source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh
 
+    # Upgrade to the latest version of pip to avoid it displaying warnings
+    # about it being out of date.
+    - pip install --upgrade pip
+
     # As described above, using ci-helpers, you should be able to set up an
     # environment with dependencies installed using conda and pip, but in some
     # cases this may not provide enough flexibility in how to install a
@@ -94,9 +101,13 @@ install:
     # other dependencies.
 
     # SYNPHOT
-    - if [[ $SYNPHOT_VERSION == development ]]; then pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot_refactor --use-mirrors; fi
+    - if [[ $SYNPHOT_VERSION == development ]]; then pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot_refactor; fi
 
 script:
+    # Only needed for remote data.
+    # Without this, there will be a warning but does not affect tests.
+    - if [[ $SETUP_CMD == 'test --remote-data' ]]; then export PYSYN_CDBS="ftp://ftp.stsci.edu/cdbs/"; fi
+
     - python setup.py $SETUP_CMD
 
 after_success:
