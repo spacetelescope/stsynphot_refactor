@@ -104,7 +104,7 @@ install:
     - if [[ $SYNPHOT_VERSION == development ]]; then pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot_refactor; fi
 
 script:
-    - if [[ $SETUP_CMD == 'test --remote-data' ]]; then export PYSYN_CDBS="ftp://ftp.stsci.edu/cdbs/"; fi
+    - export PYSYN_CDBS="ftp://ftp.stsci.edu/cdbs/"
     - python setup.py $SETUP_CMD
 
 after_success:

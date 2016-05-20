@@ -48,4 +48,5 @@ install:
 build: false
 
 test_script:
+    - "SET PYSYN_CDBS=ftp://ftp.stsci.edu/cdbs/"
     - "%CMD_IN_ENV% python setup.py test"
