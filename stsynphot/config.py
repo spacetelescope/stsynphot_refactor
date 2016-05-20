@@ -29,7 +29,7 @@ try:
 except ImportError:  # This is so RTD would build successfully
     pass
 
-__all__ = ['conf', 'getref', 'showref']
+__all__ = ['conf', 'getref', 'showref', 'overwrite_synphot_config']
 
 
 class Conf(ConfigNamespace):
@@ -87,12 +87,23 @@ def _get_synphot_cfgitems():
             yield c
 
 
-def _overwrite_synphot_config(root):
+def overwrite_synphot_config(root):
     """Silently overwrite ``synphot`` configurable items to point to
     given root directory.
 
+    Parameters
+    ----------
+    root : str
+        Root directory name.
+
     """
-    subdir_keys = ['calspec', 'extinction', 'comp/nonhst']
+    subdir_keys = ['calspec', 'extinction', 'nonhst']
+
+    # Need this for Windows support
+    if root.startswith('http') or root.startswith('ftp'):
+        sep = '/'
+    else:
+        sep = os.sep  # Can be / or \
 
     for cfgitem in _get_synphot_cfgitems():
         path, fname = os.path.split(cfgitem())
@@ -102,13 +113,19 @@ def _overwrite_synphot_config(root):
             continue
 
         subdir = subdir_keys[i[0]]
-        cfgitem.set(os.path.join(root, subdir, fname))
+
+        if subdir == 'nonhst':
+            cfgval = sep.join([root, 'comp', subdir, fname])
+        else:
+            cfgval = sep.join([root, subdir, fname])
+
+        cfgitem.set(cfgval)
 
 
 conf = Conf()
 
 # Override SYNPHOT configuration
-_overwrite_synphot_config(conf.rootdir)
+overwrite_synphot_config(conf.rootdir)
 
 
 def _get_ref_cfgitems():

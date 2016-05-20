@@ -23,7 +23,7 @@ class TestOverwriteSynphot(object):
     """Test if overwriting ``synphot`` defaults is successful."""
     def setup_class(self):
         # For some reason, this does not automatically execute during testing.
-        config._overwrite_synphot_config(config.conf.rootdir)
+        config.overwrite_synphot_config(config.conf.rootdir)
 
         self.vegafile = synconf.vega_file
 
