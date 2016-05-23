@@ -27,7 +27,8 @@ from astropy import units as u
 try:
     from synphot import exceptions as synexceptions
     from synphot import units
-    from synphot.models import BlackBody1D, Box1D, ConstFlux1D, PowerLawFlux1D
+    from synphot.models import (BlackBodyNorm1D, Box1D, ConstFlux1D,
+                                GaussianFlux1D, PowerLawFlux1D)
     from synphot.spectrum import SourceSpectrum, SpectralElement
 except ImportError:  # This is so RTD would build successfully
     pass
@@ -315,14 +316,15 @@ class Interpreter(GenericASTMatcher):
                 try:
                     tree.value = SourceSpectrum(
                         ConstFlux1D, amplitude=u.Quantity(args[0], args[1]),
-                        metadata=metadata)
+                        meta=metadata)
                 except NotImplementedError as e:
                     log.error(str(e))
                     self.error(fname)
 
             # Black body
             elif fname == 'bb':
-                tree.value = SourceSpectrum.from_blackbody(args[0])
+                tree.value = SourceSpectrum(
+                    BlackBodyNorm1D, temperature=args[0])
 
             # Power law
             elif fname == 'pl':
@@ -332,7 +334,7 @@ class Interpreter(GenericASTMatcher):
                 try:
                     tree.value = SourceSpectrum(
                         PowerLawFlux1D, amplitude=u.Quantity(1, args[2]),
-                        x_0=args[0], alpha=-args[1], metadata=metadata)
+                        x_0=args[0], alpha=-args[1], meta=metadata)
                 except (synexceptions.SynphotError, NotImplementedError) as e:
                     log.error(str(e))
                     self.error(fname)
@@ -341,26 +343,28 @@ class Interpreter(GenericASTMatcher):
             elif fname == 'box':
                 tree.value = SpectralElement(
                     Box1D, amplitude=1, x_0=args[0], width=args[1],
-                    metadata=metadata)
+                    meta=metadata)
 
             # Source spectrum from file
             elif fname == 'spec':
                 tree.value = SourceSpectrum.from_file(irafconvert(args[0]))
-                tree.value.metadata.update(metadata)
+                tree.value.meta.update(metadata)
 
             # Passband
             elif fname == 'band':
                 tree.value = spectrum.band(tree[2].svalue)
-                tree.value.metadata.update(metadata)
+                tree.value.meta.update(metadata)
 
             # Gaussian emission line
             elif fname == 'em':
                 if args[3] not in _SYFORMS:
                     log.error('Unrecognized unit: {0}'.format(args[3]))
                     self.error(fname)
-                tree.value = SourceSpectrum.from_gaussian(
-                    u.Quantity(args[2], args[3]), args[0], args[1],
-                    area=conf.area, vegaspec=spectrum.Vega)
+                x0 = args[0]
+                totflux = units.convert_flux(x0, u.Quantity(args[2], args[3]),
+                                             units.PHOTLAM).value
+                tree.value = SourceSpectrum(
+                    GaussianFlux1D, total_flux=totflux, mean=x0, fwhm=args[1])
 
             # Catalog interpolation
             elif fname == 'icat':
@@ -390,10 +394,10 @@ class Interpreter(GenericASTMatcher):
                     tree.value = sp.normalize(
                         rnval, band=bp, area=conf.area, vegaspec=spectrum.Vega,
                         force=True)
-                    tree.value.warnings['force_renorm'] = (
-                        'Renormalization exceeds the limit of the specified '
-                        'passband.')
-                tree.value.metadata.update(metadata)
+                    tree.value.warnings = {
+                        'force_renorm': ('Renormalization exceeds the limit '
+                                         'of the specified passband.')}
+                tree.value.meta.update(metadata)
 
             # Redshift source spectrum (flat spectrum if fails)
             elif fname == 'z':
@@ -409,7 +413,7 @@ class Interpreter(GenericASTMatcher):
                 else:
                     tree.value = SourceSpectrum(ConstFlux1D, amplitude=1)
 
-                tree.value.metadata.update(metadata)
+                tree.value.meta.update(metadata)
 
             # Extinction
             elif fname == 'ebmvx':
@@ -418,7 +422,7 @@ class Interpreter(GenericASTMatcher):
                 except synexceptions.SynphotError as e:
                     log.error(str(e))
                     self.error(fname)
-                tree.value.metadata.update(metadata)
+                tree.value.meta.update(metadata)
 
             # Default
             else:

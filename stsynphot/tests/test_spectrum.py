@@ -63,7 +63,7 @@ class TestInterpolateSpectrum(object):
         np.testing.assert_allclose(
             sp(w).value,
             [0.28, 0.22, 0.20999999, 0.22, 0.22, 0.2, 0.15000001, 0.1, 0.04])
-        assert 'acs_wfc_aper_002_syn.fits#0' in sp.metadata['expr']
+        assert 'acs_wfc_aper_002_syn.fits#0' in sp.meta['expr']
 
     def test_no_interp_has_err_col(self):
         """Test whether the algorithm grabs the correct column
@@ -162,7 +162,7 @@ class TestObservationSpectralElement(object):
         self.sp = SourceSpectrum(ConstFlux1D, amplitude=1*units.FLAM)
 
     def test_attributes(self):
-        assert (str(self.obs.obsmode) == self.obs.metadata['expr'] ==
+        assert (str(self.obs.obsmode) == self.obs.meta['expr'] ==
                 'acs,hrc,f555w')
         assert len(self.obs) == 6
         assert self.obs.area.value == conf.area
@@ -306,7 +306,7 @@ class TestEbmvx(object):
 
     def test_mwavg(self):
         """No check on data quality, which is dependent on reference file."""
-        assert spectrum._REDLAWS['mwavg'].metadata['expr'] == 'mwavg'
+        assert spectrum._REDLAWS['mwavg'].meta['expr'] == 'mwavg'
 
     @pytest.mark.parametrize('m', ['gal3', None])
     def test_dummy(self, m):
@@ -332,4 +332,4 @@ def test_vega_default():
     """Test that Vega spectrum is loaded properly."""
     # Default
     spectrum.load_vega(encoding='binary')
-    assert 'Vega' in spectrum.Vega.metadata['expr']
+    assert 'Vega' in spectrum.Vega.meta['expr']

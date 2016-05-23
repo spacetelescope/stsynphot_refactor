@@ -27,7 +27,7 @@ def test_grid_to_spec():
     w_last_50 = w[-50:]
     y_last_50 = units.convert_flux(w_last_50, sp(w_last_50), units.FLAM)
 
-    assert 'k93' in sp.metadata['expr']
+    assert 'k93' in sp.meta['expr']
     np.testing.assert_allclose(
         w_first_50.value,
         [90.90000153, 93.50000763, 96.09999847, 97.70000458, 99.59999847, 102,
