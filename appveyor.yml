@@ -38,7 +38,7 @@ install:
     - "activate test"
 
     # Upgrade to the latest version of pip
-    - "python -m pip install --upgrade pip"
+    #- "python -m pip install --upgrade pip"
 
     # SYNPHOT (DEV)
     - "pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot_refactor"
