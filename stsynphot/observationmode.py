@@ -391,6 +391,7 @@ class ObservationMode(BaseObservationMode):
                 if not component.empty:
                     product = product * component.throughput
 
+        product.meta['header'] = ''  # Clean up messy header
         return product
 
     @lazyproperty
@@ -416,9 +417,8 @@ class ObservationMode(BaseObservationMode):
         x = self.throughput.waveset
         y = self.throughput(x)
         thru = y.value * x.value * self._constant.value
-        header = {
-            'expr': 'Sensitivity for {0}'.format(self._obsmode)}
-        return SpectralElement(Empirical1D, x=x, y=thru, metadata=header)
+        meta = {'expr': 'Sensitivity for {0}'.format(self._obsmode)}
+        return SpectralElement(Empirical1D, x=x, y=thru, meta=meta)
 
     def thermal_spectrum(self, thermtable=None):
         """Calculate thermal spectrum using
@@ -606,5 +606,5 @@ class ThermalObservationMode(BaseObservationMode):
             if not component.empty:
                 y += component.emissivity.thermal_source()(x).value  # PHOTLAM
 
-        header = {'expr': '{0} ThermalSpectrum'.format(self._obsmode)}
-        return SourceSpectrum(Empirical1D, x=x, y=y, metadata=header)
+        meta = {'expr': '{0} ThermalSpectrum'.format(self._obsmode)}
+        return SourceSpectrum(Empirical1D, x=x, y=y, meta=meta)

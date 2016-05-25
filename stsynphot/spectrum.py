@@ -211,12 +211,10 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
             raise synexceptions.ExtrapolationNotAllowed(
                 'No default throughput for {0}.'.format(parfilename))
 
-    header = {
-        'expr': '{0}#{1:g}'.format(filename, interpval),
-        'warnings': warndict}
-
-    return SpectralElement(
-        Empirical1D, x=u.Quantity(wave0, wave_unit), y=thru, metadata=header)
+    meta = {'expr': '{0}#{1:g}'.format(filename, interpval),
+            'warnings': warndict}
+    return SpectralElement(Empirical1D, x=u.Quantity(wave0, wave_unit), y=thru,
+                           meta=meta)
 
 
 class ObservationSpectralElement(SpectralElement):
@@ -232,7 +230,7 @@ class ObservationSpectralElement(SpectralElement):
 
     Parameters
     ----------
-    modelclass, metadata, kwargs
+    modelclass, kwargs
         See `BaseSpectrum`.
 
     obsmode : `~stsynphot.observationmode.ObservationMode`
@@ -245,7 +243,7 @@ class ObservationSpectralElement(SpectralElement):
 
         super(ObservationSpectralElement, self).__init__(modelclass, **kwargs)
         self._obsmode = obsmode
-        self.metadata['expr'] = str(obsmode)
+        self.meta['expr'] = str(obsmode)
 
         # Check for zero bounds, if applicable
         try:
