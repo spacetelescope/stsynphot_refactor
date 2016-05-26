@@ -77,11 +77,13 @@ def irafconvert(iraf_filename, sep='$'):
 
         * ``synphot`` points to software data directory.
         * ``crrefer`` points to ``stsynphot.config.conf.rootdir``.
-        * Otherwise, decoded based on ``stsynphot.config.conf.irafshortcutfile``
+        * Otherwise, decoded based on
+          ``stsynphot.config.conf.irafshortcutfile``
           that must contain the following named columns:
             #. ``IRAFNAME`` - The shortcut for look-up. If multiple matches
                are found, the first match is used.
-            #. ``RELPATH`` - Path relative to ``stsynphot.config.conf.rootdir``.
+            #. ``RELPATH`` - Path relative to
+               ``stsynphot.config.conf.rootdir``.
 
     If separator is not found, input is returned as-is.
 
@@ -335,15 +337,17 @@ def read_comptable(filename, tab_ext=1):
 
     Example:
 
-    +--------------------+----------------+----------------------------------------+---------------------------+
-    |TIME                |COMPNAME        |FILENAME                                |COMMENT                    |
-    +====================+================+========================================+===========================+
-    |oct 30 2013 15:44:42|acs_blocking1   |cracscomp$acs_blocking1_001_syn.fits    |throughput curve           |
-    +--------------------+----------------+----------------------------------------+---------------------------+
-    |apr 19 2000 12:36:38|wfpc2_polq_par  |crwfpc2comp$wfpc2_polq_par_004_syn.fits |redeliver with new filename|
-    +--------------------+----------------+----------------------------------------+---------------------------+
-    |apr 18 2000 21:02:45|stis_2p4_ech_176|crstiscomp$stis_2p4_ech_176_003_syn.fits|redeliver with new filename|
-    +--------------------+----------------+----------------------------------------+---------------------------+
+    """
+    '\n+--------------------+----------------+----------------------------------------+---------------------------+'  # noqa
+    '\n|TIME                |COMPNAME        |FILENAME                                |COMMENT                    |'  # noqa
+    '\n+====================+================+========================================+===========================+'  # noqa
+    '\n|oct 30 2013 15:44:42|acs_blocking1   |cracscomp$acs_blocking1_001_syn.fits    |throughput curve           |'  # noqa
+    '\n+--------------------+----------------+----------------------------------------+---------------------------+'  # noqa
+    '\n|apr 19 2000 12:36:38|wfpc2_polq_par  |crwfpc2comp$wfpc2_polq_par_004_syn.fits |redeliver with new filename|'  # noqa
+    '\n+--------------------+----------------+----------------------------------------+---------------------------+'  # noqa
+    '\n|apr 18 2000 21:02:45|stis_2p4_ech_176|crstiscomp$stis_2p4_ech_176_003_syn.fits|redeliver with new filename|'  # noqa
+    '\n+--------------------+----------------+----------------------------------------+---------------------------+'  # noqa
+    """
 
     Parameters
     ----------
@@ -402,7 +406,8 @@ def read_catalog(filename, tab_ext=1):
         Data table.
 
     """
-    return _read_table(filename, tab_ext, {'INDEX': np.str, 'FILENAME': np.str})
+    return _read_table(filename, tab_ext, {'INDEX': np.str,
+                                           'FILENAME': np.str})
 
 
 def read_wavecat(filename):

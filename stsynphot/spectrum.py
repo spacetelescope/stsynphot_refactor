@@ -524,7 +524,7 @@ class ObservationSpectralElement(SpectralElement):
             Observation mode yields no throughput.
 
         """
-        from .observationmode import ObservationMode  # To avoid circular import
+        from .observationmode import ObservationMode  # Avoid circular import
 
         ob = ObservationMode(
             obsmode, graphtable=graphtable, comptable=comptable,
@@ -554,9 +554,11 @@ def ebmvx(redlaw_name, ebv):
 
     Parameters
     ----------
-    redlaw_name : {'lmc30dor', 'lmcavg', 'mwavg', 'mwdense', 'mwrv21', 'mwrv40', 'smcbar', 'xgalsb', 'gal3', `None`}
+    redlaw_name : str
         Reddening law model name
         (see :func:`synphot.reddening.ReddeningLaw.from_extinction_model`).
+        Choose from 'lmc30dor', 'lmcavg', 'mwavg', 'mwdense', 'mwrv21',
+        'mwrv40', 'smcbar', 'xgalsb', 'gal3', or `None`.
         ``gal3`` and `None` are same as ``mwavg`` and used for testing only.
 
     ebv : float or `~astropy.units.quantity.Quantity`
