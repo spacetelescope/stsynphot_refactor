@@ -384,9 +384,9 @@ class Interpreter(GenericASTMatcher):
 
                 # Always force the renormalization to occur: prevent exceptions
                 # in case of partial overlap. Less robust but duplicates
-                # IRAF SYNPHOT. Force the renormalization in the case of partial
-                # overlap, but raise an exception if the spectrum and bandpass
-                # are entirely disjoint.
+                # IRAF SYNPHOT. Force the renormalization in the case of
+                # partial overlap, but raise an exception if the spectrum and
+                # bandpass are entirely disjoint.
                 try:
                     tree.value = sp.normalize(
                         rnval, band=bp, area=conf.area, vegaspec=spectrum.Vega)

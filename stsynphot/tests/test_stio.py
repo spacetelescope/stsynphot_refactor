@@ -36,7 +36,8 @@ class TestIRAFConvert(object):
         [('mypath/image.fits', 'mypath/image.fits'),
          ('$MYTESTPATH//image.fits', '/path1/path2/image.fits'),
          ('CRREFER$image.fits', os.path.join(conf.rootdir, 'image.fits')),
-         ('mtab$image.fits', os.path.join(conf.rootdir, 'mtab', 'image.fits'))])
+         ('mtab$image.fits', os.path.join(conf.rootdir, 'mtab', 'image.fits'))
+         ])
     def test_irafconvert(self, in_str, ans):
         out_str = stio.irafconvert(in_str)
         assert out_str == ans

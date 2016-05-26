@@ -174,6 +174,19 @@ class BaseObservationMode(object):
     and optical component tables, common to both optical and
     thermal observation modes.
 
+    .. note::
+
+        `modes` for parameterized mode is set such that the parameterized
+        value is stripped away; e.g., ``'acs,wfc1,f555w,mjd#53000'``
+        becomes ``['acs', 'wfc1', 'f555w', 'mjd#']``. Instead, the
+        parameterized value is kept in `pardict`; e.g., `'mjd#53000'``
+        becomes ``{'mjd': 53000.0}``.
+
+        `pixscale` is set from ``stsynphot.config.conf.detectorfile``,
+        which is parsed with :func:`synphot.stio.read_detector_pars`.
+
+        `binset` is set by ``stsynphot.wavetable.WAVECAT``.
+
     Parameters
     ----------
     obsmode : str
@@ -190,10 +203,10 @@ class BaseObservationMode(object):
     Attributes
     ----------
     modes : list
-        List of individual modes within observation mode. For parameterized mode, its value is stripped. For example, ``'acs,wfc1,f555w,mjd#53000'`` becomes ``['acs', 'wfc1', 'f555w', 'mjd#']``.
+        List of individual modes within observation mode.
 
     pardict : dict
-        Maps parameterized mode to its value. For example, ``'mjd#53000'`` becomes ``{'mjd': 53000.0}``.
+        Maps parameterized mode to its value.
 
     gtname, ctname : str
         Graph and component table filenames.
@@ -208,10 +221,10 @@ class BaseObservationMode(object):
         Telescope collecting area.
 
     pixscale : `astropy.units.quantity.Quantity`
-        Detector pixel scale from ``stsynphot.config.conf.detectorfile``, which is parsed with :func:`synphot.stio.read_detector_pars`.
+        Detector pixel scale.
 
     binset : str
-        Wavelength table filename or parameter string from the matching observation mode in ``stsynphot.wavetable.WAVECAT``.
+        Wavelength table filename/param string from matching obsmode.
 
     bandwave : `astropy.units.quantity.Quantity`
         Wavelength set defined by ``binset``.
@@ -342,6 +355,8 @@ class ObservationMode(BaseObservationMode):
     """Class to handle an observation that uses the graph
     and optical component tables.
 
+    See `BaseObservationMode` for additional attributes.
+
     Parameters
     ----------
     obsmode, graphtable, comptable
@@ -349,11 +364,6 @@ class ObservationMode(BaseObservationMode):
 
     component_dict : dict
         Maps component filename to corresponding `Component`.
-
-    Attributes
-    ----------
-    modes, pardict, gtname, ctname, compnames, thcompnames, components, primary_area, pixscale, binset, bandwave
-        See `BaseObservationMode`.
 
     """
     def __init__(self, obsmode, graphtable=None, comptable=None,
@@ -402,7 +412,8 @@ class ObservationMode(BaseObservationMode):
         except IndexError as e:  # pragma: no cover
             thru = None
             warnings.warn(
-                'Graph table is broken: {0}'.format(str(e)), AstropyUserWarning)
+                'Graph table is broken: {0}'.format(str(e)),
+                AstropyUserWarning)
         return thru
 
     @lazyproperty
@@ -458,6 +469,8 @@ class ThermalObservationMode(BaseObservationMode):
     """Class to handle an observation that uses the graph,
     optical component, and thermal component tables.
 
+    See `BaseObservationMode` for additional attributes.
+
     Parameters
     ----------
     obsmode, graphtable, comptable
@@ -469,9 +482,6 @@ class ThermalObservationMode(BaseObservationMode):
 
     Attributes
     ----------
-    modes, pardict, gtname, ctname, compnames, thcompnames, components, primary_area, pixscale, binset, bandwave
-        See `BaseObservationMode`.
-
     thname : str
         Thermal component table filename.
 

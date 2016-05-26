@@ -210,7 +210,7 @@ class GenericParser(object):
                 break
             self.buildState(tokens[i], states, i, tree)
 
-        #_dump(tokens, states)
+        # _dump(tokens, states)
 
         if i < len(tokens)-1 or states[i+1] != [(self.startRule, 2, 0)]:
             del tokens[-1]
@@ -329,7 +329,7 @@ class GenericParser(object):
             #  A -> a . c (scanner)
             #
             elif token == nextSym:
-                #assert new not in states[i+1]
+                # assert new not in states[i+1]
                 states[i+1].append((rule, pos+1, parent))
 
     def buildTree(self, tokens, tree, root):
@@ -419,12 +419,12 @@ class GenericASTBuilder(GenericParser):
         super(GenericASTBuilder, self).__init__(start)
         self.AST = AST
 
+    def rebind(self, lhs):
+        return lambda args, lhs=lhs, self=self: self.buildASTNode(args, lhs)
+
     def preprocess(self, rule, func):
-        rebind = lambda lhs, self=self: \
-            lambda args, lhs=lhs, self=self: \
-            self.buildASTNode(args, lhs)
         lhs, rhs = rule
-        return rule, rebind(lhs)
+        return rule, self.rebind(lhs)
 
     def buildASTNode(self, args, lhs):
         children = []
@@ -512,15 +512,15 @@ class GenericASTMatcher(GenericParser):
         super(GenericASTMatcher, self).__init__(start)
         self.ast = ast
 
+    def rebind(self, func):
+        return lambda args, func=func, self=self: self.foundMatch(args, func)
+
     def preprocess(self, rule, func):
-        rebind = lambda func, self=self: \
-            lambda args, func=func, self=self: \
-            self.foundMatch(args, func)
         lhs, rhs = rule
         rhslist = list(rhs)
         rhslist.reverse()
 
-        return (lhs, tuple(rhslist)), rebind(func)
+        return (lhs, tuple(rhslist)), self.rebind(func)
 
     def foundMatch(self, args, func):
         func(args[-1])

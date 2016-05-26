@@ -25,6 +25,7 @@ env:
         # overridden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
         - NUMPY_VERSION=stable
+        - MAIN_CMD='python setup.py'
         #- ASTROPY_VERSION=stable
         - ASTROPY_VERSION=development
         - SYNPHOT_VERSION=development
@@ -36,20 +37,18 @@ env:
         #- CONDA_DEPENDENCIES='Cython'
         - CONDA_DEPENDENCIES='Cython jinja2 scipy'
     matrix:
-        # DISABLED FOR NOW
         # Make sure that egg_info works without dependencies
-        #- SETUP_CMD='egg_info'
+        - SETUP_CMD='egg_info'
         # Try all python versions with the latest numpy
-        - SETUP_CMD='test'
-        #- SETUP_CMD='test --remote-data'
+        - SETUP_CMD='test --open-files'
+        #- SETUP_CMD='test --open-files --remote-data'
 
 matrix:
     include:
 
-        # DISABLED FOR NOW
         # Do a coverage test in Python 2.
-        #- python: 2.7
-        #  env: SETUP_CMD='test --coverage'
+        - python: 2.7
+          env: SETUP_CMD='test --coverage'
 
         # DISABLED FOR NOW
         # Check for sphinx doc build warnings - we do this first because it
@@ -63,6 +62,10 @@ matrix:
         #  env: ASTROPY_VERSION=development
         #- python: 3.5
         #  env: ASTROPY_VERSION=development
+
+        # Do a PEP8 test
+        - python: 2.7
+          env: MAIN_CMD='pep8 stsynphot --count' SETUP_CMD=''
 
 before_install:
 
@@ -108,10 +111,10 @@ script:
     # Without this, there will be a warning but does not affect tests.
     - if [[ $SETUP_CMD == 'test --remote-data' ]]; then export PYSYN_CDBS="ftp://ftp.stsci.edu/cdbs/"; fi
 
-    - python setup.py $SETUP_CMD
+    - $MAIN_CMD $SETUP_CMD
 
 after_success:
     # If coveralls.io is set up for this package, uncomment the line
     # below and replace "packagename" with the name of your package.
     # The coveragerc file may be customized as needed for your package.
-    # - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls --rcfile='stsynphot/tests/coveragerc'; fi
+    - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls --rcfile='stsynphot/tests/coveragerc'; fi

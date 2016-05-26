@@ -48,7 +48,8 @@ class TestInterpolateSpectrum(object):
             'cracscomp$acs_fr656n_005_syn.fits[fr656n#]')
         self.fname_stis = irafconvert(
             'crstiscomp$stis_nm16_mjd_010_syn.fits[MJD#]')
-        self.wave_stis = [1049, 2250, 3500, 4750, 6000, 7250, 8500, 9750, 11000]
+        self.wave_stis = [1049, 2250, 3500, 4750, 6000, 7250, 8500, 9750,
+                          11000]
 
     def test_no_interp_first_col(self):
         """Test whether the algorithm grabs the correct column
@@ -145,7 +146,8 @@ class TestInterpolateSpectrum(object):
         # Invalid interpolation column name
         with pytest.raises(synexceptions.SynphotError):
             sp = spectrum.interpolate_spectral_element(
-                irafconvert('cracscomp$acs_wfc_aper_002_syn.fits[mjd#]'), 51252)
+                irafconvert('cracscomp$acs_wfc_aper_002_syn.fits[mjd#]'),
+                51252)
 
         # Cannot extrapolate and no default throughput
         with pytest.raises(synexceptions.ExtrapolationNotAllowed):

@@ -50,5 +50,6 @@ test_script:
     # Only needed for remote data.
     # Without this, there will be a warning but does not affect tests.
     #- "SET PYSYN_CDBS=ftp://ftp.stsci.edu/cdbs/"
+    #- "%CMD_IN_ENV% python setup.py test --remote-data"
 
     - "%CMD_IN_ENV% python setup.py test"

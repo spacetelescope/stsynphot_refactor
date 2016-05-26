@@ -104,7 +104,8 @@ class TestEnvVar(object):
             os.environ['PYSYN_CDBS'] = conf.rootdir
 
     def test_double_slash(self):
-        sp = spparser.parse_spec('spec($PYSYN_CDBS//calspec/gd71_mod_005.fits)')
+        sp = spparser.parse_spec(
+            'spec($PYSYN_CDBS//calspec/gd71_mod_005.fits)')
         assert isinstance(sp, SourceSpectrum)
         assert isinstance(sp.model, Empirical1D)
 

@@ -59,7 +59,8 @@ class TestConfigChanges(object):
         assert getattr(config.conf, cfgname) == self.def_dict[cfgname]
 
     def test_waveset(self):
-        w = generate_wavelengths(minwave=3000, maxwave=5000, num=100, log=False)
+        w = generate_wavelengths(
+            minwave=3000, maxwave=5000, num=100, log=False)
         config.conf.waveset_array = w[0].value.tolist()
         config.conf.waveset = w[1]
         np.testing.assert_allclose(
