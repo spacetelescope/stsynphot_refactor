@@ -314,8 +314,9 @@ class Interpreter(GenericASTMatcher):
                     log.error('Unrecognized unit: {0}'.format(args[1]))
                     self.error(fname)
                 try:
+                    fluxunit = units.validate_unit(args[1])
                     tree.value = SourceSpectrum(
-                        ConstFlux1D, amplitude=u.Quantity(args[0], args[1]),
+                        ConstFlux1D, amplitude=u.Quantity(args[0], fluxunit),
                         meta=metadata)
                 except NotImplementedError as e:
                     log.error(str(e))
@@ -332,8 +333,9 @@ class Interpreter(GenericASTMatcher):
                     log.error('Unrecognized unit: {0}'.format(args[2]))
                     self.error(fname)
                 try:
+                    fluxunit = units.validate_unit(args[2])
                     tree.value = SourceSpectrum(
-                        PowerLawFlux1D, amplitude=u.Quantity(1, args[2]),
+                        PowerLawFlux1D, amplitude=u.Quantity(1, fluxunit),
                         x_0=args[0], alpha=-args[1], meta=metadata)
                 except (synexceptions.SynphotError, NotImplementedError) as e:
                     log.error(str(e))
@@ -361,7 +363,8 @@ class Interpreter(GenericASTMatcher):
                     log.error('Unrecognized unit: {0}'.format(args[3]))
                     self.error(fname)
                 x0 = args[0]
-                totflux = units.convert_flux(x0, u.Quantity(args[2], args[3]),
+                fluxunit = units.validate_unit(args[3])
+                totflux = units.convert_flux(x0, u.Quantity(args[2], fluxunit),
                                              units.PHOTLAM).value
                 tree.value = SourceSpectrum(
                     GaussianFlux1D, total_flux=totflux, mean=x0, fwhm=args[1])
@@ -374,7 +377,8 @@ class Interpreter(GenericASTMatcher):
             elif fname == 'rn':
                 sp = args[0]
                 bp = args[1]
-                rnval = u.Quantity(args[2], args[3])
+                fluxunit = units.validate_unit(args[3])
+                rnval = u.Quantity(args[2], fluxunit)
 
                 if not isinstance(sp, SourceSpectrum):
                     sp = SourceSpectrum.from_file(irafconvert(sp))
