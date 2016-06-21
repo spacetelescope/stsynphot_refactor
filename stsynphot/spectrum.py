@@ -52,13 +52,13 @@ def _interp_spec(interpval, waves, lower_val, upper_val, lower_thru,
     interpval : float
         Desired parameter value.
 
-    waves : array_like
+    waves : array-like
         Wavelengths for all the parameterized spectra.
 
     lower_val, upper_val : float
         Low and high values of parameter to interpolate.
 
-    lower_thru, upper_thru : array_like
+    lower_thru, upper_thru : array-like
         Throughput values are ``lower_val`` and ``upper_val``.
 
     doshift : bool
@@ -66,7 +66,7 @@ def _interp_spec(interpval, waves, lower_val, upper_val, lower_thru,
 
     Returns
     -------
-    thru : array_like
+    thru : array-like
         Interpolated throughput at ``interpval``.
 
     """
@@ -282,7 +282,7 @@ class ObservationSpectralElement(SpectralElement):
 
         Parameters
         ----------
-        wavelengths : array_like, `~astropy.units.quantity.Quantity`, or `None`
+        wavelengths : array-like, `~astropy.units.quantity.Quantity`, or `None`
             Wavelength values for sampling.
             If not a Quantity, assumed to be in Angstrom.
             If `None`, ``self.waveset`` is used.
@@ -458,7 +458,7 @@ class ObservationSpectralElement(SpectralElement):
         filename : str
             Output filename.
 
-        wavelengths : array_like, `~astropy.units.quantity.Quantity`, or `None`
+        wavelengths : array-like, `~astropy.units.quantity.Quantity`, or `None`
             Wavelength values for sampling.
             If not a Quantity, assumed to be in Angstrom.
             If `None`, ``self.waveset`` is used.

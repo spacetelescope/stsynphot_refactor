@@ -21,7 +21,6 @@ from astropy.utils.data import get_pkg_data_filename
 # SYNPHOT
 from synphot import units
 from synphot import exceptions as synexceptions
-from synphot.integrator import TrapezoidIntegrator
 from synphot.models import ConstFlux1D
 from synphot.spectrum import SourceSpectrum, SpectralElement
 
@@ -197,7 +196,7 @@ class TestObservationSpectralElement(object):
 
         # Unit response
         a = obs.unit_response(obs.area)
-        b = units.HC * 0.01 / TrapezoidIntegrator()._raw_math(x, x * y)
+        b = units.HC * 0.01 / abs(np.trapz(x * y, x=x))
         np.testing.assert_allclose(a.value, b.value)
 
     @pytest.mark.parametrize(
