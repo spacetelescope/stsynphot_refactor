@@ -97,6 +97,8 @@ def test_grid_to_spec_exceptions():
 
     # Quantity is not acceptable for log values
     with pytest.raises(synexceptions.SynphotError):
-        sp = catalog.grid_to_spec('k93', 6440, u.Quantity(0), 4.3)
+        sp = catalog.grid_to_spec(
+            'k93', 6440, 0 * u.dimensionless_unscaled, 4.3)
     with pytest.raises(synexceptions.SynphotError):
-        sp = catalog.grid_to_spec('k93', 6440, 0, u.Quantity(4.3))
+        sp = catalog.grid_to_spec(
+            'k93', 6440, 0, 4.3 * u.dimensionless_unscaled)

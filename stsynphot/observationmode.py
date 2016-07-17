@@ -314,7 +314,7 @@ class BaseObservationMode(object):
         if pixscales.size < 1:
             self.pixscale = None
         else:
-            self.pixscale = u.Quantity(pixscales[0], unit=u.arcsec)
+            self.pixscale = pixscales[0] * u.arcsec
 
     def _get_components(self):
         raise NotImplementedError('To be implemented by subclasses.')

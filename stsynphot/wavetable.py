@@ -152,7 +152,7 @@ class WaveCatalog(object):
         """Get wavelengths array from parameter string."""
         a, b, c, nwave = self._calc_quadratic_coeff(coeff)
         i = np.arange(nwave, dtype=np.float64)
-        return u.Quantity(((a * i) + b) * i + c, self.wave_unit)
+        return (((a * i) + b) * i + c) * self.wave_unit
 
     def load_waveset(self, obsmode):
         """Load wavelength table by observation mode.

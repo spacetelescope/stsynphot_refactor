@@ -310,8 +310,8 @@ def read_graphtable(filename, tab_ext=1):
     else:  # pragma: no cover
         primary_area = None
 
-    if primary_area is not None:
-        primary_area = u.Quantity(primary_area, units.AREA)
+    if primary_area is not None and not isinstance(primary_area, u.Quantity):
+        primary_area = primary_area * units.AREA
 
     # Check for segmented graph table
     if np.any([x.lower().endswith('graph')
@@ -480,7 +480,12 @@ def read_waveset(filename, wave_unit=u.AA):
     data = ascii.read(
         filename, header_start=None, data_start=0, names=(str('WAVELENGTH'), ),
         converters={'WAVELENGTH': np.float})
-    return u.Quantity(data['WAVELENGTH'].data, wave_unit)
+    waveset = data['WAVELENGTH'].data
+
+    if not isinstance(waveset, u.Quantity):
+        waveset = waveset * u.AA
+
+    return waveset
 
 
 def read_detector_pars(filename):

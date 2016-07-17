@@ -316,8 +316,7 @@ class Interpreter(GenericASTMatcher):
                 try:
                     fluxunit = units.validate_unit(args[1])
                     tree.value = SourceSpectrum(
-                        ConstFlux1D, amplitude=u.Quantity(args[0], fluxunit),
-                        meta=metadata)
+                        ConstFlux1D, amplitude=args[0]*fluxunit, meta=metadata)
                 except NotImplementedError as e:
                     log.error(str(e))
                     self.error(fname)
@@ -335,8 +334,8 @@ class Interpreter(GenericASTMatcher):
                 try:
                     fluxunit = units.validate_unit(args[2])
                     tree.value = SourceSpectrum(
-                        PowerLawFlux1D, amplitude=u.Quantity(1, fluxunit),
-                        x_0=args[0], alpha=-args[1], meta=metadata)
+                        PowerLawFlux1D, amplitude=1*fluxunit, x_0=args[0],
+                        alpha=-args[1], meta=metadata)
                 except (synexceptions.SynphotError, NotImplementedError) as e:
                     log.error(str(e))
                     self.error(fname)
@@ -364,8 +363,8 @@ class Interpreter(GenericASTMatcher):
                     self.error(fname)
                 x0 = args[0]
                 fluxunit = units.validate_unit(args[3])
-                totflux = units.convert_flux(x0, u.Quantity(args[2], fluxunit),
-                                             units.PHOTLAM).value
+                totflux = units.convert_flux(
+                    x0, args[2] * fluxunit, units.PHOTLAM).value
                 tree.value = SourceSpectrum(
                     GaussianFlux1D, total_flux=totflux, mean=x0, fwhm=args[1])
 
@@ -378,7 +377,7 @@ class Interpreter(GenericASTMatcher):
                 sp = args[0]
                 bp = args[1]
                 fluxunit = units.validate_unit(args[3])
-                rnval = u.Quantity(args[2], fluxunit)
+                rnval = args[2] * fluxunit
 
                 if not isinstance(sp, SourceSpectrum):
                     sp = SourceSpectrum.from_file(irafconvert(sp))
