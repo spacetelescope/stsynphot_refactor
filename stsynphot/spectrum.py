@@ -213,8 +213,7 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
 
     meta = {'expr': '{0}#{1:g}'.format(filename, interpval),
             'warnings': warndict}
-    return SpectralElement(Empirical1D, x=u.Quantity(wave0, wave_unit), y=thru,
-                           meta=meta)
+    return SpectralElement(Empirical1D, x=wave0*wave_unit, y=thru, meta=meta)
 
 
 class ObservationSpectralElement(SpectralElement):
@@ -365,7 +364,7 @@ class ObservationSpectralElement(SpectralElement):
         sp = self.obsmode.thermal_spectrum(thermtable=thermtable)
         bg = sp.integrate() * self.obsmode.pixscale ** 2 * area
 
-        return u.Quantity(bg.value, u.count / u.s / u.pix)
+        return bg.value * (u.count / u.s / u.pix)
 
     def binned_waverange(self, cenwave, npix, **kwargs):
         """Calculate the wavelength range covered by the given number
@@ -401,14 +400,13 @@ class ObservationSpectralElement(SpectralElement):
 
         # Calculation is done in the unit of cenwave.
         if not isinstance(cenwave, u.Quantity):
-            cenwave = u.Quantity(cenwave, self._internal_wave_unit)
+            cenwave = cenwave * self._internal_wave_unit
 
         bin_wave = units.validate_quantity(
             self.binset, cenwave.unit, equivalencies=u.spectral())
 
-        return u.Quantity(
-            binning.wave_range(bin_wave.value, cenwave.value, npix, **kwargs),
-            cenwave.unit)
+        return binning.wave_range(
+            bin_wave.value, cenwave.value, npix, **kwargs) * cenwave.unit
 
     def binned_pixelrange(self, waverange, **kwargs):
         """Calculate the number of pixels within the given wavelength
