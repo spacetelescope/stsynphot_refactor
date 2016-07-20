@@ -213,7 +213,8 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
 
     meta = {'expr': '{0}#{1:g}'.format(filename, interpval),
             'warnings': warndict}
-    return SpectralElement(Empirical1D, x=wave0*wave_unit, y=thru, meta=meta)
+    return SpectralElement(
+        Empirical1D, points=wave0*wave_unit, lookup_table=thru, meta=meta)
 
 
 class ObservationSpectralElement(SpectralElement):
