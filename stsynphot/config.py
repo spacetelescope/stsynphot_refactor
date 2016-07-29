@@ -130,9 +130,18 @@ overwrite_synphot_config(conf.rootdir)
 
 def _get_ref_cfgitems():
     """Iterator for configuration items to be displayed."""
-    for cfgitem in (Conf.graphtable, Conf.comptable, Conf.thermtable,
-                    Conf.area, Conf.waveset):
-        yield cfgitem
+    from .stio import get_latest_file, irafconvert
+
+    for cfgitem, do_conv in (
+            (Conf.graphtable, True),
+            (Conf.comptable, True),
+            (Conf.thermtable, True),
+            (Conf.area, False),
+            (Conf.waveset, False)):
+        val = cfgitem()
+        if do_conv:
+            val = get_latest_file(irafconvert(val))
+        yield cfgitem.name, val
 
 
 def getref():
@@ -143,12 +152,12 @@ def getref():
     refdict : dict
 
     """
-    return dict([[x.name, x()] for x in _get_ref_cfgitems()])
+    return dict([x for x in _get_ref_cfgitems()])
 
 
 def showref():  # pragma: no cover
     """Show the values of select configurable items."""
     info_str = '\n'
     for x in _get_ref_cfgitems():
-        info_str += '{0:10s}: {1}\n'.format(x.name, x())
+        info_str += '{0:10s}: {1}\n'.format(*x)
     log.info(info_str)
