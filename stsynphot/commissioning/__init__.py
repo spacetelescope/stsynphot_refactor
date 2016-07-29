@@ -17,10 +17,6 @@ To run the tests from a Python session::
     >>> stsynphot.test('commissioning', remote_data=True)
 
 """
+from __future__ import absolute_import, division, print_function
 
-try:
-    import pysynphot  # ASTROLIB
-except ImportError:
-    HAS_PYSYNPHOT = False
-else:
-    HAS_PYSYNPHOT = True
+from . import utils
