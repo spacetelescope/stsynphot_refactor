@@ -1,6 +1,9 @@
 """Utility functions for commissioning tests."""
 from __future__ import absolute_import, division, print_function
 
+# STDLIB
+import sys
+
 # THIRD-PARTY
 import numpy as np
 from numpy.testing import assert_allclose
@@ -116,13 +119,26 @@ class CommCase(object):
             wave = wave.value
         return wave
 
+    # TODO: Make this more reliable?
     @staticmethod
-    def _get_flux_atol(flux, factor=2.0):
+    def _get_flux_atol(flux, factor=2.0, max_no_atol=1e-4):
         """Reasonable limit for atol for flux comparison.
-        For example, max flux of 1e-5 will give atol of 1e-10.
+        For example, max flux of 1e-16 will give atol of 1e-32.
+        Max flux of 1e-4 or higher will use default atol of 0.
 
         """
-        return 10 ** (np.log10(abs(max(flux))) * factor)
+        y = abs(max(flux))
+
+        if y >= max_no_atol:
+            flux_atol = 0
+        else:
+            flux_atol = 10 ** (np.log10(y) * factor)
+
+        # No point going below system limit.
+        if flux_atol < sys.float_info.min:
+            flux_atol = sys.float_info.min
+
+        return flux_atol
 
     def test_spec(self, thresh=0.01):
         """Test source spectrum in PHOTLAM."""
