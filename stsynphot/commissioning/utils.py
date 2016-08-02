@@ -1,9 +1,6 @@
 """Utility functions for commissioning tests."""
 from __future__ import absolute_import, division, print_function
 
-# STDLIB
-import sys
-
 # THIRD-PARTY
 import numpy as np
 from numpy.testing import assert_allclose
@@ -98,6 +95,14 @@ class CommCase(object):
         else:
             self.obs = Observation(self.sp, self.bp)
 
+        # Astropy version does not assume a default waveset
+        # (you either have it or you don't). If there is no
+        # waveset, no point comparing obs waveset against ASTROLIB.
+        if self.sp.waveset is None or self.bp.waveset is None:
+            self._has_obswave = False
+        else:
+            self._has_obswave = True
+
         self.spref = old_parse_spec(self.spectrum)
         self.bpref = S.ObsBandpass(self.obsmode)
         self.obsref = S.Observation(self.spref, self.bpref)
@@ -119,71 +124,90 @@ class CommCase(object):
             wave = wave.value
         return wave
 
-    # TODO: Make this more reliable?
     @staticmethod
-    def _get_flux_atol(flux, factor=2.0, max_no_atol=1e-4):
-        """Reasonable limit for atol for flux comparison.
-        For example, max flux of 1e-16 will give atol of 1e-32.
-        Max flux of 1e-4 or higher will use default atol of 0.
+    def _compare_nonzero(new, old, thresh=0.01):
+        """Compare normally when results from both are non-zero."""
+        i = (new != 0) & (old != 0)
+        assert_allclose(new[i], old[i], rtol=thresh)
 
-        """
-        y = abs(max(flux))
+    # TODO: What do we really want here?
+    @staticmethod
+    def _compare_zero(new, old, thresh=0.01):
+        """Special handling for comparison when one of the results
+        is zero. This is because ``rtol`` will not work."""
+        i = ((new == 0) | (old == 0)) & (new != old)
+        try:
+            assert_allclose(new[i], old[i], rtol=thresh)
+        except AssertionError as e:
+            # pytest.xfail(str(e))
+            raise
 
-        if y >= max_no_atol:
-            flux_atol = 0
-        else:
-            flux_atol = 10 ** (np.log10(y) * factor)
-
-        # No point going below system limit.
-        if flux_atol < sys.float_info.min:
-            flux_atol = sys.float_info.min
-
-        return flux_atol
-
-    def test_spec(self, thresh=0.01):
-        """Test source spectrum in PHOTLAM."""
-        wave = self._get_new_wave(self.sp)
-        assert_allclose(wave, self.spref.wave, rtol=thresh)
-
-        flux = self.sp(wave).value
-        flux_atol = self._get_flux_atol(flux)
-        assert_allclose(flux, self.spref.flux, rtol=thresh, atol=flux_atol)
-
-    def test_thru(self, thresh=0.01, thru_atol=1e-8):
-        """Test bandpass. Throughput is always between 0 and 1."""
+    def test_band_wave(self, thresh=0.01):
+        """Test bandpass waveset."""
         wave = self._get_new_wave(self.bp)
         assert_allclose(wave, self.bpref.wave, rtol=thresh)
 
+    def test_spec_wave(self, thresh=0.01):
+        """Test source spectrum waveset."""
+        wave = self._get_new_wave(self.sp)
+        assert_allclose(wave, self.spref.wave, rtol=thresh)
+
+    def test_obs_wave(self, thresh=0.01):
+        """Test observation waveset."""
+        if not self._has_obswave:  # Nothing to test
+            return
+
+        # Native
+        wave = self.obs.waveset.value
+        assert_allclose(wave, self.obsref.wave, rtol=thresh)
+
+        # Binned
+        binset = self.obs.binset.value
+        assert_allclose(binset, self.obsref.binwave, rtol=thresh)
+
+    @pytest.mark.parametrize('thrutype', ['zero', 'nonzero'])
+    def test_band_thru(self, thrutype, thresh=0.01):
+        """Test bandpass throughput, which is always between 0 and 1."""
+        wave = self.bpref.wave
         thru = self.bp(wave).value
-        assert_allclose(thru, self.bpref.throughput, rtol=thresh,
-                        atol=thru_atol)
 
-    def test_obs(self, thresh=0.01):
-        """Test observation."""
+        if thrutype == 'zero':
+            self._compare_zero(thru, self.bpref.throughput, thresh=thresh)
+        else:  # nonzero
+            self._compare_nonzero(thru, self.bpref.throughput, thresh=thresh)
 
-        # Astropy version does not assume a default waveset
-        # (you either have it or you don't). If there is no
-        # waveset, use ASTROLIB values for flux comparison.
-        if self.sp.waveset is None or self.bp.waveset is None:
-            wave = self.obsref.wave
+    @pytest.mark.parametrize('fluxtype', ['zero', 'nonzero'])
+    def test_spec_flux(self, fluxtype, thresh=0.01):
+        """Test flux for source spectrum in PHOTLAM."""
+        wave = self.spref.wave
+        flux = self.sp(wave).value
 
-        # If there is a valid waveset, compare it as well.
-        else:
-            wave = self.obs.waveset.value
-            assert_allclose(wave, self.obsref.wave, rtol=thresh)
+        if fluxtype == 'zero':
+            self._compare_zero(flux, self.spref.flux, thresh=thresh)
+        else:  # nonzero
+            self._compare_nonzero(flux, self.spref.flux, thresh=thresh)
 
-            # Binned data comparison has to happen here because
-            # they cannot be resampled.
-            binset = self.obs.binset.value
-            binflux = self.obs.binflux.value
-            flux_atol = self._get_flux_atol(binflux)
-            assert_allclose(binset, self.obsref.binwave, rtol=thresh)
-            assert_allclose(binflux, self.obsref.binflux, rtol=thresh,
-                            atol=flux_atol)
-
+    @pytest.mark.parametrize('fluxtype', ['zero', 'nonzero'])
+    def test_obs_flux(self, fluxtype, thresh=0.01):
+        """Test flux for observation in PHOTLAM."""
+        wave = self.obsref.wave
         flux = self.obs(wave).value
-        flux_atol = self._get_flux_atol(flux)
-        assert_allclose(flux, self.obsref.flux, rtol=thresh, atol=flux_atol)
+
+        # Native
+        if fluxtype == 'zero':
+            self._compare_zero(flux, self.obsref.flux, thresh=thresh)
+        else:  # nonzero
+            self._compare_nonzero(flux, self.obsref.flux, thresh=thresh)
+
+        if not self._has_obswave:  # Do not compare binned flux
+            return
+
+        # Binned (cannot be resampled)
+        binflux = self.obs.binflux.value
+        if fluxtype == 'zero':
+            self._compare_zero(binflux, self.obsref.binflux, thresh=thresh)
+        else:  # nonzero
+            self._compare_nonzero(binflux, self.obsref.binflux, thresh=thresh)
 
     def test_countrate(self, thresh=0.01):
         """Test observation countrate calculations."""
