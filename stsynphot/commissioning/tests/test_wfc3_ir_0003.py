@@ -1,4 +1,6 @@
-"""Adapted from ``astrolib/pysynphot/from_commissioning/wfc3_ir/test3.py``."""
+"""This module contains WFC3/IR commissioning tests.
+Adapted from ``astrolib/pysynphot/from_commissioning/wfc3_ir/test3.py``.
+"""
 from __future__ import absolute_import, division, print_function
 
 # ASTROPY
