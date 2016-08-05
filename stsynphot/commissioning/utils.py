@@ -1,6 +1,9 @@
 """Utility functions for commissioning tests."""
 from __future__ import absolute_import, division, print_function
 
+# STDLIB
+from collections import Iterable
+
 # THIRD-PARTY
 import numpy as np
 from numpy.testing import assert_allclose
@@ -127,20 +130,33 @@ class CommCase(object):
             wave = wave.value
         return wave
 
-    @staticmethod
-    def _compare_nonzero(new, old, thresh=0.01):
+    def _assert_allclose(self, actual, desired, rtol=1e-07, atol=0):
+        """``assert_allclose`` only report percentage but we
+        also want to know some extra info conveniently."""
+        if isinstance(actual, Iterable):
+            ntot = len(actual)
+        else:
+            ntot = 1
+
+        n = np.count_nonzero(
+            abs(actual - desired) > atol + rtol * abs(desired))
+        msg = 'obsmode: {0}\nspectrum: {1}\n(mismatch {2}/{3})'.format(
+            self.obsmode, self.spectrum, n, ntot)
+
+        assert_allclose(actual, desired, rtol=rtol, atol=atol, err_msg=msg)
+
+    def _compare_nonzero(self, new, old, thresh=0.01):
         """Compare normally when results from both are non-zero."""
         i = (new != 0) & (old != 0)
-        assert_allclose(new[i], old[i], rtol=thresh)
+        self._assert_allclose(new[i], old[i], rtol=thresh)
 
     # TODO: What do we really want here?
-    @staticmethod
-    def _compare_zero(new, old, thresh=0.01):
+    def _compare_zero(self, new, old, thresh=0.01):
         """Special handling for comparison when one of the results
         is zero. This is because ``rtol`` will not work."""
         i = ((new == 0) | (old == 0)) & (new != old)
         try:
-            assert_allclose(new[i], old[i], rtol=thresh)
+            self._assert_allclose(new[i], old[i], rtol=thresh)
         except AssertionError as e:
             pytest.xfail(str(e))  # Will revisit later
             # raise  # Uncomment this to revisit
@@ -148,12 +164,12 @@ class CommCase(object):
     def test_band_wave(self, thresh=0.01):
         """Test bandpass waveset."""
         wave = self._get_new_wave(self.bp)
-        assert_allclose(wave, self.bpref.wave, rtol=thresh)
+        self._assert_allclose(wave, self.bpref.wave, rtol=thresh)
 
     def test_spec_wave(self, thresh=0.01):
         """Test source spectrum waveset."""
         wave = self._get_new_wave(self.sp)
-        assert_allclose(wave, self.spref.wave, rtol=thresh)
+        self._assert_allclose(wave, self.spref.wave, rtol=thresh)
 
     def test_obs_wave(self, thresh=0.01):
         """Test observation waveset."""
@@ -162,11 +178,11 @@ class CommCase(object):
 
         # Native
         wave = self.obs.waveset.value
-        assert_allclose(wave, self.obsref.wave, rtol=thresh)
+        self._assert_allclose(wave, self.obsref.wave, rtol=thresh)
 
         # Binned
         binset = self.obs.binset.value
-        assert_allclose(binset, self.obsref.binwave, rtol=thresh)
+        self._assert_allclose(binset, self.obsref.binwave, rtol=thresh)
 
     @pytest.mark.parametrize('thrutype', ['zero', 'nonzero'])
     def test_band_thru(self, thrutype, thresh=0.01):
@@ -219,13 +235,13 @@ class CommCase(object):
         # Astropy version does not assume a default area.
         val = self.obs.countrate(conf.area).value
 
-        assert_allclose(val, ans, rtol=thresh)
+        self._assert_allclose(val, ans, rtol=thresh)
 
     def test_efflam(self, thresh=0.01):
         """Test observation effective wavelength."""
         ans = self.obsref.efflam()
         val = self.obs.effective_wavelength().value
-        assert_allclose(val, ans, rtol=thresh)
+        self._assert_allclose(val, ans, rtol=thresh)
 
     def teardown_class(self):
         """Reset config for both software."""
@@ -260,4 +276,4 @@ class ThermCase(CommCase):
         ans = self.bpref.thermback()
         val = self.bp.thermback().value
 
-        assert_allclose(val, ans, rtol=thresh)
+        self._assert_allclose(val, ans, rtol=thresh)
