@@ -119,10 +119,10 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
 
     Parameters
     ----------
-    gridname : {'ck04', 'k93', 'phoenix'}
+    gridname : {'ck04models', 'k93models', 'phoenix'}
         Model to use:
-            * ``ck04`` - Castelli & Kurucz (2004)
-            * ``k93`` - Kurucz (1993)
+            * ``ck04models`` - Castelli & Kurucz (2004)
+            * ``k93models`` - Kurucz (1993)
             * ``phoenix`` - Allard et al. (2009)
 
     t_eff : str, float or `astropy.units.quantity.Quantity`
@@ -152,9 +152,9 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
         Invalid inputs.
 
     """
-    if gridname == 'ck04':
+    if gridname == 'ck04models':
         catdir = 'crgridck04$'
-    elif gridname == 'k93':
+    elif gridname == 'k93models':
         catdir = 'crgridk93$'
     elif gridname == 'phoenix':
         catdir = 'crgridphoenix$'
