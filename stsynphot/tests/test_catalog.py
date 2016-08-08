@@ -20,7 +20,7 @@ from .. import catalog, exceptions
 @remote_data
 def test_grid_to_spec():
     """Test creating spectrum from grid, and related cache."""
-    sp = catalog.grid_to_spec('k93', 6440, 0, 4.3)
+    sp = catalog.grid_to_spec('k93models', 6440, 0, 4.3)
     w = sp.waveset
     w_first_50 = w[:50]
     y_first_50 = units.convert_flux(w_first_50, sp(w_first_50), units.FLAM)
@@ -86,7 +86,7 @@ def test_grid_to_spec():
 def test_grid_to_spec_bounds_check(t, m, g):
     """Test out of bounds check."""
     with pytest.raises(exceptions.ParameterOutOfBounds):
-        sp = catalog.grid_to_spec('k93', t, m, g)
+        sp = catalog.grid_to_spec('k93models', t, m, g)
 
 
 def test_grid_to_spec_exceptions():
@@ -98,7 +98,7 @@ def test_grid_to_spec_exceptions():
     # Quantity is not acceptable for log values
     with pytest.raises(synexceptions.SynphotError):
         sp = catalog.grid_to_spec(
-            'k93', 6440, 0 * u.dimensionless_unscaled, 4.3)
+            'k93models', 6440, 0 * u.dimensionless_unscaled, 4.3)
     with pytest.raises(synexceptions.SynphotError):
         sp = catalog.grid_to_spec(
-            'k93', 6440, 0, 4.3 * u.dimensionless_unscaled)
+            'k93models', 6440, 0, 4.3 * u.dimensionless_unscaled)

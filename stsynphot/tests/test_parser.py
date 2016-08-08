@@ -56,12 +56,13 @@ def test_single_functioncall(input_str, ans_cls, ans_model):
     ('input_str', 'ans_cls', 'ans_model'),
     [('spec(crcalspec$alpha_lyr_stis_007.fits)', SourceSpectrum, Empirical1D),
      ('band(v)', spectrum.ObservationSpectralElement, Empirical1D),
-     ('icat(k93, 5000, 0.5, 0)', SourceSpectrum, None),
+     ('icat(k93models, 5000, 0.5, 0)', SourceSpectrum, None),
      ('ebmvx(0.3, mwavg)', ExtinctionCurve, Empirical1D),
      ('rn(crcalspec$gd71_mod_005.fits, box(5000, 10), 17, vegamag)',
       SourceSpectrum, None),
-     ('rn(icat(k93, 5000, 0.5, 0), cracscomp$acs_f814w_hrc_006_syn.fits, '
-      '17, obmag)', SourceSpectrum, None),
+     ('rn(icat(k93models, 5000, 0.5, 0), '
+      'cracscomp$acs_f814w_hrc_006_syn.fits, 17, obmag)',
+      SourceSpectrum, None),
      ('rn(pl(5000, 1, flam), band(v), 1, photlam)',
       SourceSpectrum, None),
      ('rn(unit(1,flam), band(acs, wfc1, fr388n#3881.0), 10, abmag)',
