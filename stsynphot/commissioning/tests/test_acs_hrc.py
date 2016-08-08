@@ -343,4 +343,168 @@ class Test536(Test535):
     spectrum = 'rn(unit(1.0,flam),band(johnson,v),10,vegamag)'
 
 
-# UNTIL HERE - test2.py Test537
+class Test537(Test535):
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),15,vegamag)'
+
+
+class Test538(Test535):
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),5,vegamag)'
+
+
+class Test539(Test535):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)')
+
+
+class Test540(CommCase):
+    obsmode = 'acs,hrc,f606w'
+    spectrum = '$PYSYN_CDBS/calspec/g191b2b_mod_004.fits'
+
+
+class Test541(Test540):
+    spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test542(Test540):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+class Test543(Test540):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1e-18,flam)'
+
+
+class Test544(Test540):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
+
+
+class Test545(CommCase):
+    obsmode = 'acs,hrc,f625w'
+    spectrum = '$PYSYN_CDBS/calspec/g191b2b_mod_004.fits'
+
+
+class Test546(Test545):
+    spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test547(Test545):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+class Test548(Test545):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1e-18,flam)'
+
+
+class Test549(Test545):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
+
+
+class Test550(CommCase):
+    obsmode = 'acs,hrc,f658n'
+    spectrum = '$PYSYN_CDBS/calspec/g191b2b_mod_004.fits'
+
+
+class Test551(Test550):
+    spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test552(Test550):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+class Test553(Test550):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1e-18,flam)'
+
+
+class Test554(Test550):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
+
+
+class Test555(CommCase):
+    obsmode = 'acs,hrc,f660n'
+    spectrum = '$PYSYN_CDBS/calspec/g191b2b_mod_004.fits'
+
+
+class Test556(Test555):
+    spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test557(Test555):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+class Test558(CommCase):
+    obsmode = 'acs,hrc,f775w'
+    spectrum = '$PYSYN_CDBS/calspec/g191b2b_mod_004.fits'
+
+
+class Test559(Test558):
+    spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test560(Test558):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+# Duplicate of Test558 and syntax already tested in Test507.
+# class Test561(Test558):
+#    spectrum = 'crcalspec$g191b2b_mod_004.fits'
+
+
+class Test562(Test558):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1e-18,flam)'
+
+
+class Test563(Test558):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
+
+
+class Test564(CommCase):
+    obsmode = 'acs,hrc,f814w'
+    spectrum = '$PYSYN_CDBS/calspec/g191b2b_mod_004.fits'
+
+
+class Test565(Test564):
+    spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test566(Test564):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+# Duplicate of Test564 and syntax already tested in Test507.
+# class Test567(Test564):
+#    spectrum = 'crcalspec$g191b2b_mod_004.fits'
+
+
+class Test568(CommCase):
+    obsmode = 'acs,hrc,f850lp'
+    spectrum = '$PYSYN_CDBS/calspec/g191b2b_mod_004.fits'
+
+
+class Test569(Test568):
+    spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test570(Test568):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+class Test571(Test568):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1e-18,flam)'
+
+
+class Test572(Test568):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
+
+
+# UNTIL HERE - test3.py - class Test573
