@@ -1,5 +1,7 @@
 """This module contains ACS/HRC commissioning tests.
-Adapted from ``astrolib/pysynphot/from_commissioning/acs/test1.py``.
+Adapted from ``astrolib/pysynphot/from_commissioning/acs/test1.py``,
+``astrolib/pysynphot/from_commissioning/acs/test2.py``, and most of
+``astrolib/pysynphot/from_commissioning/acs/test3.py``.
 """
 from __future__ import absolute_import, division, print_function
 
@@ -272,3 +274,73 @@ class Test520(CommCase):
 
 class Test521(Test520):
     spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test522(Test520):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+class Test523(Test520):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1e-18,flam)'
+
+
+class Test524(Test520):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
+
+
+class Test525(CommCase):
+    obsmode = 'acs,hrc,f555w'
+    spectrum = '$PYSYN_CDBS/calspec/g191b2b_mod_004.fits'
+
+
+class Test526(Test525):
+    spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test527(Test525):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+class Test528(Test525):
+    spectrum = 'rn(bb(10000),band(johnson,v),20,vegamag)'
+
+
+class Test529(Test525):
+    spectrum = 'rn(icat(k93models,5770,0.0,4.5),band(johnson,v),20,vegamag)'
+
+
+class Test530(Test525):
+    spectrum = 'rn(pl(4000.0,-1.0,flam),band(johnson,v),20,vegamag)'
+
+
+class Test531(Test525):
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),15,vegamag)'
+
+
+class Test532(Test525):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1e-18,flam)'
+
+
+class Test533(Test525):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)')
+
+
+class Test534(Test525):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
+
+
+class Test535(CommCase):
+    obsmode = 'acs,hrc,f555w,coron'
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),0,vegamag)'
+
+
+class Test536(Test535):
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),10,vegamag)'
+
+
+# UNTIL HERE - test2.py Test537
