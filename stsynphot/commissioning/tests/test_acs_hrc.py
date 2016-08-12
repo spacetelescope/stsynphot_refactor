@@ -507,4 +507,207 @@ class Test572(Test568):
                 'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
 
 
-# UNTIL HERE - test3.py - class Test573
+class Test573(CommCase):
+    obsmode = 'acs,hrc,f892n'
+    spectrum = '$PYSYN_CDBS/calspec/g191b2b_mod_004.fits'
+
+
+class Test574(Test573):
+    spectrum = '$PYSYN_CDBS/calspec/gd153_mod_004.fits'
+
+
+class Test575(Test573):
+    spectrum = '$PYSYN_CDBS/calspec/gd71_mod_005.fits'
+
+
+class Test576(Test573):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1e-18,flam)'
+
+
+class Test577(Test573):
+    spectrum = 'spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+    'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+spec(el1302a.fits)+'
+    'spec(el1356a.fits)+spec(el2471a.fits))'
+
+
+class Test578(CommCase):
+    obsmode = 'acs,hrc,fr388n#3880'
+    spectrum = 'rn(bb(10000),band(johnson,v),20,vegamag)'
+
+
+class Test579(Test578):
+    spectrum = 'rn(icat(k93models,15400,0.0,3.9),band(johnson,v),15,vegamag)'
+
+
+class Test580(Test578):
+    spectrum = 'rn(icat(k93models,3500,0.0,4.6),band(johnson,v),15,vegamag)'
+
+
+class Test581(Test578):
+    spectrum = 'rn(icat(k93models,44500,0.0,5.0),band(johnson,v),15,vegamag)'
+
+
+class Test582(Test578):
+    spectrum = 'rn(icat(k93models,4850,0.0,1.1),band(johnson,v),15,vegamag)'
+
+
+class Test583(Test578):
+    spectrum = 'rn(icat(k93models,5770,0.0,4.5),band(johnson,v),15,vegamag)'
+
+
+class Test584(Test578):
+    spectrum = 'rn(icat(k93models,5770,0.0,4.5),band(johnson,v),20,vegamag)'
+
+
+class Test585(Test578):
+    spectrum = 'rn(pl(4000.0,-1.0,flam),band(johnson,v),20,vegamag)'
+
+
+class Test586(Test578):
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),15,vegamag)'
+
+
+class Test587(Test578):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1.E-15,flam)'
+
+
+# Duplicate of Test587 and syntax already tested in Test571
+# class Test588(Test578):
+#    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1.e-15,flam)'
+
+
+class Test589(Test578):
+    spectrum = 'spec($PYSYN_CDBS/calspec/g191b2b_mod_004.fits)'
+
+
+class Test590(Test578):
+    spectrum = 'spec($PYSYN_CDBS/calspec/gd71_mod_005.fits)'
+
+
+class Test591(Test578):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)')
+
+
+class Test592(CommCase):
+    obsmode = 'acs,hrc,fr459m#4590'
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),22,vegamag)'
+
+
+class Test593(Test592):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1.e-15,flam)'
+
+
+class Test594(Test592):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)')
+
+
+class Test595(CommCase):
+    obsmode = 'acs,hrc,fr459m#4592'
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),15,vegamag)'
+
+
+class Test596(Test595):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)')
+
+
+class Test597(CommCase):
+    obsmode = 'acs,hrc,fr505n#5050'
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1.e-15,flam)'
+
+
+class Test598(Test597):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)')
+
+
+class Test599(CommCase):
+    obsmode = 'acs,hrc,fr656n#6560'
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1.e-15,flam)'
+
+
+class Test600(Test599):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)')
+
+
+class Test601(CommCase):
+    obsmode = 'acs,hrc,g800l'
+    spectrum = 'em(6500.0,10.0,1.0E-16,flam)'
+
+
+class Test602(Test601):
+    spectrum = 'rn(bb(10000),band(johnson,v),20,vegamag)'
+
+
+class Test603(Test601):
+    spectrum = 'rn(icat(k93models,5770,0.0,4.5),band(johnson,v),20,vegamag)'
+
+
+class Test604(Test601):
+    spectrum = 'rn(pl(4000.0,-1.0,flam),band(johnson,v),20,vegamag)'
+
+
+class Test605(Test601):
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),15,vegamag)'
+
+
+class Test606(Test601):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1.5e-16,flam)'
+
+
+class Test607(Test601):
+    spectrum = 'spec($PYSYN_CDBS/calspec/gd71_mod_005.fits)'
+
+
+class Test608(Test601):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)')
+
+
+class Test609(Test601):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
+
+
+class Test610(CommCase):
+    obsmode = 'acs,hrc,pr200l'
+    spectrum = 'em(4000.0,10.0,1.0E-16,flam)'
+
+
+class Test611(Test610):
+    spectrum = 'rn(bb(10000),band(johnson,v),20,vegamag)'
+
+
+class Test612(Test610):
+    spectrum = 'rn(icat(k93models,5770,0.0,4.5),band(johnson,v),20,vegamag)'
+
+
+class Test613(Test610):
+    spectrum = 'rn(pl(4000.0,-1.0,flam),band(johnson,v),20,vegamag)'
+
+
+class Test614(Test610):
+    spectrum = 'rn(unit(1.0,flam),band(johnson,v),15,vegamag)'
+
+
+class Test615(Test610):
+    spectrum = 'rn(unit(1.0,flam),box(5500.0,1.0),1.5e-16,flam)'
+
+
+class Test616(Test610):
+    spectrum = 'spec($PYSYN_CDBS/calspec/gd71_mod_005.fits)'
+
+
+class Test617(Test610):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)')
+
+
+class Test618(Test610):
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
