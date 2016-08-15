@@ -28,7 +28,13 @@ from ..spparser import parse_spec
 
 use_pysynphot = pytest.mark.skipif('not HAS_PYSYNPHOT')
 
-__all__ = ['use_pysynphot', 'count_outliers', 'CommCase']
+# Currently, this is here because only commissioning tests are considered
+# slow. If there are slow tests in the core unit tests, we can move this
+# one level higher.
+slow = pytest.mark.skipif(not pytest.config.getoption('--slow'),
+                          reason='need --slow option to run')
+
+__all__ = ['use_pysynphot', 'slow', 'count_outliers', 'CommCase', 'ThermCase']
 
 
 def count_outliers(data, sigma=3.0):
@@ -56,6 +62,7 @@ def count_outliers(data, sigma=3.0):
 
 
 @use_pysynphot
+@slow
 @remote_data
 class CommCase(object):
     """Base class for commissioning tests."""

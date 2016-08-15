@@ -6,17 +6,17 @@
     Tests require ASTROLIB PYSYNPHOT to be installed.
     Specifically, install the version to be compared against ``stsynphot``.
 
-To run the tests from source checkout::
+To run only the commissioning tests from source checkout::
 
     cd ../..
-    python setup.py test -P commissioning --remote-data
+    python setup.py test -P commissioning --args="--slow" --remote-data
 
-To run the tests from a Python session::
+To run only the commissioning tests from a Python session::
 
     >>> import stsynphot
-    >>> stsynphot.test('commissioning', remote_data=True)
+    >>> stsynphot.test('commissioning', args='--slow', remote_data=True)
 
 """
 from __future__ import absolute_import, division, print_function
 
-from . import utils
+from . import utils  # noqa
