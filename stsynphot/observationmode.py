@@ -429,7 +429,8 @@ class ObservationMode(BaseObservationMode):
         y = self.throughput(x)
         thru = y.value * x.value * self._constant.value
         meta = {'expr': 'Sensitivity for {0}'.format(self._obsmode)}
-        return SpectralElement(Empirical1D, x=x, y=thru, meta=meta)
+        return SpectralElement(
+            Empirical1D, points=x, lookup_table=thru, meta=meta)
 
     def thermal_spectrum(self, thermtable=None):
         """Calculate thermal spectrum using
@@ -617,4 +618,4 @@ class ThermalObservationMode(BaseObservationMode):
                 y += component.emissivity.thermal_source()(x).value  # PHOTLAM
 
         meta = {'expr': '{0} ThermalSpectrum'.format(self._obsmode)}
-        return SourceSpectrum(Empirical1D, x=x, y=y, meta=meta)
+        return SourceSpectrum(Empirical1D, points=x, lookup_table=y, meta=meta)
