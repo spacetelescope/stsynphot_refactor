@@ -10,7 +10,6 @@ import os
 import shutil
 
 # THIRD-PARTY
-from astropy.tests.helper import pytest
 from astropy.utils.data import get_pkg_data_filename
 
 # LOCAL
@@ -48,36 +47,25 @@ class Test474(Test472):
     spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
                 'band(johnson,v),22.7,vegamag)')
 
-    # TODO: Revisit failure on only one data point; Insignificant?
-    @pytest.mark.parametrize('fluxtype', ['zero', 'nonzero'])
-    def test_obs_flux(self, fluxtype, thresh=0.01):
-        try:
-            super(Test474, self).test_obs_flux(fluxtype, thresh=thresh)
-        except AssertionError as e:
-            if fluxtype == 'nonzero':
-                pytest.xfail(str(e))
-            else:
-                raise
 
-
-class Test475(Test474):
+class Test475(Test472):
     spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
                 'band(johnson,v),30.0,vegamag)')
 
 
-class Test476(Test474):
+class Test476(Test472):
     spectrum = 'spec(earthshine.fits)*0.5+spec(Zodi.fits)*1.0'
 
 
-class Test477(Test474):
+class Test477(Test472):
     spectrum = 'spec(earthshine.fits)*0.5+spec(Zodi.fits)*1.25'
 
 
-class Test478(Test474):
+class Test478(Test472):
     spectrum = 'spec(earthshine.fits)*0.5+spec(Zodi.fits)*2.0'
 
 
-class Test479(Test474):
+class Test479(Test472):
     spectrum = 'spec(earthshine.fits)*0.5+spec(Zodi.fits)*4.0'
 
 
@@ -525,9 +513,9 @@ class Test576(Test573):
 
 
 class Test577(Test573):
-    spectrum = 'spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
-    'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+spec(el1302a.fits)+'
-    'spec(el1356a.fits)+spec(el2471a.fits))'
+    spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
+                'band(johnson,v),22.7,vegamag)+(spec(el1215a.fits)+'
+                'spec(el1302a.fits)+spec(el1356a.fits)+spec(el2471a.fits))')
 
 
 class Test578(CommCase):
