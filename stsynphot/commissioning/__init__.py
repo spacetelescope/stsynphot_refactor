@@ -9,12 +9,25 @@
 To run only the commissioning tests from source checkout::
 
     cd ../..
-    python setup.py test -P commissioning --args="--slow" --remote-data
+    python setup.py test -P commissioning --remote-data --args="--slow"
+
+Like above, but also use ``pytest-html`` plugin for a detail HTML report::
+
+    python setup.py test -P commissioning --remote-data --args="--slow --html=/full/path/report.html"
+
+To generate the HTML report using ``py.test`` directly::
+
+    py.test stsynphot/commissioning/tests/ --remote-data --slow --html=report.html
 
 To run only the commissioning tests from a Python session::
 
     >>> import stsynphot
-    >>> stsynphot.test('commissioning', args='--slow', remote_data=True)
+    >>> stsynphot.test('commissioning', remote_data=True, args='--slow')
+
+Like above, but also use ``pytest-html`` plugin for a detail HTML report::
+
+    >>> stsynphot.test('commissioning', remote_data=True,
+    ...                args='--slow --html="report.html"')
 
 """
 from __future__ import absolute_import, division, print_function
