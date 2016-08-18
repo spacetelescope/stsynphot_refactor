@@ -15,7 +15,7 @@ from ..utils import CommCase
 
 # Local test data
 datafiles = ['earthshine.fits', 'el1215a.fits', 'el1302a.fits', 'el1356a.fits',
-             'el2471a.fits', 'Zodi.fits']
+             'el2471a.fits', 'qso_template.fits', 'Zodi.fits']
 
 
 def setup_module(module):
@@ -53,6 +53,7 @@ class Test1104(Test1102):
 class Test1105(Test1102):
     spectrum = ('rn(spec($PYSYN_CDBS/calspec/agk_81d266_stis_001.fits),'
                 'band(johnson,v),10,vegamag)')
+    force = 'extrap'
 
 
 class Test1106(Test1102):
@@ -61,6 +62,7 @@ class Test1106(Test1102):
 
 class Test1107(Test1102):
     spectrum = 'spec($PYSYN_CDBS/calspec/agk_81d266_stis_001.fits)'
+    force = 'extrap'
 
 
 class Test1108(Test1102):
@@ -92,6 +94,7 @@ class Test1112(CommCase):
 
 class Test1113(Test1112):
     spectrum = 'spec($PYSYN_CDBS/calspec/agk_81d266_stis_001.fits)'
+    force = 'extrap'
 
 
 class Test1114(CommCase):
@@ -119,9 +122,11 @@ class Test1117(Test1116):
 class Test1118(CommCase):
     obsmode = 'stis,ccd,f28x50oiii'
     spectrum = 'spec($PYSYN_CDBS/calspec/agk_81d266_stis_001.fits)'
+    force = 'extrap'
 
 
-class Test1119(Test1118):
+class Test1119(CommCase):
+    obsmode = 'stis,ccd,f28x50oiii'
     spectrum = ('spec(earthshine.fits)*0.5+rn(spec(Zodi.fits),'
                 'band(johnson,v),22.7,vegamag)')
 
@@ -280,6 +285,7 @@ class Test1148(Test1147):
 
 class Test1149(Test1147):
     spectrum = 'spec($PYSYN_CDBS/calspec/agk_81d266_stis_001.fits)'
+    force = 'extrap'
 
 
 class Test1150(CommCase):

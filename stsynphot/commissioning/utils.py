@@ -68,6 +68,7 @@ class CommCase(object):
     """Base class for commissioning tests."""
     obsmode = None  # Observation mode string
     spectrum = None  # SYNPHOT-like string to construct spectrum
+    force = None
 
     # Default tables are the latest available as of 2016-07-25.
     tables = {'graphtable': 'mtab$07r1502mm_tmg.fits',
@@ -101,9 +102,10 @@ class CommCase(object):
         # Astropy version has no prior knowledge of instrument-specific
         # binset, so it has to be set explicitly.
         if hasattr(self.bp, 'binset'):
-            self.obs = Observation(self.sp, self.bp, binset=self.bp.binset)
+            self.obs = Observation(self.sp, self.bp, force=self.force,
+                                   binset=self.bp.binset)
         else:
-            self.obs = Observation(self.sp, self.bp)
+            self.obs = Observation(self.sp, self.bp, force=self.force)
 
         # Astropy version does not assume a default waveset
         # (you either have it or you don't). If there is no
@@ -115,7 +117,7 @@ class CommCase(object):
 
         self.spref = old_parse_spec(self.spectrum)
         self.bpref = S.ObsBandpass(self.obsmode)
-        self.obsref = S.Observation(self.spref, self.bpref)
+        self.obsref = S.Observation(self.spref, self.bpref, force=self.force)
 
         # Ensure we are comparing in the same units
         self.bpref.convert(self.bp._internal_wave_unit.name)

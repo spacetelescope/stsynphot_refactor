@@ -15,7 +15,7 @@ from ..utils import CommCase
 
 # Local test data
 datafiles = ['earthshine.fits', 'el1215a.fits', 'el1302a.fits', 'el1356a.fits',
-             'el2471a.fits', 'Zodi.fits']
+             'el2471a.fits', 'HS20270651.dat', 'Zodi.fits']
 
 
 def setup_module(module):
@@ -242,12 +242,14 @@ class Test1250(CommCase):
 
 
 class Test1251(Test1250):
-    spectrum = ('rn(icat(k93models,44500,0.0,5.0)*ebmvx(0.5,lmc),'
+    # Original test used lmc but it is no longer supported, so we use lmcavg
+    spectrum = ('rn(icat(k93models,44500,0.0,5.0)*ebmvx(0.5,lmcavg),'
                 'band(johnson,v),15,vegamag)')
 
 
 class Test1252(Test1250):
-    spectrum = ('rn(icat(k93models,44500,0.0,5.0)*ebmvx(0.5,smc),'
+    # Original test used smc but it is no longer supported, so we use smcbar
+    spectrum = ('rn(icat(k93models,44500,0.0,5.0)*ebmvx(0.5,smcbar),'
                 'band(johnson,v),15,vegamag)')
 
 
