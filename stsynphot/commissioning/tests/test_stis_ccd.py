@@ -264,13 +264,15 @@ class Test1143(Test1138):
 class Test1144(CommCase):
     obsmode = 'stis,ccd,g750l,c7751,s52x02'
     spectrum = 'rn(z(spec(qso_template.fits),0.03),band(johnson,v),18,vegamag)'
+    force = 'extrap'
 
 
-class Test1145(Test1144):
+class Test1145(CommCase):
+    obsmode = 'stis,ccd,g750l,c7751,s52x02'
     spectrum = 'rn(z(spec(qso_template.fits),1.0),band(johnson,v),18,vegamag)'
 
 
-class Test1146(Test1144):
+class Test1146(Test1145):
     spectrum = 'rn(z(spec(qso_template.fits),3.0),band(johnson,v),18,vegamag)'
 
 

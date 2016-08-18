@@ -288,6 +288,7 @@ class Test1258(CommCase):
 class Test1259(CommCase):
     obsmode = 'stis,nuvmama,prism,s52x01'
     spectrum = 'spec(HS20270651.dat)'
+    force = 'extrap'
 
 
 class Test1260(Test1259):
