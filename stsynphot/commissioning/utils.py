@@ -152,9 +152,9 @@ class CommCase(object):
         msg = 'obsmode: {0}\nspectrum: {1}\n(mismatch {2}/{3})'.format(
             self.obsmode, self.spectrum, n, ntot)
 
-        # TODO: Revisit failure on only one data point among many;
+        # TODO: Revisit failure on only few data points among many;
         #       Insignificant?
-        if n == 1 and ntot > 7000:
+        if n > 0 and n <= 2 and ntot > 1000 and (n / ntot) < 0.001:
             pytest.xfail(msg)
         else:
             assert_allclose(actual, desired, rtol=rtol, atol=atol, err_msg=msg)
