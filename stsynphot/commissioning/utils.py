@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 # STDLIB
+import sys
 from collections import Iterable
 
 # THIRD-PARTY
@@ -42,6 +43,8 @@ def count_outliers(data, sigma=3.0):
 
     This is as defined in similar method in ``SpecCase``
     in ``astrolib/pysynphot/from_commissioning/conv_base.py``.
+
+    .. note:: This is not used but kept for reference.
 
     Parameters
     ----------
@@ -139,7 +142,8 @@ class CommCase(object):
             wave = wave.value
         return wave
 
-    def _assert_allclose(self, actual, desired, rtol=1e-07, atol=0):
+    def _assert_allclose(self, actual, desired, rtol=1e-07,
+                         atol=sys.float_info.min):
         """``assert_allclose`` only report percentage but we
         also want to know some extra info conveniently."""
         if isinstance(actual, Iterable):
@@ -151,15 +155,9 @@ class CommCase(object):
             abs(actual - desired) > atol + rtol * abs(desired))
         msg = 'obsmode: {0}\nspectrum: {1}\n(mismatch {2}/{3})'.format(
             self.obsmode, self.spectrum, n, ntot)
+        assert_allclose(actual, desired, rtol=rtol, atol=atol, err_msg=msg)
 
-        # TODO: Revisit failure on only few data points among many;
-        #       Insignificant?
-        if n > 0 and n <= 2 and ntot > 1000 and (n / ntot) < 0.001:
-            pytest.xfail(msg)
-        else:
-            assert_allclose(actual, desired, rtol=rtol, atol=atol, err_msg=msg)
-
-    # TODO: Confirm whether non-zero atol is acceptable.
+    # TODO: Confirm whether non-default atol is acceptable.
     #       Have to use this value to avoid AssertionError for very
     #       small non-zero flux values like 1.8e-26 to 2e-311.
     def _compare_nonzero(self, new, old, thresh=0.01, atol=1e-29):
@@ -168,11 +166,10 @@ class CommCase(object):
 
         # Make sure non-zero atol is not too high, otherwise just let it fail.
         if atol > (thresh * min(new.max(), old.max())):
-            atol = 0
+            atol = sys.float_info.min
 
         self._assert_allclose(new[i], old[i], rtol=thresh, atol=atol)
 
-    # TODO: What do we really want here?
     def _compare_zero(self, new, old, thresh=0.01):
         """Special handling for comparison when one of the results
         is zero. This is because ``rtol`` will not work."""
@@ -180,8 +177,7 @@ class CommCase(object):
         try:
             self._assert_allclose(new[i], old[i], rtol=thresh)
         except AssertionError as e:
-            pytest.xfail(str(e))  # Will revisit later
-            # raise  # Uncomment this to revisit
+            pytest.xfail(str(e))  # TODO: Will revisit later
 
     def test_band_wave(self, thresh=0.01):
         """Test bandpass waveset."""
@@ -197,7 +193,7 @@ class CommCase(object):
             self._assert_allclose(wave, self.spref.wave, rtol=thresh)
         except (AssertionError, ValueError) as e:
             if 'bb(' in self.spectrum:
-                pytest.xfail(str(e))
+                pytest.xfail('Blackbody waveset implementations are different')
             else:
                 raise
 
@@ -214,7 +210,7 @@ class CommCase(object):
             self._assert_allclose(wave, self.obsref.wave, rtol=thresh)
         except (AssertionError, ValueError) as e:
             if 'bb(' in self.spectrum:
-                pytest.xfail(str(e))
+                pytest.xfail('Blackbody waveset implementations are different')
             else:
                 raise
 

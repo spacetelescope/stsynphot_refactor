@@ -29,6 +29,10 @@ Like above, but also use ``pytest-html`` plugin for a detail HTML report::
     >>> stsynphot.test('commissioning', remote_data=True,
     ...                args='--slow --html="report.html"')
 
+To rerun only failed tests from the last run, add ``--lf`` in the list of
+``args`` above. This option requires ``pytest-cache`` (enabled by default)
+and is useful for debugging.
+
 """
 from __future__ import absolute_import, division, print_function
 
