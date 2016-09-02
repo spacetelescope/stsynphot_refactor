@@ -9,6 +9,6 @@ from ..utils import ThermCase
 
 class Test1361(ThermCase):
     # Original test used gal1 but it is no longer supported, so we use gal3
-    obsmode = 'wfc3,ir,f160w'
+    obsmode = 'wfc3,ir,f160w'  # IRAF thermback=0.1359
     spectrum = ('rn(spec($PYSYN_CDBS/grid/pickles/dat_uvk/pickles_uk_100.fits)'
                 ',band(cousins,i),28.0,vegamag)*ebmvx(0.04,gal3)')
