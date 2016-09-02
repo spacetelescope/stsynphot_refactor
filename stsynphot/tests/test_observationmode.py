@@ -14,8 +14,7 @@ from astropy.tests.helper import pytest, remote_data
 from astropy.utils.data import get_pkg_data_filename
 
 # SYNPHOT
-from synphot import spectrum as synspectrum
-from synphot import thermal, units
+from synphot import units
 
 # LOCAL
 from .. import observationmode
@@ -86,7 +85,7 @@ class TestThermalComponent(object):
 
     def test_thermal_empty(self):
         c = observationmode.ThermalComponent(self.cp_name, 'clear')
-        assert c.empty
+        assert not c.empty
         assert c.throughput is not None
         assert c.emissivity is None
 
@@ -187,6 +186,8 @@ class TestObservationMode(object):
     def test_thermal_spec(self):
         """Also see TestThermalObservationMode.
         Whitespace in obsmode should not matter.
+        Flux values are from ASTROLIB PYSYNPHOT, except the first value,
+        which is supposed to be zero.
 
         """
         obsmode = observationmode.ObservationMode(
@@ -195,9 +196,9 @@ class TestObservationMode(object):
         w = [6898, 7192, 7486, 7780, 8630, 11190, 13790, 15670, 17954.90234375]
         np.testing.assert_allclose(
             thsp(w).value,
-            [2.556017e-30, 8.38847197e-29, 2.04416858e-27, 3.86172895e-26,
-             1.61682936e-21, 2.49276497e-15, 2.81005993e-11, 1.82601857e-08,
-             8.58820308e-09], rtol=1e-6)
+            [2.911303e-30, 9.52169734e-29, 2.32066138e-27, 4.38458258e-26,
+             1.86992105e-21, 2.90270169e-15, 3.42776351e-11, 2.15179718e-08,
+             7.24300701e-09], rtol=5e-3)
 
 
 @remote_data
@@ -246,7 +247,7 @@ class TestThermalObservationMode(object):
 
     def test_exceptions(self):
         with pytest.raises(NotImplementedError):
-            thmode = observationmode.ThermalObservationMode(
+            observationmode.ThermalObservationMode(
                 'acs,wfc1,f555w', graphtable=GT_FILE, comptable=CP_FILE,
                 thermtable=TH_FILE)
 

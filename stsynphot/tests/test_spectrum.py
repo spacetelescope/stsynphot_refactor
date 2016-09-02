@@ -140,17 +140,17 @@ class TestInterpolateSpectrum(object):
     def test_exceptions(self):
         # Invalid filename format
         with pytest.raises(synexceptions.SynphotError):
-            sp = spectrum.interpolate_spectral_element('dummy.fits', -5)
+            spectrum.interpolate_spectral_element('dummy.fits', -5)
 
         # Invalid interpolation column name
         with pytest.raises(synexceptions.SynphotError):
-            sp = spectrum.interpolate_spectral_element(
+            spectrum.interpolate_spectral_element(
                 irafconvert('cracscomp$acs_wfc_aper_002_syn.fits[mjd#]'),
                 51252)
 
         # Cannot extrapolate and no default throughput
         with pytest.raises(synexceptions.ExtrapolationNotAllowed):
-            sp = spectrum.interpolate_spectral_element(self.fname_acs, -5)
+            spectrum.interpolate_spectral_element(self.fname_acs, -5)
 
 
 @remote_data
@@ -228,10 +228,8 @@ class TestObservationSpectralElement(object):
         obs = spectrum.band(
             'wfc3,ir,f153m', graphtable=GT_FILE, comptable=CP_FILE)
         bg = obs.thermback(thermtable=TH_FILE)
-
-        # 5% difference!
         np.testing.assert_allclose(
-            bg, 5.9774451061328011e-2 * (u.count / u.s / u.pix), rtol=5e-2)
+            bg, 5.9774451061328011e-2 * (u.count / u.s / u.pix), rtol=5e-3)
 
         # ACS has no thermal background
         with pytest.raises(NotImplementedError):
@@ -257,19 +255,18 @@ class TestObservationSpectralElement(object):
 
         # No pixel scale
         with pytest.raises(synexceptions.SynphotError):
-            a = obs1.thermback()
+            obs1.thermback()
 
         # No binset
         with pytest.raises(synexceptions.UndefinedBinset):
-            a = obs1.binned_waverange(5000, 2)
+            obs1.binned_waverange(5000, 2)
         with pytest.raises(synexceptions.UndefinedBinset):
-            a = obs1.binned_pixelrange([5000, 5002])
+            obs1.binned_pixelrange([5000, 5002])
 
     def test_no_obsmode(self):
         """Spectrum without obsmode."""
         with pytest.raises(synexceptions.SynphotError):
-            obs = spectrum.ObservationSpectralElement(
-                Const1D, amplitude=1)
+            spectrum.ObservationSpectralElement(Const1D, amplitude=1)
 
     def test_write_fits(self):
         outfile = os.path.join(self.outdir, 'outspec1.fits')
@@ -289,11 +286,11 @@ class TestObservationSpectralElement(object):
 
     def test_disabled_methods(self):
         with pytest.raises(NotImplementedError):
-            obs = self.obs.taper()
+            self.obs.taper()
         with pytest.raises(NotImplementedError):
-            obs = self.obs.from_file('dummy.fits')
+            self.obs.from_file('dummy.fits')
         with pytest.raises(NotImplementedError):
-            obs = self.obs.from_filter('johnson_v')
+            self.obs.from_filter('johnson_v')
 
     def teardown_class(self):
         shutil.rmtree(self.outdir)

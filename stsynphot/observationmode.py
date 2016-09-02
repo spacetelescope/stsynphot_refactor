@@ -135,8 +135,8 @@ class ThermalComponent(Component):
 
     @property
     def empty(self):
-        """`True` if ``self.emissivity`` is empty."""
-        return self.emissivity is None
+        """`True` if component is empty."""
+        return self.throughput is None and self.emissivity is None
 
     def __str__(self):
         return str(self.emissivity)
@@ -554,9 +554,9 @@ class ThermalObservationMode(BaseObservationMode):
 
         # Merge subsequent wavelength sets
         for component in self.components[index:]:
-            if not component.empty:
-                w = component.emissivity.waveset.value
-                result = merge_wavelengths(result, w)
+            emissivity = component.emissivity
+            if emissivity is not None:
+                result = merge_wavelengths(result, emissivity.waveset.value)
 
         return result
 
@@ -574,8 +574,9 @@ class ThermalObservationMode(BaseObservationMode):
 
         # Refine min and max wavelengths using thermal components
         for component in self.components[1:]:
-            if not component.empty:
-                w = component.emissivity.waveset.value  # Angstrom
+            emissivity = component.emissivity
+            if emissivity is not None:
+                w = emissivity.waveset.value  # Angstrom
                 minw = max(minw, w.min())
                 maxw = min(maxw, w.max())
 
@@ -614,7 +615,7 @@ class ThermalObservationMode(BaseObservationMode):
                 y *= component.throughput(x).value
 
             # Thermal section
-            if not component.empty:
+            if component.emissivity is not None:
                 y += component.emissivity.thermal_source()(x).value  # PHOTLAM
 
         meta = {'expr': '{0} ThermalSpectrum'.format(self._obsmode)}
