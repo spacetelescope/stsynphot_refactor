@@ -608,15 +608,25 @@ class ThermalObservationMode(BaseObservationMode):
         # Create zero-flux spectrum
         x = self._get_wave_intersection()  # Angstrom
         y = np.zeros_like(x, dtype=np.float64)  # PHOTLAM
+        minw, maxw = x[([0, -1], )]
+        sp = SourceSpectrum(Empirical1D, points=x, lookup_table=y)
 
         for component in self.components:
             # Transmissive section (optical passband)
             if component.throughput is not None:
-                y *= component.throughput(x).value
+                sp = sp * component.throughput
 
             # Thermal section
             if component.emissivity is not None:
-                y += component.emissivity.thermal_source()(x).value  # PHOTLAM
+                sp = sp + component.emissivity.thermal_source()
+
+                # Trim spectrum
+                w = sp.waveset.value
+                mask = (w >= minw) & (w <= maxw)
+                x = w[mask]
+                y = sp(x)
+                sp = SourceSpectrum(Empirical1D, points=x, lookup_table=y)
 
         meta = {'expr': '{0} ThermalSpectrum'.format(self._obsmode)}
-        return SourceSpectrum(Empirical1D, points=x, lookup_table=y, meta=meta)
+        sp.meta.update(meta)
+        return sp
