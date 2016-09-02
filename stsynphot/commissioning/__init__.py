@@ -13,11 +13,13 @@ To run only the commissioning tests from source checkout::
 
 Like above, but also use ``pytest-html`` plugin for a detail HTML report::
 
-    python setup.py test -P commissioning --remote-data --args="--slow --html=/full/path/report.html"
+    python setup.py test -P commissioning --remote-data \
+    --args="--slow --html=/full/path/report.html"
 
 To generate the HTML report using ``py.test`` directly::
 
-    py.test stsynphot/commissioning/tests/ --remote-data --slow --html=report.html
+    py.test stsynphot/commissioning/tests/ --remote-data \
+    --slow --html=report.html
 
 To run only the commissioning tests from a Python session::
 
