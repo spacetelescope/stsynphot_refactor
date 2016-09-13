@@ -32,8 +32,11 @@ use_pysynphot = pytest.mark.skipif('not HAS_PYSYNPHOT')
 # Currently, this is here because only commissioning tests are considered
 # slow. If there are slow tests in the core unit tests, we can move this
 # one level higher.
-slow = pytest.mark.skipif(not pytest.config.getoption('--slow'),
-                          reason='need --slow option to run')
+try:
+    slow = pytest.mark.skipif(not pytest.config.getoption('--slow'),
+                              reason='need --slow option to run')
+except AttributeError:  # Not using pytest
+    slow = pytest.mark.skipif(True, reason='need --slow option to run')
 
 __all__ = ['use_pysynphot', 'slow', 'count_outliers', 'CommCase', 'ThermCase']
 
@@ -192,8 +195,11 @@ class CommCase(object):
         try:
             self._assert_allclose(wave, self.spref.wave, rtol=thresh)
         except (AssertionError, ValueError) as e:
+            self._has_obswave = False  # Skip obs waveset tests
             if 'bb(' in self.spectrum:
                 pytest.xfail('Blackbody waveset implementations are different')
+            elif 'unit(' in self.spectrum:
+                pytest.xfail('Flat does not use default waveset anymore')
             else:
                 raise
 
@@ -211,6 +217,9 @@ class CommCase(object):
         except (AssertionError, ValueError) as e:
             if 'bb(' in self.spectrum:
                 pytest.xfail('Blackbody waveset implementations are different')
+            elif 'unit(' in self.spectrum:
+                self._has_obswave = False  # Skip binned flux test
+                pytest.xfail('Flat does not use default waveset anymore')
             else:
                 raise
 
@@ -260,7 +269,15 @@ class CommCase(object):
         if fluxtype == 'zero':
             self._compare_zero(binflux, self.obsref.binflux, thresh=thresh)
         else:  # nonzero
-            self._compare_nonzero(binflux, self.obsref.binflux, thresh=thresh)
+            try:
+                self._compare_nonzero(binflux, self.obsref.binflux,
+                                      thresh=thresh)
+            except AssertionError as e:
+                if 'unit(' in self.spectrum:
+                    pytest.xfail('Flat does not use default waveset anymore:\n'
+                                 '{0}'.format(str(e)))
+                else:
+                    raise
 
     def test_countrate(self, thresh=0.01):
         """Test observation countrate calculations."""
