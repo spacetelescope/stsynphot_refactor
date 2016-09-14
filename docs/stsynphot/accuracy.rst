@@ -11,4 +11,6 @@ should expect that some calculations will give different results.
 
 An extensive commissioning process will be performed to verify that the results
 produced by ``stsynphot`` are either as good as, or better than, the results
-obtained using ASTROLIB PYSYNPHOT for the same calculations.
+obtained using ASTROLIB PYSYNPHOT for the same calculations. Here are the
+`commissioning test results <http://ssb.stsci.edu/stsynphot/report.html>`_
+(might take time to load as it contains results for over 9800 tests).
