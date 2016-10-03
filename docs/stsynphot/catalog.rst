@@ -2,9 +2,8 @@
 
 .. _stsynphot_catalog:
 
-********
-Catalogs
-********
+Catalogs and Spectral Atlases
+=============================
 
 There are several spectral atlases consisting of both observed and model data
 that are available for use with `stsynphot`.
@@ -19,7 +18,7 @@ Details are also available from
 .. _stsynphot-cat-grid:
 
 Grids
-=====
+-----
 
 Some catalogs come with a grid of basis spectra which are indexed for various
 combinations of these properties:
