@@ -21,7 +21,6 @@ from astropy.extern import six
 
 # ASTROPY
 from astropy import log
-from astropy import units as u
 
 # SYNPHOT
 try:
