@@ -14,6 +14,6 @@ from ._astropy_init import *
 if not _ASTROPY_SETUP_:
     # STSYNPHOT UI
     from .config import getref, showref
-    from .spectrum import band, ebmvx
+    from .spectrum import band, ebmvx, Vega
     from .catalog import grid_to_spec
     from .spparser import parse_spec
