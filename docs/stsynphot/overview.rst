@@ -10,7 +10,7 @@ to only clarify things that are unique in **stsynphot**. In particular, this
 package adds functionalities similar to ASTROLIB PYSYNPHOT that are specific to
 STScI database or supported telescopes, including but not limited to:
 
-* :ref:`stsynphot-database`
+* :ref:`stsynphot-crds-overview`
 * :ref:`stsynphot_catalog`
 * Observation modes, et cetera (see :ref:`stsynphot_spec_manip`)
 * :ref:`stsynphot-language-parser`
