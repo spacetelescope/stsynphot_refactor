@@ -1,3 +1,5 @@
+.. doctest-skip-all
+
 .. _stsynphot-refdata:
 
 Reference Data
@@ -11,181 +13,178 @@ Reference data has its history in IRAF SYNPHOT::
     (cmptbl = "mtab$*_tmc.fits") Instrument component table
     (mode = "a")
 
-In **stsynphot**, reference data is managed via its configuration system... add link to installation section???
+In **stsynphot**, this is managed via its configuration system
+(``stsynphot.config.conf``). Its overview and setup are explained in
+:ref:`stsynphot-installation-setup`. As you can see in its
+`stsynphot.cfg <https://github.com/spacetelescope/stsynphot_refactor/blob/master/stsynphot/stsynphot.cfg>`_
+file, the reference data management has been expanded to include the following:
 
-# UNTIL HERE
+* ``rootdir``, which is used in the absence of ``PYSYN_CDBS`` environment
+  variable
+* ``graphtable``, the instrument graph table
+* ``comptable``, the instrument component table
+* ``thermtable``, the instrument thermal component table
+* ``waveset_array``, default wavelength set (mostly for backward compatibility)
+* ``waveset``, description string for ``waveset_array``
+* ``area``, the telescope collecting area in :math:`\text{cm}^{2}`
+* ``clear_filter``, the string value indicating a clear filter in graph and
+  component tables
+* ``wavecatfile``, the file containing wavelength bins for all supported
+  instruments
+* ``detectorfile``, the file containing pixel scales and sizes for all
+  supported instruments
+* ``irafshortcutfile``, the file containing IRAF-style alias for data
+  sub-directories relative to ``rootdir``
 
-... is expanded to manage the following:
+For the same telescope, most of the above configurable items are
+set-and-forget, except for graph and component tables, which can be updated
+from time to time as component throughput curves are revised. Leaving their
+filenames as wildcards (``*``) ensures that you pick up the latest versions.
+If you need to use specific tables (e.g., to reproduce an older result), you
+can also set them to specific filenames. It is also possible to
+:ref:`provide your data for other telescopes <stsynphot-other-telescopes>`.
 
-* Instrument graph table (``graphtable``)
-* Instrument component table (``comptable``)
-* Instrument thermal component table (``thermtable``)
-* :ref:`Telescope collecting area <stsynphot-area>` (``area``)
-* Default :ref:`wavelength set <stsynphot-wavelength-table>` (``waveset``)
+For backward compatibilty, :func:`~stsynphot.config.showref` and
+:func:`~stsynphot.config.getref` convenience functions are provided::
 
-The current settings can be displayed with :func:`~stsynphot.refs.showref`.
-To use custom settings or reset any changes back to software default, you can
-use :func:`~stsynphot.refs.setref`. Meanwhile, :func:`~stsynphot.refs.getref`
-also returns the current settings, but as a Python :py:class:`dict` instead of
-printing to screen. For example:
+    >>> import stsynphot as STS
+    >>> STS.showref()
+    graphtable: /my/local/dir/cdbs/mtab/0bf2050hm_tmg.fits
+    comptable : /my/local/dir/cdbs/mtab/0ac1951am_tmc.fits
+    thermtable: /my/local/dir/cdbs/mtab/tae17277m_tmt.fits
+    area      : 45238.93416
+    waveset   : Min: 500, Max: 26000, Num: 10000, Delta: None, Log: True
+     [stsynphot.config]
+    >>> STS.getref()
+    {'area': 45238.93416,
+     'comptable': '/my/local/dir/cdbs/mtab/0ac1951am_tmc.fits',
+     'graphtable': '/my/local/dir/cdbs/mtab/0bf2050hm_tmg.fits',
+     'thermtable': '/my/local/dir/cdbs/mtab/tae17277m_tmt.fits',
+     'waveset': 'Min: 500, Max: 26000, Num: 10000, Delta: None, Log: True'}
 
->>> S.showref()
-thermtable: /my/local/dir/cdbs/mtab/tae17277m_tmt.fits
-   waveset: Min: 500, Max: 26000, Num: 10000.0, Delta: None, Log: True
- comptable: /my/local/dir/cdbs/mtab/yah1742rm_tmc.fits
-graphtable: /my/local/dir/cdbs/mtab/yah1742qm_tmg.fits
-      area: 45238.93416
->>> S.setref(graphtable='new_tmg.fits', comptable='new_tmc.fits', area=1)
->>> S.showref()
-thermtable: /my/local/dir/cdbs/mtab/tae17277m_tmt.fits
-   waveset: Min: 500, Max: 26000, Num: 10000.0, Delta: None, Log: True
- comptable: new_tmc.fits
-graphtable: new_tmg.fits
-      area: 1
->>> S.setref()  # Reset to software default
->>> S.showref()
-thermtable: /my/local/dir/cdbs/mtab/tae17277m_tmt.fits
-   waveset: Min: 500, Max: 26000, Num: 10000.0, Delta: None, Log: True
- comptable: /my/local/dir/cdbs/mtab/yah1742rm_tmc.fits
-graphtable: /my/local/dir/cdbs/mtab/yah1742qm_tmg.fits
-      area: 45238.93416
->>> S.refs.getref()
-{'area': 45238.93416,
- 'comptable': '/my/local/dir/cdbs/mtab/yah1742rm_tmc.fits',
- 'graphtable': '/my/local/dir/cdbs/mtab/yah1742qm_tmg.fits',
- 'thermtable': '/my/local/dir/cdbs/mtab/tae17277m_tmt.fits',
- 'waveset': 'Min: 500, Max: 26000, Num: 10000.0, Delta: None, Log: True'}
+To change a configurable item's value, use the machinery of
+:ref:`Astropy configuration system <astropy:astropy_config>`.
+Examples shown are only for ``graphtable`` but they are similar for others
+(in fact, usually all the graph and component tables are changed together)::
 
-Changing the default tables is not recommended unless you know what you are
-doing because **stsynphot** always uses the most up-to-date version in your
-``$PYSYN_CDBS/mtab/`` directory.
+    >>> STS.conf.graphtable = '/path/to/my_new_tmg.fits'  # Entire session
+    >>> STS.conf.reload('graphtable')  # Reload from stsynphot.cfg
+    >>> STS.conf.reload()  # Reload everything
+    >>> STS.conf.reset('graphtable')  # Reset to software default
+    >>> STS.conf.reset()  # Reset everything
+    >>> with STS.conf.set_temp('graphtable', '/path/to/my_new_tmg.fits'):
+    ...     pass  # graphtable will only change inside this block
 
-The HST bandpass for available
-:ref:`observation modes <stsynphot-obsmode-bandpass>`
+
+.. _refdata-graph-comp-tab:
+
+Graph and Component Tables
+--------------------------
+
+The HST bandpass for available :ref:`observation modes <stsynphot-obsmode>`
 are defined by ``graphtable`` and ``comptable``. In addition, for IR
 instruments, thermal component is defined by ``thermtable``. These files are
-described in detail in :ref:`Appendix C <stsynphot-appendixc>`. It is also
-possible to
-:ref:`provide your own tables and telescope area for other telescopes <stsynphot-other-telescopes>`.
+described in detail in :ref:`Appendix C <stsynphot-appendixc>`.
 
 The tables decide which throughput files will be used for a particular
 observation mode. They can be displayed using
-:meth:`~stsynphot.obsbandpass.ObsModeBandpass.showfiles`. A bandpass that does
-not rely on the tables does not have this feature. For example:
+:meth:`~stsynphot.spectrum.ObservationSpectralElement.showfiles`.
+A bandpass that does not rely on the tables does not have this feature.
+For example::
 
->>> bp_hst = S.ObsBandpass('wfc3,ir,f105w')
->>> bp_hst.name
-'wfc3,ir,f105w'
->>> bp_hst.showfiles()
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_primary_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_secondary_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_pom_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_csm_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_fold_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_mir1_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_mir2_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_mask_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_rcp_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_f105w_004_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_win_001_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_qe_003_syn.fits
-/my/local/dir/cdbs/comp/wfc3/wfc3_ir_cor_004_syn.fits
->>> bp_nonhst = S.ObsBandpass('johnson,v')
->>> bp_nonhst.name
-'/my/local/dir/cdbs/comp/nonhst/johnson_v_004_syn.fits'
->>> bp_nonhst.showfiles()
-AttributeError: 'TabularSpectralElement' object has no attribute 'showfiles'
+    >>> bp_hst = STS.band('wfc3,ir,f105w')
+    >>> bp_hst.showfiles()
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_primary_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_secondary_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_pom_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_csm_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_fold_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_mir1_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_mir2_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_mask_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_rcp_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_f105w_004_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_win_001_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_qe_003_syn.fits
+    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_cor_004_syn.fits  [...]
 
-Every HST observation mode has an optimal binned wavelength set (``binset``) for
-constructing an :ref:`stsynphot-observation`. The ``binset`` is set according to
-a pre-defined wavelength catalog in ``stsynphot.locations.wavecat`` and can be
-accessed via :meth:`~stsynphot.observationmode.BaseObservationMode.bandWave`.
-The default ``waveset`` shown above is used for when such a ``binset`` is not
-available. The example below illustrate both situations:
-
->>> S.locations.wavecat
-'/my/installation/path/stsynphot/data/wavecat.dat'
->>> bp_hst.obsmode.bandWave()
-array([  7000.,   7001.,   7002., ...,  17998.,  17999.,  18000.])
->>> bp_nonhst.obsmode.bandWave()
-AttributeError: 'TabularSpectralElement' object has no attribute 'obsmode'
+    >>> from synphot import SpectralElement
+    >>> bp_nonhst = SpectralElement.from_filter('johnson_v')
+    >>> bp_nonhst.showfiles()
+    AttributeError: 'SpectralElement' object has no attribute 'showfiles'
 
 
 .. _stsynphot-area:
 
 Area
-====
+----
 
-Some calculations require the telescope collecting area in
-:math:`\textnormal{cm}^{2}`. For example, flux conversion involving counts or
-``obmag``, and  :ref:`bandpass unit response <stsynphot-formula-uresp>`
-calculation.
+Some calculations require the telescope collecting area; e.g., flux conversion
+involving count/OBMAG or :ref:`synphot:synphot-formula-uresp` calculation.
+When an area is required, you may use the ``area`` value from **stsynphot**
+configuration for convenience, as it is always set to the telescope collecting
+area.
 
-When an area is required, a spectrum object first looks in its ``primary_area``
-class attribute. If it is undefined, the object then takes the value from
-``stsynphot.refs.PRIMARY_AREA``, which defaults to the area of the HST primary
-mirror but can be changed with :func:`~stsynphot.refs.setref` (see
-:ref:`stsynphot-refdata`).
+For :class:`~stsynphot.spectrum.ObservationSpectralElement` constructed
+with :func:`~stsynphot.spectrum.band`, it also has its own
+`~stsynphot.spectrum.ObservationSpectralElement.area` property, which is
+usually the same as the configuration value *except* when overwritten by the
+value (in :math:`\text{cm}^{2}`) of ``PRIMAREA`` keyword in the graph table's
+primary header. This behavior is retained from ASTROLIB PYSYNPHOT to be
+backward compatible. When in doubt, always provide the desired telescope area
+explicitly by passing it into the ``area`` keyword, where applicable.
 
-For non-HST calculations, you can set the primary area to the value of your
-telescope right after you import **stsynphot** and just leave it at that for the
-rest of the session. For HST calculations, you do not have to do anything
-because it is the default value. When in doubt, check the ``primary_area`` class
-attributes of your spectrum objects.
 
-Composite spectra (`~stsynphot.spectrum.CompositeSourceSpectrum` and
-`~stsynphot.spectrum.CompositeSpectralElement`) inherit their
-``primary_area`` values from either of the input spectra, if defined. If both
-input spectra have defined but different values, then an error is raised.
+.. _refdata-wavecatfile:
 
-Bandpass object constructed from observation mode string
-(`~stsynphot.obsbandpass.ObsModeBandpass`) inherits its ``primary_area`` value
-from `~stsynphot.tables.GraphTable`, which in turn read its value from
-``PRIMAREA`` keyword in the table primary header of the given ``*_tmg.fits``
-file.
+Wavelength Catalog
+------------------
 
-`~stsynphot.observation.Observation` inherits its ``primary_area`` from the
-input bandpass.
+Every HST observation mode has an optimally binned wavelength set (``binset``),
+which ensures proper coverage and resolution, for constructing an
+:ref:`synphot:synphot_observation`. The ``binset`` is set according to a
+pre-defined wavelength catalog in ``wavecatfile`` and can be accessed via
+`~stsynphot.spectrum.ObservationSpectralElement.binset`. For example::
+
+    >>> from synphot import Observation
+    >>> obs = Observation(STS.Vega, bp_hst, binset=bp_hst.binset)
+    >>> bp_hst.binset
+    <Quantity [  7000.,  7001.,  7002.,...,  17998., 17999., 18000.] Angstrom>
+    >>> obs.binset
+    <Quantity [  7000.,  7001.,  7002.,...,  17998., 17999., 18000.] Angstrom>
+
+For more details on how the catalog works, see the `~stsynphot.wavetable`
+module. In most cases, there is no need to modify the catalog file as you can
+simply use Numpy or other methods to generate your own wavelength array to be
+used as ``binset`` should the catalog is insufficient.
 
 
 .. _stsynphot-wavelength-table:
 
 Wavelength Table
-================
+----------------
 
-The wavelength table is a feature inherited from IRAF STSDAS SYNPHOT, in which
-it is known as ``wavetab``. It is used to specify the name of a file containing
-a list of wavelength values that determine the wavelength grid to be used in the
-calculations and plotting. In **stsynphot**, this is equivalent to ``waveset``,
-``binwave``, or ``binset``, depending on the type of spectral objects that
-you are working with.
+The wavelength table is a feature inherited from IRAF SYNPHOT, in which it is
+known as ``wavetab``. It is used to specify the name of a file containing
+a list of wavelength values that determine the wavelength grid to be used in
+calculations and plotting. In **synphot** and **stsynphot**, this has been
+replaced by various alternatives such as
+`~synphot.spectrum.BaseSpectrum.waveset`,
+`~synphot.observation.Observation.binset`, or simply providing sampling of
+your choice in :py:meth:`~object.__call__`.
 
-The default ``waveset`` can be changed using :func:`~stsynphot.refs.setref`.
-This is used when a spectral object has no instrument-specific (see below)
-or custom wavelength set (e.g., a Gaussian source has its own values that
-tightly sample the peak). The default grid consists of 10000 points covering
-500 to 26000 Angstroms (sufficient for most HST calculations), spaced
-logarithmically with :func:`numpy.logspace` such that:
+Nevertheless, for backward compatibility, the ``waveset_array`` is provided
+and its default consists of 10000 points covering approximately 500 to 26000
+Angstrom (sufficient for most HST calculations), spaced logarithmically with
+:func:`~numpy.logspace` such that:
 
 .. math::
 
-       \log \lambda = \log \lambda_{min} + (\log \lambda_{max} - \log \lambda_{min}) \frac{i}{N}
+    \log \lambda = \log \lambda_{\text{min}} + (\log \lambda_{\text{max}} - \log \lambda_{\text{min}}) \frac{i}{N}
 
 where
 
 * :math:`N` is the number of data points
 * :math:`i` is the index value, starting from 0
-* :math:`\lambda_{min}` and :math:`\lambda_{max}` are the wavelength limits
-
-Instrument-specific wavelength sets (``binwave``) are stored in a data file
-defined by ``stsynphot.locations.wavecat``, which is "wavecat.dat" that comes
-with the software by default; The wavelength grid contains optimal coverage
-and resolution that is appropriate for each HST instrument.
-
-Instead of modifying ``wavecat``, which requires the knowledge of how
-`~stsynphot.wavetable` works, it is easier to just provide your own
-``binset``. You can generate wavelength values using :func:`numpy.arange` (also
-accessible as ``stsynphot.Waveset()``). If you wish to save the values in a
-file, follow the instructions in :ref:`stsynphot-io` but ignore the second
-column (for flux or throughput). The wavelength values must be monotonically
-increasing or decreasing. See :ref:`stsynphot_tutorial_6` for a working example.
+* :math:`\lambda_{\text{min}}` and :math:`\lambda_{\text{max}}` are the
+  wavelength limits

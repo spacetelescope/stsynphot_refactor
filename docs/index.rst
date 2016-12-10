@@ -30,7 +30,7 @@ cross-instrument simulations and examine the transmission curve of the
 Optical Telescope Assembly (OTA) and spectra of calibration targets.
 
 If you use **stsynphot** in your work, please cite it as,
-"*Lim, P. L. 2016, stsynphot User's Guide
+"*Lim, P. L., et al. 2016, stsynphot User's Guide
 (Baltimore, MD: STScI), http://stsynphot.readthedocs.io/en/latest/*"
 
 If you have questions or concerns regarding the software, please open an issue
@@ -103,7 +103,8 @@ synphot data file locations within the Python session**. For example::
     >>> print(syn_conf.johnson_v_file)
     /my/local/dir/cdbs//comp/nonhst/johnson_v_004_syn.fits
 
-You can also take advantage of :ref:`astropy:astropy_config` to manage
+You can also take advantage of
+:ref:`Astropy configuration system <astropy:astropy_config>` to manage
 **stsynphot** configuration and data files. For example, you can copy
 `stsynphot.cfg <https://github.com/spacetelescope/stsynphot_refactor/blob/master/stsynphot/stsynphot.cfg>`_
 to your ``$HOME/.astropy/config/`` directory and modify it to your needs::
@@ -243,7 +244,7 @@ Using **stsynphot**
    stsynphot/refdata
    stsynphot/tutorials
    stsynphot/commissioning
-##   stsynphot/appendixa
+   stsynphot/appendixa
 ##   stsynphot/appendixb
 ##   stsynphot/appendixc
 
@@ -277,6 +278,10 @@ API
 References
 ==========
 
+.. _stsynphot-ref-calzetti1994:
+
+Calzetti, D., Kinney, A. L., & Storchi-Bergmann, T. 1994, ApJ, 429, 582
+
 .. _stsynphot-ref-demarchi2004:
 
 De Marchi, G. et al. 2004, ISR ACS 2004-08: Detector Quantum Efficiency and Photometric Zero Points of the ACS (Baltimore, MD: STScI), http://www.stsci.edu/hst/acs/documents/isrs/isr0408.pdf
@@ -293,9 +298,25 @@ Earley, J. 1968, An Efficient Context-Free Parsing Algorithm, PhD thesis, Carneg
 
 Earley, J. 1970, An Efficient Context-Free Parsing Algorithm, CACM, 13(2), 94
 
+.. _stsynphot-ref-francis1991:
+
+Francis, P. J., Hewett, P. C., Foltz, C. B., Chaffee, F. H., Weymann, R. J., & Morris, S. L. 1991, ApJ, 373, 465
+
+.. _stsynphot-ref-gunn1983:
+
+Gunn, J. E. & Stryker, L. L. 1983, ApJS, 52, 121
+
 .. _stsynphot-ref-horne1988:
 
 Horne, K. 1988, in New Directions in Spectophotometry: A Meeting Held in Las Vegas, NV, March 28-30, Application of Synthetic Photometry Techniques to Space Telescope Calibration, ed. A. G. Davis Philip, D. S. Hayes, & S. J. Adelman (Schenectady, NY: L. Davis Press), 145
+
+.. _stsynphot-ref-jacoby1984:
+
+Jacoby, G. H., Hunter, D. A., & Christian, C. A. 1984, ApJS, 56, 257
+
+.. _stsynphot-ref-kinney1996:
+
+Kinney, A. L., Calzetti, D., Bohlin, R. C., McQuade, K., Storchi-Bergmann, T., & Schmitt, H. R. 1996, ApJ, 467, 38
 
 .. _stsynphot-ref-koornneef1986:
 
@@ -321,6 +342,14 @@ Lim, P. L., Diaz, R. I., & Laidler, V. 2015, PySynphot User's Guide (Baltimore, 
 
 Lim, P. L. 2016, synphot User's Guide (Baltimore, MD: STScI), http://synphot.readthedocs.io/en/latest/
 
+.. _stsynphot-ref-pickles1998:
+
+Pickles, A. J. 1998, PASP, 110, 863
+
 .. _stsynphot-ref-robitaille2013:
 
 Robitaille, T. P., et al. 2013, A&A, 558, A33
+
+.. _stsynphot-ref-strecker1979:
+
+Strecker, D. W. et al. 1979, ApJS, 41, 501
