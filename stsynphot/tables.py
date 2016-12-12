@@ -179,8 +179,6 @@ class GraphTable(object):
             # Find the entry corresponding to the component named
             # 'default', because thats the one we'll use if we don't
             # match anything in the modes list
-            defaultindex = np.where(self.keywords[nodes] == 'default')
-
             if 'default' in self.keywords[nodes]:
                 dfi = np.where(self.keywords[nodes] == 'default')[0][0]
                 outnode = self.outnodes[nodes[0][dfi]]
@@ -225,7 +223,8 @@ class GraphTable(object):
 
         if outnode < 0:
             log.debug('outnode={0} (stop condition)'.format(outnode))
-            raise exceptions.IncompleteObsmode('{0}'.format(modes))
+            raise exceptions.IncompleteObsmode(
+                '{0}, choose from {1}'.format(modes, self.keywords[nodes]))
 
         if inmodes != used_modes:
             raise exceptions.UnusedKeyword(
