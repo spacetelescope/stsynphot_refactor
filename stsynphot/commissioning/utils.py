@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 # STDLIB
+import os
 import sys
 from collections import Iterable
 
@@ -77,9 +78,10 @@ class CommCase(object):
     force = None
 
     # Default tables are the latest available as of 2016-07-25.
-    tables = {'graphtable': 'mtab$07r1502mm_tmg.fits',
-              'comptable': 'mtab$07r1502nm_tmc.fits',
-              'thermtable': 'mtab$tae17277m_tmt.fits'}
+    tables = {
+        'graphtable': os.path.join('mtab$OLD_FILES', '07r1502mm_tmg.fits'),
+        'comptable': os.path.join('mtab$OLD_FILES', '07r1502nm_tmc.fits'),
+        'thermtable': 'mtab$tae17277m_tmt.fits'}
 
     def setup_class(self):
         """Subclass needs to define ``obsmode`` and ``spectrum``

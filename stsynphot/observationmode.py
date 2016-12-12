@@ -379,6 +379,11 @@ class ObservationMode(BaseObservationMode):
 
         for throughput_name in self._throughput_filenames:
             parkey = self._parkey_from_filename(throughput_name)
+
+            # Hack for WFPC2 ramp filters
+            if parkey == 'wave' and self.modes[0] == 'wfpc2':
+                parkey = 'lrf'
+
             cdict_key = (throughput_name, self.pardict.get(parkey))
 
             if cdict_key not in self._component_dict:
