@@ -232,8 +232,6 @@ F110W filter::
 Using **stsynphot**
 ===================
 
-# UNTIL HERE
-
 .. toctree::
    :maxdepth: 1
 
@@ -245,8 +243,8 @@ Using **stsynphot**
    stsynphot/tutorials
    stsynphot/commissioning
    stsynphot/appendixa
-##   stsynphot/appendixb
-##   stsynphot/appendixc
+   stsynphot/appendixb
+   stsynphot/appendixc
 
 
 .. _stsynphot_api:
@@ -278,6 +276,22 @@ API
 References
 ==========
 
+.. _stsynphot-ref-bessell1983:
+
+Bessell, M. S. 1983, PASP, 95, 480
+
+.. _stsynphot-ref-bessell1988:
+
+Bessell, M. S. & Brett, J. M. 1988, PASP, 100, 1134
+
+.. _stsynphot-ref-bohlin2001:
+
+Bohlin, R. C., Dickinson, M. E., & Calzetti, D. 2001, AJ, 122, 2118
+
+.. _stsynphot-ref-bohlin2004:
+
+Bohlin, R. C. & Gilliland, R. L. 2004, AJ, 127, 3508
+
 .. _stsynphot-ref-calzetti1994:
 
 Calzetti, D., Kinney, A. L., & Storchi-Bergmann, T. 1994, ApJ, 429, 582
@@ -302,9 +316,25 @@ Earley, J. 1970, An Efficient Context-Free Parsing Algorithm, CACM, 13(2), 94
 
 Francis, P. J., Hewett, P. C., Foltz, C. B., Chaffee, F. H., Weymann, R. J., & Morris, S. L. 1991, ApJ, 373, 465
 
+.. _stsynphot-ref-fukugita1996:
+
+Fukugita, M., Ichikawa, T., Gunn, J. E., Doi, M., Shimasaku, K., & Schneider, D. P. 1996, AJ, 111, 1748
+
+.. _stsynphot-ref-gunn2001:
+
+`Gunn, J. E., Hogg, D., Finkbeiner, D., & Schlegel, D. 2001, Photometry White Paper <http://www.sdss.org/dr3/algorithms/sdssphot.ps>`_
+
 .. _stsynphot-ref-gunn1983:
 
 Gunn, J. E. & Stryker, L. L. 1983, ApJS, 52, 121
+
+.. _stsynphot-ref-harris1991:
+
+Harris, H., Baum, W., Hunter, D., & Kreidl, T. 1991, AJ, 101, 677
+
+.. _stsynphot-ref-holberg2006:
+
+Holberg, J. B. & Bergeron, P. 2006, AJ, 132, 1221
 
 .. _stsynphot-ref-horne1988:
 
@@ -313,6 +343,10 @@ Horne, K. 1988, in New Directions in Spectophotometry: A Meeting Held in Las Veg
 .. _stsynphot-ref-jacoby1984:
 
 Jacoby, G. H., Hunter, D. A., & Christian, C. A. 1984, ApJS, 56, 257
+
+.. _stsynphot-ref-johnson1965:
+
+Johnson, H. L. 1965, ApJ, 141, 923
 
 .. _stsynphot-ref-kinney1996:
 
@@ -334,6 +368,10 @@ Laidler, V., et al. 2005, Synphot User's Guide, Version 5.0 (Baltimore, MD: STSc
 
 Laidler, V., et al. 2008, Synphot Data User's Guide, Version 1.2 (Baltimore, MD: STScI)
 
+.. _stsynphot-ref-landolt1983:
+
+Landolt, A. U. 1983, AJ, 88, 439
+
 .. _stsynphot-ref-lim2015:
 
 Lim, P. L., Diaz, R. I., & Laidler, V. 2015, PySynphot User's Guide (Baltimore, MD: STScI), https://pysynphot.readthedocs.io/en/latest/
@@ -341,6 +379,26 @@ Lim, P. L., Diaz, R. I., & Laidler, V. 2015, PySynphot User's Guide (Baltimore, 
 .. _stsynphot-ref-lim2016:
 
 Lim, P. L. 2016, synphot User's Guide (Baltimore, MD: STScI), http://synphot.readthedocs.io/en/latest/
+
+.. _stsynphot-ref-lub1977:
+
+Lub, J. & Pel, J. W. 1977, A&A, 54, 137
+
+.. _stsynphot-ref-lupton1999:
+
+Lupton, R. H., Gunn, J. E., & Szalay A. S. 1999, AJ, 118, 1406
+
+.. _stsynphot-ref-maiz2006:
+
+Maiz Apellaniz, J. 2006, AJ, 131, 1184
+
+.. _stsynphot-ref-morrissey2007:
+
+Morrissey, P. et al. 2007, ApJS, 173, 682
+
+.. _stsynphot-ref-oke1983:
+
+Oke, J. B. & Gunn, J. E. 1983, ApJ, 266, 713
 
 .. _stsynphot-ref-pickles1998:
 
@@ -350,6 +408,14 @@ Pickles, A. J. 1998, PASP, 110, 863
 
 Robitaille, T. P., et al. 2013, A&A, 558, A33
 
+.. _stsynphot-ref-smith2002:
+
+Smith, J. A. et al. 2002, AJ, 123, 2121
+
 .. _stsynphot-ref-strecker1979:
 
 Strecker, D. W. et al. 1979, ApJS, 41, 501
+
+.. _stsynphot-ref-vanduinen1975:
+
+van Duinen, R. J., Aalders, J. W. G., Wesselius, P. R., Wildeman, K. J., Wu, C. C., Luinge, W., & Snel, D. 1975, A&A, 39, 159

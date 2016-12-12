@@ -1,0 +1,29 @@
+.. |acs_ramp| replace:: :ref:`Ramp filter <stsynphot_acs_parameterized_ramp>`
+.. |aper_par| replace:: :ref:`EE radius <stsynphot-parameterized-aper>`
+.. |cont_par| replace:: :ref:`Decontamination <stsynphot-parameterized-contamination>`
+.. |mjd_par| replace:: :ref:`stsynphot-parameterized-mjd`
+.. |nic_therm| replace:: :ref:`Thermal component <stsynphot-parameterized-temperature>`
+.. |wfc3_bkg| replace:: :ref:`Background calculation <stsynphot-parameterized-temperature>`
+.. |wfc3_qyc| replace:: :ref:`Quantum yield correction <stsynphot-wfc3-qyc>`
+.. |wfpc2_lrf| replace:: :ref:`lrf# <stsynphot-wfpc2-ramp>`
+.. |wfpc2_quad| replace:: :ref:`fquvn fquvn33 fqch4n fqch4n33 fqch4n15 fqch4p15 polq polq_par polq_perp polqn33 polqn18 polqp15 <stsynphot-wfpc2-quad>`
+.. |nonhst_cousins| replace:: :ref:`cousins <stsynphot-nonhst-cousins>`
+.. |nonhst_cousins2| replace:: :ref:`Cousins <stsynphot-nonhst-cousins>`
+.. |nonhst_galex| replace:: :ref:`galex <stsynphot-nonhst-galex>`
+.. |nonhst_johnson| replace:: :ref:`johnson <stsynphot-nonhst-johnson>`
+.. |nonhst_johnson2| replace:: :ref:`Johnson <stsynphot-nonhst-johnson>`
+.. |nonhst_landolt| replace:: :ref:`landolt <stsynphot-nonhst-landolt>`
+.. |nonhst_landolt2| replace:: :ref:`Landolt <stsynphot-nonhst-landolt>`
+.. |nonhst_sdss| replace:: :ref:`sdss <stsynphot-nonhst-sdss>`
+.. |nonhst_stromgren| replace:: :ref:`stromgren <stsynphot-nonhst-stromgren>`
+.. |nonhst_stromgren2| replace:: :ref:`Stromgren <stsynphot-nonhst-stromgren>`
+.. |bohlin2004| replace:: :ref:`Bohlin & Gilliland (2004) <stsynphot-ref-bohlin2004>`
+.. |holberg2006| replace:: :ref:`Holberg & Bergeron (2006) <stsynphot-ref-holberg2006>`
+.. |maiz2006| replace:: :ref:`Maiz Apellaniz (2006) <stsynphot-ref-maiz2006>`
+.. |nonhst_ans| replace:: :ref:`ans <stsynphot-nonhst-ans>`
+.. |nonhst_baum| replace:: :ref:`baum <stsynphot-nonhst-baum>`
+.. |nonhst_bessell| replace:: :ref:`bessell <stsynphot-nonhst-bessell>`
+.. |nonhst_eso| replace:: :ref:`eso <stsynphot-nonhst-eso>`
+.. |nonhst_kpno| replace:: :ref:`kpno <stsynphot-nonhst-kpno>`
+.. |nonhst_steward| replace:: :ref:`steward <stsynphot-nonhst-steward>`
+.. |nonhst_walraven| replace:: :ref:`walraven <stsynphot-nonhst-walraven>`

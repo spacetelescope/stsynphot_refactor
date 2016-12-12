@@ -1,11 +1,14 @@
+.. doctest-skip-all
+
 .. _stsynphot-appendixc:
 
-***********************************
 Appendix C: TMG, TMC, and TMT Files
-***********************************
+===================================
+
+.. note:: This is currently only available for HST.
 
 **stsynphot** computes the combined throughput for an
-:ref:`observing mode <stsynphot-obsmode-bandpass>` (``obsmode``) with the
+:ref:`observing mode <stsynphot-obsmode>` (``obsmode``) with the
 following steps:
 
 #. The comma-separated ``obsmode`` is broken into individual keywords,
@@ -33,12 +36,12 @@ following steps:
    they are resampled onto the specified wavelength set (if necessary) and
    multiplied together to form the combined throughput.
 
-The :meth:`~stsynphot.obsbandpass.ObsModeBandpass.thermback` method actually
-traverses the graph table *twice*; Once in the usual fashion, using the
-``COMPNAME`` column; And once to obtain the optical train necessary for thermal
-calculations for IR detectors, using the ``THCOMPNAME`` column. These trains
-differ because of the existence of opaque but emissive components in the optical
-path, such as the spider that supports the HST secondary mirror.
+The :meth:`~stsynphot.spectrum.ObservationSpectralElement.thermback` method
+actually traverses the graph table *twice*; Once in the usual fashion, using
+the ``COMPNAME`` column; And once to obtain the optical train necessary for
+thermal calculations for IR detectors, using the ``THCOMPNAME`` column.
+These trains differ because of the existence of opaque but emissive components
+in the optical path, such as the spider that supports the HST secondary mirror.
 
 The graph table is used to obtain the train of thermally emissive components in
 the same way it is used for optical components, except that:
@@ -51,11 +54,11 @@ the same way it is used for optical components, except that:
   TMC file.
 
 Further details and examples can be found in
-:ref:`Diaz (2012) <synphot-ref-diaz2012>`.
+:ref:`Diaz (2012) <stsynphot-ref-diaz2012>`.
 
 .. _fig-tmg:
 
-.. figure:: _static/tmg.png
+.. figure:: images/tmg.png
    :width: 600px
    :alt: TMG file
 
@@ -66,7 +69,7 @@ Further details and examples can be found in
 
 .. _fig-tmc:
 
-.. figure:: _static/tmc.png
+.. figure:: images/tmc.png
    :width: 600px
    :alt: TMG file
 
@@ -77,7 +80,7 @@ Further details and examples can be found in
 .. _stsynphot-graph:
 
 Graph Table (TMG)
-=================
+-----------------
 
 The instrument graph table has 6 columns, as follow:
 
@@ -137,14 +140,14 @@ increase as one goes down the light path in the instrument.
 .. raw:: html
 
   <div style="text-align:center">
-  Figure 3: Example contents of a graph (TMG) table.
+  Figure 3: Example contents of a graph (TMG) table.<br/><br/>
   </div>
 
 
 .. _stsynphot-master-comp:
 
 Component Table (TMC, TMT)
-==========================
+--------------------------
 
 TMC and TMT files are the master component and thermal component lookup tables,
 respectively. Both of them have the same 4 columns, as follow:
@@ -152,13 +155,13 @@ respectively. Both of them have the same 4 columns, as follow:
 ============ =============================== =======================
 Column Name  Description                     Data Format
 ============ =============================== =======================
-TIME [2]_    Insertion time (not used)       String of 26 characters
+TIME [2]_    Insertion time                  String of 26 characters
 COMPNAME     Component name                  String of 18 characters
 FILENAME     Throughput file name and column String of 50 characters
 COMMENT [1]_ Comment (not used)              String of 68 characters
 ============ =============================== =======================
 
-.. [2] The insertion time column is used by the **stsynphot**.
+.. [2] The insertion time column is used by **stsynphot**.
        It contains the time that the component file was delivered.
        It is included for documentation and to simplify traceability of the
        data files. The time format is ``yyyymmdd:HHMMSS``.
@@ -169,7 +172,7 @@ columns, respectively.
 
 The ``FILENAME`` column provides the filename of the
 :ref:`throughput table <stsynphot-throughput>`, which includes abbreviated
-path names, as defined in ``stsynphot.locations.CONVERTDICT``.
+path names, as defined in ``stsynphot.config.conf.irafshortcutfile``.
 The table must be in binary FITS format.
 The entry for a :ref:`parameterized component <stsynphot-parameterized>`
 should contain its filename followed by square brackets containing the
@@ -210,7 +213,7 @@ a new version of a component throughput is delivered to CRDS.
 
   <div style="text-align:center">
   Figure 4: Example contents of a TMC table, taken from
-  <i>z4k1425fm_tmc.fits</i>.
+  <i>z4k1425fm_tmc.fits</i>.<br/>
   </div>
 
 .. _fig-5:
@@ -229,19 +232,20 @@ a new version of a component throughput is delivered to CRDS.
 
   <div style="text-align:center">
   Figure 5: Example contents of a TMT table, taken from
-  <i>tae17277m_tmt.fits</i>.
+  <i>tae17277m_tmt.fits</i>.<br/><br/>
   </div>
 
 
 .. _stsynphot-throughput:
 
 Throughput Table
-================
+----------------
 
 The throughput table contains the component throughput as a function of
-wavelength (see :ref:`stsynphot-io`). It may also contain an optional column
-of estimated errors or uncertainties associated with the throughput values;
-The error column must have the following naming convention:
+wavelength (see :ref:`synphot:synphot-fits-format-overview`).
+It may also contain an optional column of estimated errors or uncertainties
+associated with the throughput values; The error column must have the following
+naming convention:
 
 +-----------+----------------+--------------------+
 |Wavelength |Throughput      |Error               |
@@ -259,7 +263,7 @@ The error column must have the following naming convention:
 
 Wavelength values must be in monotonically ascending or descending order.
 Wavelength unit must be specified for the column (see
-:ref:`stsynphot-wave-units` for acceptable units).
+:ref:`synphot:synphot-wave-units` for acceptable units).
 Throughput and error columns do not need units, but you may specify them as
 "transmission", "qe", "dn", or "photon" (or any of their unique abbreviations)
 for documentation. Values in all columns must be 64-bit floating-point numbers.
@@ -286,7 +290,7 @@ For more details, see :ref:`stsynphot-parameterized`.
 .. raw:: html
 
   <div style="text-align:center">
-  Figure 6: Example contents of a simple throughput table.
+  Figure 6: Example contents of a simple throughput table.<br/>
   </div>
 
 .. _fig-7:
@@ -304,7 +308,7 @@ For more details, see :ref:`stsynphot-parameterized`.
 
   <div style="text-align:center">
   Figure 7: Example contents of a throughput table parameterized for the
-  ACS FR647M ramp filter.
+  ACS FR647M ramp filter.<br/>
   </div>
 
 .. _fig-8:
@@ -321,7 +325,7 @@ For more details, see :ref:`stsynphot-parameterized`.
 
   <div style="text-align:center">
   Figure 8: Example contents of a throughput table parameterized for MJD
-  to characterize time-dependent change in STIS sensitivity.
+  to characterize time-dependent change in STIS sensitivity.<br/>
   </div>
 
 .. _fig-9:
@@ -339,14 +343,14 @@ For more details, see :ref:`stsynphot-parameterized`.
 
   <div style="text-align:center">
   Figure 9: Example contents of a throughput table parameterized for
-  encircled energy in ACS/WFC detector.
+  encircled energy in ACS/WFC detector.<br/><br/>
   </div>
 
 
 .. _stsynphot_thermal_em:
 
 Thermal Emissivity Table
-========================
+------------------------
 
 The thermal emissivity table contains the component emissivity
 as a function of wavelength. This is only relevant for IR instruments with
@@ -364,15 +368,15 @@ is used to specify a component temperature, overriding the default temperature
 present in the ``DEFT`` header keyword (see below).
 
 In addition, it must also contain the following keywords in its table
-(extension 1) header:
+(Extension 1) header:
 
-* ``BEAMFILL`` specifies the fraction of the optical beam filled by this
+* ``BEAMFILL``, which specifies the fraction of the optical beam filled by this
   component. This value is usually 1, but it depends on the precise optical
   layout of the instrument.
-* ``DEFT`` specifies the default temperature (in Kelvin) of the component. This
-  is the temperature that will be used in thermal calculations unless
-  it is overridden in the ``obsmode``.
-* ``THTYPE`` specifies the type of thermal component that is described
+* ``DEFT``, which specifies the default temperature (in Kelvin) of the
+  component. This is the temperature that will be used in thermal calculations
+  unless   it is overridden in the ``obsmode``.
+* ``THTYPE``, which specifies the type of thermal component that is described
   by this file:
 
   * "opaque" component is the type that partially obstructs the beam.
@@ -390,26 +394,28 @@ In addition, it must also contain the following keywords in its table
   when traversing the :ref:`graph table <stsynphot-graph>`. ``THMODE`` contains
   the ``obsmode`` keyword which points to the associated ``THCOMPNAME``.
 
-The example below displays the header keywords mentioned above:
+The example below displays the header keywords mentioned above::
 
->>> from astropy.io import fits
->>> filename = os.path.join(
-...     os.environ['PYSYN_CDBS'], 'comp', 'nicmos', 'nic2_f110w_002_th.fits')
->>> with fits.open(filename) as pf:
-...     print(pf[1].header)
-....
-BEAMFILL=                   1. / Fraction of beam filled by this component
-DEFT    =                 77.1 / Default temperature in kelvins
-THTYPE  = 'THRU    '           / Thermal type (opaque/thru/numeric/clear)
-THCMPNAM= 'nic2_f110w'         / Name of thermal component
-THMODE  = 'f110w   '           / Keyword in obsmode to specify temperature
-....
+    >>> import os
+    >>> from astropy.io import fits
+    >>> filename = os.path.join(
+    ...     os.environ['PYSYN_CDBS'], 'comp', 'nicmos',
+    ...     'nic2_f110w_002_th.fits')
+    >>> with fits.open(filename) as pf:
+    ...     print(pf[1].header)
+    ....
+    BEAMFILL=                   1. / Fraction of beam filled by this component
+    DEFT    =                 77.1 / Default temperature in kelvins
+    THTYPE  = 'THRU    '           / Thermal type (opaque/thru/numeric/clear)
+    THCMPNAM= 'nic2_f110w'         / Name of thermal component
+    THMODE  = 'f110w   '           / Keyword in obsmode to specify temperature
+    ....
 
 
 .. _stsynphot-parameterized:
 
 Parameterized Keyword
-=====================
+---------------------
 
 Parameterized keywords are used to access
 :ref:`throughput tables <stsynphot-throughput>` for which the throughput is a
@@ -421,9 +427,9 @@ indicates to **stsynphot** that a parameterized keyword is being used.
 A parameterized throughput table contains several throughput columns,
 each for a specified value of the parameterized component. When an arbitrary
 value is given, **stsynphot** will linearly interpolate the throughput values
-between the two closest keyword values; This is done using the
-`~stsynphot.spectrum.InterpolatedSpectralElement` class. If the table's
-primary (extension 0) header contains ``PARAMS=WAVELENGTH``, wavelength shift
+between the two closest keyword values; This is done using
+:func:`~stsynphot.spectrum.interpolate_spectral_element`. If the table's
+primary (Extension 0) header contains ``PARAMS=WAVELENGTH``, wavelength shift
 will be done before the interpolation.
 
 Extrapolation is only allowed if the table's primary header contains an
@@ -446,15 +452,15 @@ a function of position (wavelength) on the filter. Therefore, its throughput
 table contains several throughput columns, each evaluated at a different
 central wavelength. :ref:`Figure 7 <fig-7>` shows part of the throughput
 table for ACS FR647M ramp filter, where the first throughput column is
-for 5366 Angstroms, the second for 5586.8 Angstroms, and so forth. In this case,
-a request for 5400 Angstroms will result in interpolation between the first
+for 5366 Angstrom, the second for 5586.8 Angstrom, and so forth. In this case,
+a request for 5400 Angstrom will result in interpolation between the first
 two columns.
 
 Another example is the STIS :ref:`time-dependent <stsynphot-parameterized-mjd>`
 change in sensitivity, as illustrated in :ref:`Figure 8 <fig-8>`. In this case,
-when "mjd#value" is given as part of an ``obsmode``, the parameterized column(s)
-will be used and interpolated, as needed. If "mjd#value" is not given, then the
-default ``THROUGHPUT`` column is used.
+when "mjd#value" is given as part of an ``obsmode``, the parameterized
+column(s) will be used and interpolated, as needed. If "mjd#value" is not
+given, then the default ``THROUGHPUT`` column is used.
 
 Similarly, parameterization of
 :ref:`encircled energy <stsynphot-parameterized-aper>` via aperture size is
