@@ -541,7 +541,7 @@ def band(*args, **kwargs):
     an observation mode string.
 
     See :func:`ObservationSpectralElement.from_obsmode` and
-    :ref:`synphot-obsmode`.
+    :ref:`stsynphot-obsmode`.
 
     """
     return ObservationSpectralElement.from_obsmode(*args, **kwargs)

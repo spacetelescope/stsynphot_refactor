@@ -11,8 +11,8 @@ package adds functionalities similar to ASTROLIB PYSYNPHOT that are specific to
 STScI database or supported telescopes, including but not limited to:
 
 * :ref:`stsynphot-crds-overview`
-* :ref:`stsynphot_catalog`
-* Observation modes, et cetera (see :ref:`stsynphot_spec_manip`)
+* :ref:`stsynphot-spec-atlas`
+* :ref:`stsynphot-obsmode`
 * :ref:`stsynphot-language-parser`
 
 Spectra are constructed from observation modes or catalogs using files from

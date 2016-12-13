@@ -12,7 +12,7 @@ This bandpass is the wavelength-dependent sensitivity curve of the associated
 photometer or spectrophotometer. Its overview is given at
 :ref:`observing mode overview <stsynphot-obsmode-overview>`.
 A complete list of ``obsmode`` keywords can be found in
-:ref:`<stsynphot-appendixb`.
+:ref:`<stsynphot-appendixb>`.
 
 Observation mode can be passed into :func:`~stsynphot.spectrum.band`, which
 supports the strings below, to create a bandpass:

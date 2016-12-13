@@ -8,7 +8,7 @@ Source Spectrum
 In addition to
 :ref:`source spectrum in synphot <synphot:source-spectrum-main>`, **stsynphot**
 adds the capability to use :ref:`stsynphot-crds-overview` for creating sources
-from :ref:`stsynphot_catalog`. The `~stsynphot.spectrum` module also provides
+from :ref:`stsynphot-spec-atlas`. The `~stsynphot.spectrum` module also provides
 the following for convenience, especially for those who are used to having them
 available in ASTROLIB PYSYNPHOT:
 
