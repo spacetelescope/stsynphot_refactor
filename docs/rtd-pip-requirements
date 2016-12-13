@@ -1,6 +1,6 @@
 numpy
 matplotlib
 Cython
-scipy
+scipy>=0.14
 -e git+https://github.com/astropy/astropy.git#egg=astropy
 -e git+https://github.com/spacetelescope/synphot_refactor.git#egg=synphot
