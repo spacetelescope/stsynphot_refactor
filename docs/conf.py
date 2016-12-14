@@ -110,6 +110,8 @@ release = package.__version__
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
 
+html_static_path = '_static'
+
 # Logo
 html_logo = '_static/stsci_logo.png'
 
