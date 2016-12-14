@@ -1,5 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""This module handles :ref:`catalog spectra <stsynphot_catalog>`."""
+"""This module handles :ref:`catalog spectra <stsynphot-spec-atlas>`."""
 from __future__ import absolute_import, division, print_function
 
 # STDLIB
@@ -23,7 +23,7 @@ except ImportError:  # This is so RTD would build successfully
 # LOCAL
 from . import exceptions, stio
 
-__all__ = ['grid_to_spec']
+__all__ = ['reset_cache', 'grid_to_spec']
 
 _PARAM_NAMES = ['T_eff', 'metallicity', 'log_g']
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.

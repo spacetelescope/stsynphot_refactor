@@ -1,8 +1,8 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """This module handles ``stsynphot``-specific I/O for:
 
-    * FITS - See `astropy.io.fits`
-    * Basic ASCII - See `astropy.io.ascii`
+* FITS - See `astropy.io.fits`
+* Basic ASCII - See `astropy.io.ascii`
 
 """
 from __future__ import absolute_import, division, print_function
@@ -69,21 +69,22 @@ def irafconvert(iraf_filename, sep='$'):
 
     Acceptable IRAF formats:
 
-        * ``$path/file`` - ``path`` assumed to be environment variable.
-        * ``path$file`` - ``path`` is special IRAF shortcut for CDBS
-          data directory (case-insensitive).
+    * ``$path/file`` - ``path`` assumed to be environment variable.
+    * ``path$file`` - ``path`` is special IRAF shortcut for CDBS
+      data directory (case-insensitive).
 
     Notes on special IRAF shortcut:
 
-        * ``synphot`` points to software data directory.
-        * ``crrefer`` points to ``stsynphot.config.conf.rootdir``.
-        * Otherwise, decoded based on
-          ``stsynphot.config.conf.irafshortcutfile``
-          that must contain the following named columns:
-            #. ``IRAFNAME`` - The shortcut for look-up. If multiple matches
-               are found, the first match is used.
-            #. ``RELPATH`` - Path relative to
-               ``stsynphot.config.conf.rootdir``.
+    * ``synphot`` points to software data directory.
+    * ``crrefer`` points to ``stsynphot.config.conf.rootdir``.
+    * Otherwise, decoded based on
+      ``stsynphot.config.conf.irafshortcutfile``
+      that must contain the following named columns:
+
+        #. ``IRAFNAME`` - The shortcut for look-up. If multiple matches
+           are found, the first match is used.
+        #. ``RELPATH`` - Path relative to
+           ``stsynphot.config.conf.rootdir``.
 
     If separator is not found, input is returned as-is.
 
@@ -218,7 +219,7 @@ def _read_table(filename, ext, dtypes):
 
     Returns
     -------
-    data : `astropy.io.fits.fitsrec.FITS_rec` or `astropy.table.table.Table`
+    data : `~astropy.io.fits.FITS_rec` or `~astropy.table.Table`
         Data table.
 
     Raises
@@ -254,12 +255,12 @@ def read_graphtable(filename, tab_ext=1):
 
     Table must contain the following named columns:
 
-        #. ``COMPNAME`` - Component name, usually filter name (str)
-        #. ``KEYWORD`` - Usually instrument name (str)
-        #. ``INNODE`` - Input node number (int)
-        #. ``OUTNODE``- Output node number (int)
-        #. ``THCOMPNAME`` - Thermal component name, usually filter name (str)
-        #. ``COMMENT`` - Comment (str)
+    #. ``COMPNAME`` - Component name, usually filter name (str)
+    #. ``KEYWORD`` - Usually instrument name (str)
+    #. ``INNODE`` - Input node number (int)
+    #. ``OUTNODE``- Output node number (int)
+    #. ``THCOMPNAME`` - Thermal component name, usually filter name (str)
+    #. ``COMMENT`` - Comment (str)
 
     Example:
 
@@ -285,11 +286,11 @@ def read_graphtable(filename, tab_ext=1):
 
     Returns
     -------
-    primary_area : `astropy.units.quantity.Quantity` or `None`
+    primary_area : `~astropy.units.quantity.Quantity` or `None`
         Value of PRIMAREA keyword in primary header.
         Always `None` for ASCII file.
 
-    data : `astropy.io.fits.fitsrec.FITS_rec` or `astropy.table.table.Table`
+    data : `~astropy.io.fits.FITS_rec` or `~astropy.table.Table`
         Data table.
 
     Raises
@@ -327,27 +328,15 @@ def read_comptable(filename, tab_ext=1):
 
     Table must contain the following named columns:
 
-        #. ``TIME`` - Useafter date and time in the format of
-           ``MMM DD YYYY HH:MM:SS`` (str)
-        #. ``COMPNAME`` - Component name, usually a combination of
-           instrument/detector and filter names (str)
-        #. ``FILENAME`` - Path to corresponding throughput file in the
-           format of ``path_var$filename`` (str)
-        #. ``COMMENT`` - Comment (str)
+    #. ``TIME`` - Useafter date and time in the format of
+       ``MMM DD YYYY HH:MM:SS`` (str)
+    #. ``COMPNAME`` - Component name, usually a combination of
+       instrument/detector and filter names (str)
+    #. ``FILENAME`` - Path to corresponding throughput file in the
+       format of ``path_var$filename`` (str)
+    #. ``COMMENT`` - Comment (str)
 
-    Example:
-
-    """
-    '\n+--------------------+----------------+----------------------------------------+---------------------------+'  # noqa
-    '\n|TIME                |COMPNAME        |FILENAME                                |COMMENT                    |'  # noqa
-    '\n+====================+================+========================================+===========================+'  # noqa
-    '\n|oct 30 2013 15:44:42|acs_blocking1   |cracscomp$acs_blocking1_001_syn.fits    |throughput curve           |'  # noqa
-    '\n+--------------------+----------------+----------------------------------------+---------------------------+'  # noqa
-    '\n|apr 19 2000 12:36:38|wfpc2_polq_par  |crwfpc2comp$wfpc2_polq_par_004_syn.fits |redeliver with new filename|'  # noqa
-    '\n+--------------------+----------------+----------------------------------------+---------------------------+'  # noqa
-    '\n|apr 18 2000 21:02:45|stis_2p4_ech_176|crstiscomp$stis_2p4_ech_176_003_syn.fits|redeliver with new filename|'  # noqa
-    '\n+--------------------+----------------+----------------------------------------+---------------------------+'  # noqa
-    """
+    See :ref:`stsynphot-master-comp` for more details.
 
     Parameters
     ----------
@@ -361,7 +350,7 @@ def read_comptable(filename, tab_ext=1):
 
     Returns
     -------
-    data : `astropy.io.fits.fitsrec.FITS_rec` or `astropy.table.table.Table`
+    data : `~astropy.io.fits.FITS_rec` or `~astropy.table.Table`
         Data table.
 
     """
@@ -375,8 +364,8 @@ def read_catalog(filename, tab_ext=1):
 
     Table must contain the following named columns:
 
-        #. ``INDEX`` - Grid values (str)
-        #. ``FILENAME`` - Relative file path and column name (str)
+    #. ``INDEX`` - Grid values (str)
+    #. ``FILENAME`` - Relative file path and column name (str)
 
     Example:
 
@@ -402,7 +391,7 @@ def read_catalog(filename, tab_ext=1):
 
     Returns
     -------
-    data : `astropy.io.fits.fitsrec.FITS_rec` or `astropy.table.table.Table`
+    data : `~astropy.io.fits.FITS_rec` or `~astropy.table.Table`
         Data table.
 
     """
@@ -417,9 +406,9 @@ def read_wavecat(filename):
     Comment lines are allowed and will be ignored.
     Columns are automatically named:
 
-        #. ``OBSMODE`` - Observation mode.
-        #. ``FILENAME`` - Corresponding wavelength table filename
-           or parameters.
+    #. ``OBSMODE`` - Observation mode.
+    #. ``FILENAME`` - Corresponding wavelength table filename
+       or parameters.
 
     Example::
 
@@ -437,7 +426,7 @@ def read_wavecat(filename):
 
     Returns
     -------
-    data : `astropy.table.table.Table`
+    data : `~astropy.table.Table`
         Data table.
 
     """
@@ -467,12 +456,12 @@ def read_waveset(filename, wave_unit=u.AA):
     filename : str
         Wavelength table filename. Must be ASCII format.
 
-    wave_unit : str or `astropy.units.core.Unit`
+    wave_unit : str or `~astropy.units.Unit`
         Wavelength unit.
 
     Returns
     -------
-    waveset : `astropy.units.quantity.Quantity`
+    waveset : `~astropy.units.quantity.Quantity`
         Wavelength set array.
 
     """
@@ -495,10 +484,10 @@ def read_detector_pars(filename):
     Comment lines are allowed and will be ignored.
     Columns are automatically named:
 
-        #. ``OBSMODE`` - Observation mode.
-        #. ``SCALE`` - Pixel scale in arcseconds.
-        #. ``NX`` - X dimension in pixels.
-        #. ``NY`` - Y dimension in pixels.
+    #. ``OBSMODE`` - Observation mode.
+    #. ``SCALE`` - Pixel scale in arcseconds.
+    #. ``NX`` - X dimension in pixels.
+    #. ``NY`` - Y dimension in pixels.
 
     Example::
 
@@ -516,7 +505,7 @@ def read_detector_pars(filename):
 
     Returns
     -------
-    data : `astropy.table.table.Table`
+    data : `~astropy.table.Table`
         Data table.
 
     """
@@ -533,10 +522,10 @@ def read_interp_spec(filename, tab_ext=1):
 
     Table must contain two or more columns:
 
-        #. ``WAVELENGTH`` - Wavelength values.
-        #. ``PAR#VAL1`` - First parameterized column.
-        #. ``PAR#VAL2`` - Second parameterized column.
-        #. ...
+    #. ``WAVELENGTH`` - Wavelength values.
+    #. ``PAR#VAL1`` - First parameterized column.
+    #. ``PAR#VAL2`` - Second parameterized column.
+    #. ...
 
     Example:
 
@@ -560,7 +549,7 @@ def read_interp_spec(filename, tab_ext=1):
 
     Returns
     -------
-    data : `astropy.io.fits.fitsrec.FITS_rec`
+    data : `~astropy.io.fits.FITS_rec`
         Data table.
 
     wave_unit : str

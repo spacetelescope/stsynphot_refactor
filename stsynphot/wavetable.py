@@ -45,7 +45,7 @@ class WaveCatalog(object):
 
     For each observation mode, its wavelength table is defined
     by filename or parameter string. When it is accessed with
-    :func:`__getitem__`, the string is replaced by the actual
+    :py:meth:`~object.__getitem__`, the string is replaced by the actual
     wavelengths array. If filename is given, it is parsed with
     :func:`stsynphot.stio.read_waveset`.
 
@@ -54,7 +54,7 @@ class WaveCatalog(object):
     fname : str
         Wavecat filename.
 
-    wave_unit : str or `astropy.units.core.Unit`
+    wave_unit : str or `~astropy.units.Unit`
         Wavelength unit.
 
     Attributes
@@ -62,7 +62,7 @@ class WaveCatalog(object):
     file : str
         Wavecat filename.
 
-    wave_unit : `astropy.units.core.Unit`
+    wave_unit : `~astropy.units.Unit`
         Wavelength unit.
 
     lookup : dict
@@ -188,7 +188,7 @@ def load_wavecat(wave_unit=u.AA):
 
     Parameters
     ----------
-    wave_unit : str or `astropy.units.core.Unit`
+    wave_unit : str or `~astropy.units.Unit`
         See `WaveCatalog`.
 
     """

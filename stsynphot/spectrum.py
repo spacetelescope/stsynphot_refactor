@@ -28,8 +28,8 @@ except ImportError:  # This is so RTD would build successfully
 # LOCAL
 from . import stio
 
-__all__ = ['interpolate_spectral_element', 'ObservationSpectralElement',
-           'band', 'ebmvx', 'load_vega', 'Vega']
+__all__ = ['reset_cache', 'interpolate_spectral_element',
+           'ObservationSpectralElement', 'band', 'ebmvx', 'load_vega', 'Vega']
 
 _interpfilepatt = re.compile('\[(?P<col>.*?)\]')
 _REDLAWS = {}  # Cache previously loaded reddening laws
@@ -231,7 +231,7 @@ class ObservationSpectralElement(SpectralElement):
     Parameters
     ----------
     modelclass, kwargs
-        See `BaseSpectrum`.
+        See `~synphot.spectrum.BaseSpectrum`.
 
     obsmode : `~stsynphot.observationmode.ObservationMode`
         Observation mode for this bandpass.
@@ -463,7 +463,7 @@ class ObservationSpectralElement(SpectralElement):
             If `None`, ``self.waveset`` is used.
 
         kwargs : dict
-            Keywords accepted by :func:`synphot.stio.write_fits_spec`.
+            Keywords accepted by :func:`synphot.specio.write_fits_spec`.
 
         """
         bkeys = {
@@ -541,7 +541,7 @@ def band(*args, **kwargs):
     an observation mode string.
 
     See :func:`ObservationSpectralElement.from_obsmode` and
-    :ref:`synphot-obsmode`.
+    :ref:`stsynphot-obsmode`.
 
     """
     return ObservationSpectralElement.from_obsmode(*args, **kwargs)
@@ -555,14 +555,14 @@ def ebmvx(redlaw_name, ebv):
     ----------
     redlaw_name : str
         Reddening law model name
-        (see :func:`synphot.reddening.ReddeningLaw.from_extinction_model`).
+        (see :meth:`synphot.reddening.ReddeningLaw.from_extinction_model`).
         Choose from 'lmc30dor', 'lmcavg', 'mwavg', 'mwdense', 'mwrv21',
         'mwrv40', 'smcbar', 'xgalsb', 'gal3', or `None`.
         ``gal3`` and `None` are same as ``mwavg`` and used for testing only.
 
     ebv : float or `~astropy.units.quantity.Quantity`
         :math:`E(B-V)` value in magnitude. See
-        :func:`synphot.reddening.ReddeningLaw.extinction_curve`.
+        :meth:`synphot.reddening.ReddeningLaw.extinction_curve`.
 
     Returns
     -------

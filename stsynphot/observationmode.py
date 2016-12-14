@@ -33,8 +33,8 @@ from .spectrum import Vega, interpolate_spectral_element
 from .tables import GraphTable, CompTable
 from .wavetable import WAVECAT
 
-__all__ = ['Component', 'ThermalComponent', 'BaseObservationMode',
-           'ObservationMode', 'ThermalObservationMode']
+__all__ = ['reset_cache', 'Component', 'ThermalComponent',
+           'BaseObservationMode', 'ObservationMode', 'ThermalObservationMode']
 
 _band_patt = re.compile(r'band\((.*?)\)', re.IGNORECASE)
 
@@ -176,16 +176,16 @@ class BaseObservationMode(object):
 
     .. note::
 
-        `modes` for parameterized mode is set such that the parameterized
+        ``modes`` for parameterized mode is set such that the parameterized
         value is stripped away; e.g., ``'acs,wfc1,f555w,mjd#53000'``
         becomes ``['acs', 'wfc1', 'f555w', 'mjd#']``. Instead, the
-        parameterized value is kept in `pardict`; e.g., `'mjd#53000'``
+        parameterized value is kept in ``pardict``; e.g., ``'mjd#53000'``
         becomes ``{'mjd': 53000.0}``.
 
-        `pixscale` is set from ``stsynphot.config.conf.detectorfile``,
-        which is parsed with :func:`synphot.stio.read_detector_pars`.
+        ``pixscale`` is set from ``stsynphot.config.conf.detectorfile``,
+        which is parsed with :func:`stsynphot.stio.read_detector_pars`.
 
-        `binset` is set by ``stsynphot.wavetable.WAVECAT``.
+        ``binset`` is set by ``stsynphot.wavetable.WAVECAT``.
 
     Parameters
     ----------
@@ -600,9 +600,10 @@ class ThermalObservationMode(BaseObservationMode):
 
         The calculations start with zero-flux spectrum.
         Then for each component:
-            #. Multiply with optical throughput.
-            #. Add in thermal source spectrum from
-               :func:`synphot.thermal.ThermalSpectralElement.thermal_source`.
+
+        #. Multiply with optical throughput.
+        #. Add in thermal source spectrum from
+           :meth:`synphot.thermal.ThermalSpectralElement.thermal_source`.
 
         Returns
         -------

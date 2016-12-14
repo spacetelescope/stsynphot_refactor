@@ -149,6 +149,7 @@ man_pages = [('index', project.lower(), project + u' Documentation',
 # -- Options for intersphinx ---------------------------------------------------
 
 intersphinx_mapping.update({
+        'astropy': ('http://docs.astropy.org/en/latest/', None),
         'synphot': ('http://synphot.readthedocs.org/en/latest/', None)})
 
 ## -- Options for the edit_on_github extension ---------------------------------
