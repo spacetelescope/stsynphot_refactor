@@ -23,7 +23,7 @@ except ImportError:  # This is so RTD would build successfully
 # LOCAL
 from . import exceptions, stio
 
-__all__ = ['grid_to_spec']
+__all__ = ['reset_cache', 'grid_to_spec']
 
 _PARAM_NAMES = ['T_eff', 'metallicity', 'log_g']
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.

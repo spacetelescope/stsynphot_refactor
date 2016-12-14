@@ -12,9 +12,9 @@ from :ref:`stsynphot-spec-atlas`. The `~stsynphot.spectrum` module also provides
 the following for convenience, especially for those who are used to having them
 available in ASTROLIB PYSYNPHOT:
 
-* :func:`~stsynphot.spectrum.embvx`, which shortens the two-step creation of an
+* :func:`~stsynphot.spectrum.ebmvx`, which shortens the two-step creation of an
   extinction curve from a reddening law into one. In addition, it also accepts
-  `None` and `'gal3'` as a reddening law to be backward compatible.
+  `None` and ``'gal3'`` as a reddening law to be backward compatible.
   For performance, any loaded reddening law is cached, which can be cleared
   using :func:`~stsynphot.spectrum.reset_cache`.
 * ``stsynphot.spectrum.Vega``, which is a preloaded

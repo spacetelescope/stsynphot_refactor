@@ -1,11 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""This module handles graph and component (optical or thermal) tables.
-
-.. warning::
-
-    Use this module, *not* `stsynphot.graphtab`.
-
-"""
+"""This module handles graph and component (optical or thermal) tables."""
 from __future__ import absolute_import, division, print_function
 from astropy.extern import six
 

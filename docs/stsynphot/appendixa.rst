@@ -76,8 +76,7 @@ available in CRDS are from "the Grids of ATLAS9-ODFNEW Models and Fluxes" from
 for more details.
 The atlas data files are organized in a similar naming convention as
 :ref:`stsynphot-appendixa-kurucz1993`, and are easily accessible using
-:func:`~stsynphot.spectrum.grid_to_spec` (also see
-:ref:`stsynphot-spec-atlas`).
+:func:`~stsynphot.catalog.grid_to_spec` (also see :ref:`stsynphot-spec-atlas`).
 
 The example below generates a spectrum with metallicity :math:`\log Z = +0.1`,
 temperature :math:`T_{\text{eff}} = 10000 \text{K}`, and gravity
@@ -172,7 +171,7 @@ means :math:`\log g = 3.0`::
     >>> wave = spec['WAVELENGTH']
     >>> flux = spec['g30']
 
-The easier way is to use :func:`~stsynphot.spectrum.grid_to_spec` (also see
+The easier way is to use :func:`~stsynphot.catalog.grid_to_spec` (also see
 :ref:`stsynphot-spec-atlas`). Equivalent to the example above::
 
     >>> import stsynphot as STS
@@ -438,7 +437,7 @@ are calculated with a cloud model, valid across the entire parameter range. See
 for more details.
 The atlas data files are organized in a similar naming convention as
 :ref:`stsynphot-appendixa-kurucz1993`, and are easily accessible using
-:func:`~stsynphot.spectrum.grid_to_spec` (also see
+:func:`~stsynphot.catalog.grid_to_spec` (also see
 :ref:`stsynphot-spec-atlas`).
 
 The example below generates a spectrum with metallicity :math:`\log Z = +0.1`,

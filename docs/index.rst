@@ -9,8 +9,8 @@ Synthetic Photometry for HST/JWST (stsynphot)
 Introduction
 ============
 
-**stsynphot** is an extension to :ref:`synphot:astropy_synphot`
-(:ref:`Lim 2016 <stsynphot-ref-lim2016>`) that implements
+**stsynphot** is an extension to :ref:`synphot <synphot:astropy_synphot>`
+(:ref:`Lim et al. 2016 <stsynphot-ref-lim2016>`) that implements
 synthetic photometry package for HST (and soon JWST) support. The documentation
 in this package is meant to *complement* that of **synphot**, which already
 documents the non-observatory specific functionalities. It is recommended that
@@ -58,7 +58,7 @@ for a future release):
 
 * From standalone release::
 
-    pip install git+https://github.com/spacetelescope/stsynphot_refactor.git@0.1b1
+    pip install git+https://github.com/spacetelescope/stsynphot_refactor.git@0.1b2
 
 * From source (example shown is for the ``dev`` version)::
 
@@ -130,6 +130,7 @@ to your ``$HOME/.astropy/config/`` directory and modify it to your needs::
     (e.g. ``set_temp()``) to manage **stsynphot** configuration items.
     However, due to the complicated relationships between instrument-specific
     data files, it is not recommended unless you know what you are doing.
+    Also see :ref:`stsynphot-refdata`.
 
 
 .. _stsynphot_getting_started:
@@ -164,14 +165,14 @@ slash in path name does not affect software operation)::
     '/my/local/dir/cdbs//calspec/alpha_lyr_stis_008.fits'
 
 Plot the built-in Vega spectrum, which is used to compute VEGAMAG. This is
-pre-loaded at start-up for convenience:
+pre-loaded at start-up for convenience::
 
-.. plot::
-    :include-source:
+    >>> from synphot import units
+    >>> STS.Vega.plot(right=20000, flux_unit=units.FLAM, title='Vega spectrum')
 
-    import stsynphot as STS
-    from synphot import units
-    STS.Vega.plot(right=20000, flux_unit=units.FLAM, title='Vega spectrum')
+.. image:: stsynphot/images/vega_spec.png
+    :width: 600px
+    :alt: Vega spectrum.
 
 Construct a bandpass for HST/ACS camera using WFC1 detector and F555W filter;
 Then, show all the individual throughput files used in its construction::
@@ -267,8 +268,10 @@ API
    :no-inheritance-diagram:
 
 .. automodapi:: stsynphot.tables
+   :no-inheritance-diagram:
 
 .. automodapi:: stsynphot.wavetable
+   :no-inheritance-diagram:
 
 
 .. _stsynphot_biblio:
@@ -378,7 +381,7 @@ Lim, P. L., Diaz, R. I., & Laidler, V. 2015, PySynphot User's Guide (Baltimore, 
 
 .. _stsynphot-ref-lim2016:
 
-Lim, P. L. 2016, synphot User's Guide (Baltimore, MD: STScI), http://synphot.readthedocs.io/en/latest/
+Lim, P. L., et al. 2016, synphot User's Guide (Baltimore, MD: STScI), http://synphot.readthedocs.io/en/latest/
 
 .. _stsynphot-ref-lub1977:
 

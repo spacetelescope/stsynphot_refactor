@@ -12,7 +12,7 @@ This bandpass is the wavelength-dependent sensitivity curve of the associated
 photometer or spectrophotometer. Its overview is given at
 :ref:`observing mode overview <stsynphot-obsmode-overview>`.
 A complete list of ``obsmode`` keywords can be found in
-:ref:`<stsynphot-appendixb>`.
+:ref:`stsynphot-appendixb`.
 
 Observation mode can be passed into :func:`~stsynphot.spectrum.band`, which
 supports the strings below, to create a bandpass:
@@ -21,12 +21,12 @@ supports the strings below, to create a bandpass:
   the light path through the telescope and the instrument
 * ``'johnson,v'``, which produces a single throughput and is the same as
   reading in just ``$PYSYN_CDBS/comp/nonhst/johnson_v_004_syn.fits`` using
-  :meth:`synphot.SpectralElement.from_file` that does not account for telescope
-  optics
+  :meth:`synphot.spectrum.SpectralElement.from_file` that does not account for
+  telescope optics
 
 For performance, some lookup tables are cached. They contain graph, component,
 and pixel scale information. The cache can be reset using
-:func:`~stsynphot.observation_mode.reset_cache`.
+:func:`~stsynphot.observationmode.reset_cache`.
 
 
 .. _stsynphot-obsmode-example:
@@ -100,8 +100,8 @@ used to calculate the pixel and wavelength ranges, respectively, spanned by the
 observation mode given its ``binset``, if available.
 
 The example below calculates the number of pixels covered from 8600.5 to
-12400.5 Angstroms. Then, it calculates the starting and ending wavelengths
-covered by 3800 pixels centered at 10500 Angstroms::
+12400.5 Angstrom. Then, it calculates the starting and ending wavelengths
+covered by 3800 pixels centered at 10500 Angstrom::
 
     >>> import stsynphot as STS
     >>> from astropy import units as u

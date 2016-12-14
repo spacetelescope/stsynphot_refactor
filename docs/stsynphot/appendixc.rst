@@ -5,7 +5,7 @@
 Appendix C: TMG, TMC, and TMT Files
 ===================================
 
-.. note:: This is currently only available for HST.
+.. note:: This is currently not yet available for JWST.
 
 **stsynphot** computes the combined throughput for an
 :ref:`observing mode <stsynphot-obsmode>` (``obsmode``) with the
@@ -213,7 +213,7 @@ a new version of a component throughput is delivered to CRDS.
 
   <div style="text-align:center">
   Figure 4: Example contents of a TMC table, taken from
-  <i>z4k1425fm_tmc.fits</i>.<br/>
+  <i>z4k1425fm_tmc.fits</i>.<br/><br/>
   </div>
 
 .. _fig-5:
@@ -290,7 +290,7 @@ For more details, see :ref:`stsynphot-parameterized`.
 .. raw:: html
 
   <div style="text-align:center">
-  Figure 6: Example contents of a simple throughput table.<br/>
+  Figure 6: Example contents of a simple throughput table.<br/><br/>
   </div>
 
 .. _fig-7:
@@ -308,7 +308,7 @@ For more details, see :ref:`stsynphot-parameterized`.
 
   <div style="text-align:center">
   Figure 7: Example contents of a throughput table parameterized for the
-  ACS FR647M ramp filter.<br/>
+  ACS FR647M ramp filter.<br/><br/>
   </div>
 
 .. _fig-8:
@@ -325,7 +325,7 @@ For more details, see :ref:`stsynphot-parameterized`.
 
   <div style="text-align:center">
   Figure 8: Example contents of a throughput table parameterized for MJD
-  to characterize time-dependent change in STIS sensitivity.<br/>
+  to characterize time-dependent change in STIS sensitivity.<br/><br/>
   </div>
 
 .. _fig-9:
