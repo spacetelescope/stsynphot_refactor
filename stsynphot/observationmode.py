@@ -504,8 +504,9 @@ class ThermalObservationMode(BaseObservationMode):
         super(ThermalObservationMode, self).__init__(
             obsmode, graphtable=graphtable, comptable=comptable)
 
-        # Check here to see if there are any valid filters
-        if set(self.thcompnames).issubset(set([conf.clear_filter, ''])):
+        # Check here to see if there are any valid filters.
+        # "0.0" was added in tae17277m_tmt.fits (Apr 2017).
+        if set(self.thcompnames).issubset(set([conf.clear_filter, '', '0.0'])):
             raise NotImplementedError(
                 'No thermal support provided for {0}'.format(self._obsmode))
 
