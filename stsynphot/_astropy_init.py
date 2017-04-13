@@ -140,5 +140,5 @@ if not _ASTROPY_SETUP_:
                             "expected.")
                     warn(ConfigurationDefaultMissingWarning(wmsg))
                     del e
-                except:
+                except Exception:
                     raise orig_error
