@@ -51,17 +51,72 @@ STMAG zeropoint for the respective bandpass (e.g.,
 `WFC3 <http://www.stsci.edu/hst/wfc3/phot_zp_lbn>`_).
 
 In this tutorial, you will learn how to calculate the STMAG zeropoint for
-the ACS/WFC1 F555W bandpass::
+the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
 
     >>> import numpy as np
     >>> import stsynphot as STS
-    >>> bp = STS.band('acs,wfc1,f555w')
-    >>> uresp = bp.unit_response(STS.conf.area)
-    >>> uresp
-    <Quantity 1.9712343504030155e-19 FLAM>
-    >>> st_zpt = -2.5 * np.log10(uresp.value) - 21.1
+    >>> from astropy.time import Time
+    >>> obsdate = Time('2017-05-30').mjd
+    >>> bp = STS.band('acs,wfc1,f555w,mjd#{}'.format(obsdate))
+    >>> photflam = bp.unit_response(STS.conf.area)
+    >>> photflam
+    <Quantity 1.9647813651514673e-19 FLAM>
+    >>> st_zpt = -2.5 * np.log10(photflam.value) - 21.1
     >>> print('STmag zeropoint for {} is {:.5f}'.format(bp.obsmode, st_zpt))
-    STmag zeropoint for acs,wfc1,f555w is 25.66315
+    STmag zeropoint for acs,wfc1,f555w,mjd#57903.0 is 25.66671
+
+
+.. _tutorial_band_abmag:
+
+Bandpass ABMAG Zeropoint
+------------------------
+
+For ABMAG zeropoint, it extends from :ref:`tutorial_band_stmag` by also using
+``PHOTPLAM`` keyword in image headers.
+
+In this tutorial, you will learn how to calculate the ABMAG zeropoint for
+the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
+
+    >>> import numpy as np
+    >>> import stsynphot as STS
+    >>> from astropy.time import Time
+    >>> obsdate = Time('2017-05-30').mjd
+    >>> bp = STS.band('acs,wfc1,f555w,mjd#{}'.format(obsdate))
+    >>> photflam = bp.unit_response(STS.conf.area)
+    >>> photplam = bp.pivot()
+    >>> photplam
+    <Quantity 5360.938362432486 Angstrom>
+    >>> ab_zpt = (-2.5 * np.log10(photflam.value) - 21.1 -
+    ...           5 * np.log10(photplam.value) + 18.6921)
+    >>> print('ABmag zeropoint for {} is {:.5f}'.format(bp.obsmode, ab_zpt))
+    ABmag zeropoint for acs,wfc1,f555w,mjd#57903.0 is 25.71261
+
+
+.. _tutorial_band_vegamag:
+
+Bandpass VEGAMAG Zeropoint
+--------------------------
+
+In addition to :ref:`tutorial_band_stmag` and :ref:`tutorial_band_abmag`,
+HST bandpasses also provide zeropoints in ``VEGAMAG``, which is a magnitude
+system where Vega has magnitude 0 at all wavelengths. Note that this zeropoint
+strongly depends on the actual Vega spectrum used; Therefore, VEGAMAG zeropoint
+values for the same filter might vary in literature as the authors use their
+favorite Vega spectra.
+
+In this tutorial, you will learn how to calculate the VEGAMAG zeropoint for
+the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
+
+    >>> import numpy as np
+    >>> import stsynphot as STS
+    >>> from astropy.time import Time
+    >>> from synphot import Observation
+    >>> obsdate = Time('2017-05-30').mjd
+    >>> bp = STS.band('acs,wfc1,f555w,mjd#{}'.format(obsdate))
+    >>> obs = Observation(STS.Vega, bp, binset=bp.binset)
+    >>> vega_zpt = -obs.effstim(flux_unit='obmag', area=STS.conf.area)
+    >>> print('VEGAMAG zeropoint for {} is {:.5f}'.format(bp.obsmode, vega_zpt))
+    VEGAMAG zeropoint for acs,wfc1,f555w,mjd#57903.0 is 25.71235 OBMAG
 
 
 .. _tutorial_wavetab:
