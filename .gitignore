@@ -19,7 +19,8 @@ MANIFEST
 assets
 
 # Sphinx
-docs/api
+docs/api/
+docs/stsynphot/api/
 docs/_build
 
 # Eclipse editor project files
