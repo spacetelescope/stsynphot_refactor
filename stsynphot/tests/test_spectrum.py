@@ -10,12 +10,13 @@ import tempfile
 
 # THIRD-PARTY
 import numpy as np
+import pytest
 
 # ASTROPY
 from astropy import units as u
 from astropy.io import fits
 from astropy.modeling.models import Const1D
-from astropy.tests.helper import pytest, remote_data
+from astropy.tests.helper import remote_data
 from astropy.utils.data import get_pkg_data_filename
 
 # SYNPHOT

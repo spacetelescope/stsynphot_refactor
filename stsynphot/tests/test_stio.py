@@ -13,9 +13,10 @@ import os
 
 # THIRD-PARTY
 import numpy as np
+import pytest
 
 # ASTROPY
-from astropy.tests.helper import pytest, remote_data
+from astropy.tests.helper import remote_data
 from astropy.utils.data import _find_pkg_data_path, get_pkg_data_filename
 
 # SYNPHOT

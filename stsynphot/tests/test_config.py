@@ -7,9 +7,10 @@ import os
 
 # THIRD-PARTY
 import numpy as np
+import pytest
 
 # ASTROPY
-from astropy.tests.helper import pytest, remote_data
+from astropy.tests.helper import remote_data
 
 # SYNPHOT
 from synphot.config import conf as synconf
