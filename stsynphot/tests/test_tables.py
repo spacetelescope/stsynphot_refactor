@@ -11,9 +11,9 @@ from __future__ import absolute_import, division, print_function
 
 # THIRD-PARTY
 import numpy as np
+import pytest
 
 # ASTROPY
-from astropy.tests.helper import pytest
 from astropy.utils.data import get_pkg_data_filename
 
 # SYNPHOT

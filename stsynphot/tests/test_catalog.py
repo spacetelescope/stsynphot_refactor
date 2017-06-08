@@ -4,10 +4,11 @@ from __future__ import absolute_import, division, print_function
 
 # THIRD-PARTY
 import numpy as np
+import pytest
 
 # ASTROPY
 from astropy import units as u
-from astropy.tests.helper import pytest, remote_data
+from astropy.tests.helper import remote_data
 
 # SYNPHOT
 from synphot import exceptions as synexceptions

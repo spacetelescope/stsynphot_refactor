@@ -12,8 +12,11 @@ from __future__ import absolute_import, division, print_function
 # STDLIB
 import os
 
+# THIRD-PARTY
+import pytest
+
 # ASTROPY
-from astropy.tests.helper import pytest, remote_data
+from astropy.tests.helper import remote_data
 
 # SYNPHOT
 from synphot import exceptions as synexceptions

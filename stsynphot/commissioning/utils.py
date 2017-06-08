@@ -8,10 +8,11 @@ from collections import Iterable
 
 # THIRD-PARTY
 import numpy as np
+import pytest
 from numpy.testing import assert_allclose
 
 # ASTROPY
-from astropy.tests.helper import pytest, remote_data
+from astropy.tests.helper import remote_data
 
 # ASTROLIB
 try:
