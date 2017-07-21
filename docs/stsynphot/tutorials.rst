@@ -119,6 +119,33 @@ the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
     VEGAMAG zeropoint for acs,wfc1,f555w,mjd#57903.0 is 25.71235 OBMAG
 
 
+.. _tutorial_sun_absmag:
+
+Sun's Abs. Mag. in HST Filters
+------------------------------
+
+In this tutorial, you will learn how to calculate the absolute magnitude of the
+Sun for three different HST filters.
+Sun's spectrum can be obtained from :ref:`stsynphot-appendixa-calspec` but
+needs to be normalized to literature value
+(e.g., http://www.astronomynotes.com/starprop/s4.htm)::
+
+    >>> import stsynphot as STS
+    >>> from synphot import units, SourceSpectrum, SpectralElement, Observation
+    >>> v_band = SpectralElement.from_filter('johnson_v')
+    >>> sun_file = 'ftp://ftp.stsci.edu/cdbs/calspec/sun_reference_stis_002.fits'
+    >>> sun_raw = SourceSpectrum.from_file(sun_file)
+    >>> sun = sun_raw.normalize(4.83 * units.VEGAMAG, v_band, vegaspec=STS.Vega)
+    >>> for obsmode in ['acs,wfc1,f555w', 'wfc3,uvis2,f336w', 'wfc3,ir,f160w']:
+    ...     bp = STS.band(obsmode)
+    ...     obs = Observation(sun, bp, binset=bp.binset)
+    ...     m = obs.effstim('vegamag', vegaspec=STS.Vega)
+    ...     print("Sun's abs mag in {} is {:.4f}".format(bp.obsmode, m))
+    Sun's abs mag in acs,wfc1,f555w is 4.8395 VEGAMAG
+    Sun's abs mag in wfc3,uvis2,f336w is 5.4864 VEGAMAG
+    Sun's abs mag in wfc3,ir,f160w is 3.4127 VEGAMAG
+
+
 .. _tutorial_wavetab:
 
 Custom Wavelength Table
