@@ -303,6 +303,11 @@ class TestEbmvx(object):
     def setup_class(self):
         self.ec_mwavg = spectrum.ebmvx('mwavg', 0.3)
 
+        # https://github.com/spacetelescope/synphot_refactor/issues/129
+        self.w = np.squeeze(self.ec_mwavg.model.points)
+
+        self.y = self.ec_mwavg(self.w)
+
     def test_mwavg(self):
         """No check on data quality, which is dependent on reference file."""
         assert spectrum._REDLAWS['mwavg'].meta['expr'] == 'mwavg'
@@ -311,8 +316,7 @@ class TestEbmvx(object):
     def test_dummy(self, m):
         """Dummy values should default to 'mwavg'."""
         ec_test = spectrum.ebmvx(m, 0.3)
-        w = self.ec_mwavg.waveset
-        np.testing.assert_array_equal(ec_test(w), self.ec_mwavg(w))
+        np.testing.assert_array_equal(ec_test(self.w), self.y)
 
     def teardown_class(self):
         spectrum.reset_cache()

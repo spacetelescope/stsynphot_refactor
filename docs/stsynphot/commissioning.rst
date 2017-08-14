@@ -30,7 +30,7 @@ There are two ways to run the tests, either by using ``setup.py`` from the
 source directory or ``stsynphot.test()`` in a Python session. For example,
 this runs all the commissioning tests in addition to regular unit tests::
 
-    python setup.py test --remote-data --args="--slow --html=report.html"
+    python setup.py test --remote-data --args="--slow --html=/path/to/report.html"
 
 Since this involves detail comparison with ASTROLIB PYSYNPHOT using various
 spectra and observing modes, it is important that the tests have access to the
@@ -47,6 +47,8 @@ following software versions:
 * Scipy 0.17.1
 * Numpy 1.11.1
 * Python 3.5.2
+* pytest (version not recorded)
+* pytest-html (version not recorded)
 
 To ensure repeatability, the graph and component tables are fixed at a specific
 version, as follows. Since we are only testing for software agreement, the fact
