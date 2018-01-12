@@ -3,10 +3,23 @@
 # no matter how it is invoked within the source tree.
 
 import os
-from astropy.tests.pytest_plugins import *
+
+from astropy.version import version as astropy_version
+if astropy_version < '3.0':
+    # With older versions of Astropy, we actually need to import the pytest
+    # plugins themselves in order to make them discoverable by pytest.
+    from astropy.tests.pytest_plugins import *
+else:
+    # As of Astropy 3.0, the pytest plugins provided by Astropy are
+    # automatically made available when Astropy is installed. This means it's
+    # not necessary to import them here, but we still need to import global
+    # variables that are used for configuration.
+    from astropy.tests.plugins.display import (PYTEST_HEADER_MODULES,
+                                               TESTED_VERSIONS)
 
 # Uncomment the following line to treat all DeprecationWarnings as
 # exceptions
+from astropy.tests.helper import enable_deprecations_as_exceptions
 enable_deprecations_as_exceptions()
 
 # Uncomment and customize the following lines to add/remove entries
@@ -37,16 +50,19 @@ try:
 except NameError:   # Needed to support Astropy <= 1.0.0
     pass
 
-
 # Uncomment the following lines, if you need to add additional commandline
 # parameters for tests (i.e., --slow to trigger long running tests)
 # To keep Astropy's pytest_addoption we have to store a reference first and
 # then execute it in the newly defined function.
+if astropy_version < '3.0':
+    _pytest_addoption = pytest_addoption
 
-_pytest_addoption = pytest_addoption
+    def pytest_addoption(parser):
+        _pytest_addoption(parser)
+        parser.addoption('--slow', action='store_true',
+                         help="Execute long-running tests")
 
-
-def pytest_addoption(parser):
-    _pytest_addoption(parser)
-    parser.addoption('--slow', action='store_true',
-                     help="Execute long-running tests")
+else:
+    def pytest_addoption(parser):
+        parser.addoption('--slow', action='store_true',
+                         help="Execute long-running tests")

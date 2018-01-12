@@ -16,7 +16,6 @@ import numpy as np
 import pytest
 
 # ASTROPY
-from astropy.tests.helper import remote_data
 from astropy.utils.data import _find_pkg_data_path, get_pkg_data_filename
 
 # SYNPHOT
@@ -62,7 +61,7 @@ class TestGetLatestFile(object):
     def setup_class(self):
         self.datadir = _find_pkg_data_path('data')
 
-    @remote_data
+    @pytest.mark.remote_data
     def test_ftp(self):
         """Remote FTP path."""
         template = 'ftp://ftp.stsci.edu/cdbs/mtab/OLD_FILES/n*tmg.fits'

@@ -16,7 +16,6 @@ import pytest
 from astropy import units as u
 from astropy.io import fits
 from astropy.modeling.models import Const1D
-from astropy.tests.helper import remote_data
 from astropy.utils.data import get_pkg_data_filename
 
 # SYNPHOT
@@ -36,7 +35,7 @@ CP_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmc.fits'))
 TH_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmt.fits'))
 
 
-@remote_data
+@pytest.mark.remote_data
 class TestInterpolateSpectrum(object):
     """Test spectrum interpolation."""
     def setup_class(self):
@@ -154,7 +153,7 @@ class TestInterpolateSpectrum(object):
             spectrum.interpolate_spectral_element(self.fname_acs, -5)
 
 
-@remote_data
+@pytest.mark.remote_data
 class TestObservationSpectralElement(object):
     """Test ``ObservationSpectralElement`` and ``band()``."""
     def setup_class(self):
@@ -297,7 +296,7 @@ class TestObservationSpectralElement(object):
         shutil.rmtree(self.outdir)
 
 
-@remote_data
+@pytest.mark.remote_data
 class TestEbmvx(object):
     """Test extinction curve and related cache."""
     def setup_class(self):
@@ -330,7 +329,7 @@ def test_vega_dummy():
     assert spectrum.Vega is None
 
 
-@remote_data
+@pytest.mark.remote_data
 def test_vega_default():
     """Test that Vega spectrum is loaded properly."""
     # Default
