@@ -93,7 +93,7 @@ class TestRenormPartialOverlap(object):
         """Raise error."""
         input_str = 'rn({0}, band(johnson, v), 15, abmag)'.format(self.fname)
         with pytest.raises(synexceptions.DisjointError):
-            sp = spparser.parse_spec(input_str)
+            spparser.parse_spec(input_str)
 
 
 @pytest.mark.remote_data
@@ -130,7 +130,7 @@ class TestEnvVar(object):
 def test_parser_exception(input_str):
     """Test syntax that raises ParserError."""
     with pytest.raises(exceptions.ParserError):
-        sp = spparser.parse_spec(input_str)
+        spparser.parse_spec(input_str)
 
 
 class TestTokens(object):

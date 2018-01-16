@@ -160,7 +160,7 @@ class TestObservationSpectralElement(object):
         self.outdir = tempfile.mkdtemp()
         self.obs = spectrum.band(
             'acs,hrc,f555w', graphtable=GT_FILE, comptable=CP_FILE)
-        self.sp = SourceSpectrum(ConstFlux1D, amplitude=1*units.FLAM)
+        self.sp = SourceSpectrum(ConstFlux1D, amplitude=1 * units.FLAM)
 
     def test_attributes(self):
         assert (str(self.obs.obsmode) == self.obs.meta['expr'] ==
@@ -168,9 +168,9 @@ class TestObservationSpectralElement(object):
         assert len(self.obs) == 6
         assert self.obs.area.value == conf.area
         np.testing.assert_array_equal(
-            self.obs.waveset[::self.obs.waveset.size-1].value, [500, 30010])
+            self.obs.waveset[::self.obs.waveset.size - 1].value, [500, 30010])
         np.testing.assert_array_equal(
-            self.obs.binset[::self.obs.binset.size-1].value, [1000, 11000])
+            self.obs.binset[::self.obs.binset.size - 1].value, [1000, 11000])
 
     def test_config_primary_area(self):
         """Changing config after init should have no effect"""

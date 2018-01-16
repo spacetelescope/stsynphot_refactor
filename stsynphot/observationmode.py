@@ -402,7 +402,7 @@ class ObservationMode(BaseObservationMode):
         product = self.components[index].throughput
 
         if len(self.components) > index:
-            for component in self.components[index+1:]:
+            for component in self.components[index + 1:]:
                 if not component.empty:
                     product = product * component.throughput
 

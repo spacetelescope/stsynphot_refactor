@@ -48,9 +48,9 @@ class TestIRAFConvert(object):
 
     def test_exceptions(self):
         with pytest.raises(TypeError):
-            out_str = stio.irafconvert(1)
+            stio.irafconvert(1)
         with pytest.raises(KeyError):
-            out_str = stio.irafconvert('dummydummy$image.fits')
+            stio.irafconvert('dummydummy$image.fits')
 
     def teardown_class(self):
         del os.environ['MYTESTPATH']
@@ -101,7 +101,7 @@ def test_read_table_exception():
 
     # Set INNODE to str (should be int)
     with pytest.raises(synexceptions.SynphotError):
-        data = stio._read_table(
+        stio._read_table(
             tabname, 1,
             {'COMPNAME': np.str, 'KEYWORD': np.str, 'INNODE': np.str,
              'OUTNODE': np.int, 'THCOMPNAME': np.str, 'COMMENT': np.str})

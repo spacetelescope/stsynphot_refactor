@@ -29,9 +29,9 @@ def test_getitem(obsmode, ans):
 def test_getitem_exceptions():
     """Waveset catalog exceptions."""
     with pytest.raises(KeyError):
-        x = WAVECAT['johnson,v']
+        WAVECAT['johnson,v']
     with pytest.raises(exceptions.AmbiguousObsmode):
-        x = WAVECAT['acs,wfc1,wfc2']
+        WAVECAT['acs,wfc1,wfc2']
 
 
 def test_load_waveset_file():
