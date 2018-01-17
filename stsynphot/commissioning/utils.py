@@ -11,9 +11,6 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 
-# ASTROPY
-from astropy.tests.helper import remote_data
-
 # ASTROLIB
 try:
     import pysynphot as S
@@ -71,7 +68,7 @@ def count_outliers(data, sigma=3.0):
 
 @use_pysynphot
 @slow
-@remote_data
+@pytest.mark.remote_data
 class CommCase(object):
     """Base class for commissioning tests."""
     obsmode = None  # Observation mode string

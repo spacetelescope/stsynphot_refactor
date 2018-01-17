@@ -20,6 +20,7 @@ environment:
 
       # We test Python 2.7 and 3.6
 
+      # TODO: Use Astropy lts after 3.0 is out.
       - PYTHON_VERSION: "2.7"
         ASTROPY_VERSION: "stable"
         NUMPY_VERSION: "stable"

@@ -9,9 +9,6 @@ import os
 import numpy as np
 import pytest
 
-# ASTROPY
-from astropy.tests.helper import remote_data
-
 # SYNPHOT
 from synphot.config import conf as synconf
 from synphot.utils import generate_wavelengths
@@ -32,7 +29,7 @@ class TestOverwriteSynphot(object):
     def test_dirname(self):
         assert self.vegafile.startswith(config.conf.rootdir)
 
-    @remote_data
+    @pytest.mark.remote_data
     def test_isfile(self):
         if self.vegafile.startswith('ftp'):
             # This is the case on Travis CI
@@ -41,7 +38,7 @@ class TestOverwriteSynphot(object):
             assert os.path.isfile(self.vegafile)
 
 
-@remote_data
+@pytest.mark.remote_data
 class TestConfigChanges(object):
     def setup_class(self):
         self.def_dict = config.getref()

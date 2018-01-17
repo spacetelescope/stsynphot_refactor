@@ -16,7 +16,6 @@ import numpy as np
 import pytest
 
 # ASTROPY
-from astropy.tests.helper import remote_data
 from astropy.utils.data import _find_pkg_data_path, get_pkg_data_filename
 
 # SYNPHOT
@@ -49,9 +48,9 @@ class TestIRAFConvert(object):
 
     def test_exceptions(self):
         with pytest.raises(TypeError):
-            out_str = stio.irafconvert(1)
+            stio.irafconvert(1)
         with pytest.raises(KeyError):
-            out_str = stio.irafconvert('dummydummy$image.fits')
+            stio.irafconvert('dummydummy$image.fits')
 
     def teardown_class(self):
         del os.environ['MYTESTPATH']
@@ -62,7 +61,7 @@ class TestGetLatestFile(object):
     def setup_class(self):
         self.datadir = _find_pkg_data_path('data')
 
-    @remote_data
+    @pytest.mark.remote_data
     def test_ftp(self):
         """Remote FTP path."""
         template = 'ftp://ftp.stsci.edu/cdbs/mtab/OLD_FILES/n*tmg.fits'
@@ -102,7 +101,7 @@ def test_read_table_exception():
 
     # Set INNODE to str (should be int)
     with pytest.raises(synexceptions.SynphotError):
-        data = stio._read_table(
+        stio._read_table(
             tabname, 1,
             {'COMPNAME': np.str, 'KEYWORD': np.str, 'INNODE': np.str,
              'OUTNODE': np.int, 'THCOMPNAME': np.str, 'COMMENT': np.str})

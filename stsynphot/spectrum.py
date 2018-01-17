@@ -31,7 +31,7 @@ from . import stio
 __all__ = ['reset_cache', 'interpolate_spectral_element',
            'ObservationSpectralElement', 'band', 'ebmvx', 'load_vega', 'Vega']
 
-_interpfilepatt = re.compile('\[(?P<col>.*?)\]')
+_interpfilepatt = re.compile(r'\[(?P<col>.*?)\]')
 _REDLAWS = {}  # Cache previously loaded reddening laws
 Vega = None  # Cache Vega spectrum
 
@@ -214,7 +214,7 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
     meta = {'expr': '{0}#{1:g}'.format(filename, interpval),
             'warnings': warndict}
     return SpectralElement(
-        Empirical1D, points=wave0*wave_unit, lookup_table=thru, meta=meta)
+        Empirical1D, points=wave0 * wave_unit, lookup_table=thru, meta=meta)
 
 
 class ObservationSpectralElement(SpectralElement):
@@ -297,7 +297,7 @@ class ObservationSpectralElement(SpectralElement):
 
         """
         thru = self(wavelengths)
-        y = thru[::thru.size-1].value
+        y = thru[::thru.size - 1].value
         bounded = np.all(y == 0)
 
         if not bounded and verbose:

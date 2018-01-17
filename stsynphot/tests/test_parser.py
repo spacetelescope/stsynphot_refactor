@@ -15,9 +15,6 @@ import os
 # THIRD-PARTY
 import pytest
 
-# ASTROPY
-from astropy.tests.helper import remote_data
-
 # SYNPHOT
 from synphot import exceptions as synexceptions
 from synphot.models import (Box1D, ConstFlux1D, Empirical1D, Gaussian1D,
@@ -54,7 +51,7 @@ def test_single_functioncall(input_str, ans_cls, ans_model):
     _single_functioncall(input_str, ans_cls, ans_model)
 
 
-@remote_data
+@pytest.mark.remote_data
 @pytest.mark.parametrize(
     ('input_str', 'ans_cls', 'ans_model'),
     [('spec(crcalspec$alpha_lyr_stis_007.fits)', SourceSpectrum, Empirical1D),
@@ -78,7 +75,7 @@ def test_single_functioncall_remote(input_str, ans_cls, ans_model):
     _single_functioncall(input_str, ans_cls, ans_model)
 
 
-@remote_data
+@pytest.mark.remote_data
 class TestRenormPartialOverlap(object):
     """Test handling of ``rn(...)`` syntax for partial overlap."""
     def setup_class(self):
@@ -96,10 +93,10 @@ class TestRenormPartialOverlap(object):
         """Raise error."""
         input_str = 'rn({0}, band(johnson, v), 15, abmag)'.format(self.fname)
         with pytest.raises(synexceptions.DisjointError):
-            sp = spparser.parse_spec(input_str)
+            spparser.parse_spec(input_str)
 
 
-@remote_data
+@pytest.mark.remote_data
 class TestEnvVar(object):
     """Test syntax using PYSYN_CDBS environment variable."""
     def setup_class(self):
@@ -133,7 +130,7 @@ class TestEnvVar(object):
 def test_parser_exception(input_str):
     """Test syntax that raises ParserError."""
     with pytest.raises(exceptions.ParserError):
-        sp = spparser.parse_spec(input_str)
+        spparser.parse_spec(input_str)
 
 
 class TestTokens(object):

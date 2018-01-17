@@ -34,7 +34,7 @@ __all__ = ['irafconvert', 'get_latest_file', 'read_graphtable',
            'read_comptable', 'read_catalog', 'read_wavecat', 'read_waveset',
            'read_detector_pars', 'read_interp_spec']
 
-_irafconvpat = re.compile('\$(\w*)')
+_irafconvpat = re.compile(r'\$(\w*)')
 _irafconvdata = None
 
 
@@ -124,7 +124,7 @@ def irafconvert(iraf_filename, sep='$'):
     if iraf_filename.startswith(sep):
         match = _irafconvpat.match(iraf_filename)
         path = os.environ[match.group(1)]
-        fname = iraf_filename[match.end()+1:]  # 1 to omit leading slash
+        fname = iraf_filename[match.end() + 1:]  # 1 to omit leading slash
 
     # dir$file
     else:

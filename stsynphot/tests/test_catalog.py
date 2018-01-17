@@ -8,7 +8,6 @@ import pytest
 
 # ASTROPY
 from astropy import units as u
-from astropy.tests.helper import remote_data
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
@@ -18,7 +17,7 @@ from synphot import units
 from .. import catalog, exceptions
 
 
-@remote_data
+@pytest.mark.remote_data
 def test_grid_to_spec():
     """Test creating spectrum from grid, and related cache."""
     sp = catalog.grid_to_spec('k93models', 6440, 0, 4.3)
@@ -48,7 +47,7 @@ def test_grid_to_spec():
          91800, 92200, 92600, 93000, 93400, 93800, 94200, 94600, 95000, 95400,
          95800, 96200, 96600, 97000, 97400, 97800, 98200, 98600, 99000, 99400,
          99800, 100200, 200000, 400000, 600000, 800000, 1000000, 1200000,
-         1400000,  1600000])
+         1400000, 1600000])
     np.testing.assert_allclose(
         y_last_50.value,
         [2.52510792e+03, 2.47883842e+03, 2.43311637e+03, 2.38843415e+03,
@@ -75,7 +74,7 @@ def test_grid_to_spec():
     assert catalog._CACHE == {}
 
 
-@remote_data
+@pytest.mark.remote_data
 @pytest.mark.parametrize(
     ('t', 'm', 'g'),
     [(3499, 0, 4.3),
@@ -87,19 +86,19 @@ def test_grid_to_spec():
 def test_grid_to_spec_bounds_check(t, m, g):
     """Test out of bounds check."""
     with pytest.raises(exceptions.ParameterOutOfBounds):
-        sp = catalog.grid_to_spec('k93models', t, m, g)
+        catalog.grid_to_spec('k93models', t, m, g)
 
 
 def test_grid_to_spec_exceptions():
     """Test other exceptions."""
     # Invalid catalog
     with pytest.raises(synexceptions.SynphotError):
-        sp = catalog.grid_to_spec('foo', 6440, 0, 4.3)
+        catalog.grid_to_spec('foo', 6440, 0, 4.3)
 
     # Quantity is not acceptable for log values
     with pytest.raises(synexceptions.SynphotError):
-        sp = catalog.grid_to_spec(
+        catalog.grid_to_spec(
             'k93models', 6440, 0 * u.dimensionless_unscaled, 4.3)
     with pytest.raises(synexceptions.SynphotError):
-        sp = catalog.grid_to_spec(
+        catalog.grid_to_spec(
             'k93models', 6440, 0, 4.3 * u.dimensionless_unscaled)

@@ -16,7 +16,6 @@ import pytest
 from astropy import units as u
 from astropy.io import fits
 from astropy.modeling.models import Const1D
-from astropy.tests.helper import remote_data
 from astropy.utils.data import get_pkg_data_filename
 
 # SYNPHOT
@@ -36,7 +35,7 @@ CP_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmc.fits'))
 TH_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmt.fits'))
 
 
-@remote_data
+@pytest.mark.remote_data
 class TestInterpolateSpectrum(object):
     """Test spectrum interpolation."""
     def setup_class(self):
@@ -154,14 +153,14 @@ class TestInterpolateSpectrum(object):
             spectrum.interpolate_spectral_element(self.fname_acs, -5)
 
 
-@remote_data
+@pytest.mark.remote_data
 class TestObservationSpectralElement(object):
     """Test ``ObservationSpectralElement`` and ``band()``."""
     def setup_class(self):
         self.outdir = tempfile.mkdtemp()
         self.obs = spectrum.band(
             'acs,hrc,f555w', graphtable=GT_FILE, comptable=CP_FILE)
-        self.sp = SourceSpectrum(ConstFlux1D, amplitude=1*units.FLAM)
+        self.sp = SourceSpectrum(ConstFlux1D, amplitude=1 * units.FLAM)
 
     def test_attributes(self):
         assert (str(self.obs.obsmode) == self.obs.meta['expr'] ==
@@ -169,9 +168,9 @@ class TestObservationSpectralElement(object):
         assert len(self.obs) == 6
         assert self.obs.area.value == conf.area
         np.testing.assert_array_equal(
-            self.obs.waveset[::self.obs.waveset.size-1].value, [500, 30010])
+            self.obs.waveset[::self.obs.waveset.size - 1].value, [500, 30010])
         np.testing.assert_array_equal(
-            self.obs.binset[::self.obs.binset.size-1].value, [1000, 11000])
+            self.obs.binset[::self.obs.binset.size - 1].value, [1000, 11000])
 
     def test_config_primary_area(self):
         """Changing config after init should have no effect"""
@@ -297,7 +296,7 @@ class TestObservationSpectralElement(object):
         shutil.rmtree(self.outdir)
 
 
-@remote_data
+@pytest.mark.remote_data
 class TestEbmvx(object):
     """Test extinction curve and related cache."""
     def setup_class(self):
@@ -330,7 +329,7 @@ def test_vega_dummy():
     assert spectrum.Vega is None
 
 
-@remote_data
+@pytest.mark.remote_data
 def test_vega_default():
     """Test that Vega spectrum is loaded properly."""
     # Default

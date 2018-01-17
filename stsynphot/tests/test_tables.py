@@ -64,11 +64,11 @@ class TestGraphTable(object):
     def test_comp_exceptions(self):
         # Invalid innode
         with pytest.raises(exceptions.UnusedKeyword):
-            x = self.gt.get_comp_from_gt(['acs'], 0)
+            self.gt.get_comp_from_gt(['acs'], 0)
 
         # Invalid outnode
         with pytest.raises(exceptions.IncompleteObsmode):
-            x = self.gt.get_comp_from_gt(['acs'], 1)
+            self.gt.get_comp_from_gt(['acs'], 1)
 
 
 class TestCompTable(object):
@@ -88,4 +88,4 @@ class TestCompTable(object):
 
     def test_exceptions(self):
         with pytest.raises(synexceptions.SynphotError):
-            files = self.ct.get_filenames(['foo'])
+            self.ct.get_filenames(['foo'])
