@@ -1,5 +1,6 @@
 numpy
 scipy
 matplotlib
+astropy-helpers
 astropy
 -e git+https://github.com/spacetelescope/synphot_refactor.git#egg=synphot
