@@ -102,3 +102,11 @@ def test_grid_to_spec_exceptions():
     with pytest.raises(synexceptions.SynphotError):
         catalog.grid_to_spec(
             'k93models', 6440, 0, 4.3 * u.dimensionless_unscaled)
+
+    # Phoenix gap
+    # https://github.com/spacetelescope/stsynphot_refactor/issues/44
+    catalog.grid_to_spec('phoenix', 2700, -1, 5.1)  # OK
+    with pytest.raises(exceptions.ParameterOutOfBounds):
+        catalog.grid_to_spec('phoenix', 2700, -0.5, 5.1)
+    with pytest.raises(exceptions.ParameterOutOfBounds):
+        catalog.grid_to_spec('phoenix', 2700, -0.501, 5.1)

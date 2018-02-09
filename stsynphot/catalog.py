@@ -17,6 +17,7 @@ try:
     from synphot import exceptions as synexceptions
     from synphot import units
     from synphot.spectrum import SourceSpectrum
+    from synphot.utils import validate_totalflux
 except ImportError:  # This is so RTD would build successfully
     pass
 
@@ -81,6 +82,13 @@ def _get_spectrum(parlist, catdir):
 
     filename = os.path.join(catdir, filename)
     sp = SourceSpectrum.from_file(filename, flux_col=column)
+
+    totflux = sp.integrate()
+    try:
+        validate_totalflux(totflux)
+    except synexceptions.SynphotError:
+        raise exceptions.ParameterOutOfBounds(
+            "Parameter '{0}' has no valid data.".format(parlist))
 
     result = [member for member in parlist]
     result.pop()
