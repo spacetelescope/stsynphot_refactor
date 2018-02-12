@@ -361,7 +361,7 @@ Koornneef, J., Bohlin, R., Buser, R., Horne, K., & Turnshek, D. 1986, Highlights
 
 .. _stsynphot-ref-laidler2009:
 
-Laidler, V. 2009, TSR 2009-01: Pysynphot Commissioning Report (Baltimore, MD: STScI), http://stsdas.stsci.edu/tsr/2009_01/
+Laidler, V. 2009, TSR 2009-01: Pysynphot Commissioning Report (Baltimore, MD: STScI), http://ssb.stsci.edu/tsr/2009_01/
 
 .. _stsynphot-ref-laidler2005:
 
