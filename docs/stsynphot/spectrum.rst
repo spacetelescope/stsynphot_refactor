@@ -82,8 +82,8 @@ parameters that you want, as shown in the example above.
 However, three of the atlases (:ref:`stsynphot-appendixa-ck04`,
 :ref:`stsynphot-appendixa-kurucz1993`, and :ref:`stsynphot-appendixa-phoenix`)
 have a grid of basis spectra which are indexed for various combinations of
-effective temperature (:math:`T_{\text{eff}}`) in Kelvin, log metallicity
-(:math:`\log Z`), and log surface gravity (:math:`\log g`). They are best
+effective temperature (:math:`T_{\text{eff}}`) in Kelvin, metallicity
+(``[M/H]``), and log surface gravity (:math:`\log g`). They are best
 accessed with a :func:`~stsynphot.catalog.grid_to_spec`.
 You may specify any combination of the properties, so long as each is
 within the allowed range, which differs from atlas to atlas. For example,
@@ -93,7 +93,7 @@ which means that no spectrum can be constructed for effective temperatures
 below 3499 K or above 50001 K (i.e., an exception will be raised).
 The example below obtains the spectrum for a
 :ref:`stsynphot-appendixa-kurucz1993` model with
-:math:`T_{\text{eff}} = 6000 \; \text{K}`, :math:`\log Z = 0`, and
+:math:`T_{\text{eff}} = 6000 \; \text{K}`, ``[M/H] = 0``, and
 :math:`\log g = 4.3`::
 
     >>> import stsynphot as STS

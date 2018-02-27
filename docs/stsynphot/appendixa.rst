@@ -78,7 +78,7 @@ The atlas data files are organized in a similar naming convention as
 :ref:`stsynphot-appendixa-kurucz1993`, and are easily accessible using
 :func:`~stsynphot.catalog.grid_to_spec` (also see :ref:`stsynphot-spec-atlas`).
 
-The example below generates a spectrum with metallicity :math:`\log Z = +0.1`,
+The example below generates a spectrum with metallicity ``[M/H] = +0.1``,
 temperature :math:`T_{\text{eff}} = 10000 \text{K}`, and gravity
 :math:`\log g = 3.0`::
 
@@ -113,7 +113,7 @@ absolute flux is needed, the model spectrum must be renormalized appropriately.
 
 The following example shows the header from one of the atlas data files.
 This file contains all the models for a star of metallicity
-:math:`\log Z = 0.0` (``p00``) and effective temperature
+``[M/H] = 0.0`` (``p00``) and effective temperature
 :math:`T_{\text{eff}} = 8000 \text{K}` (``8000``), which cover a
 range of gravities from :math:`\log g = +1.0` (``g10``) to
 :math:`\log g = +5.0` (``g50``). In this example, :math:`\log g = +0.0` and
@@ -160,7 +160,7 @@ columns in the file are filled with zeroes::
 
 The example below shows you how to manually select the flux for a specific
 model characterized by a given metallicity, effective temperature, and gravity.
-The filename ``kp01_10000`` means :math:`\log Z = +0.1` (``p01``) and
+The filename ``kp01_10000`` means ``[M/H] = +0.1`` (``p01``) and
 :math:`T_{\text{eff}} = 10000 \text{K}` (``10000``). The column name ``g30``
 means :math:`\log g = 3.0`::
 
@@ -201,7 +201,7 @@ The atlas data files are organized in a similar naming convention as
 :func:`~stsynphot.catalog.grid_to_spec` (also see
 :ref:`stsynphot-spec-atlas`).
 
-The example below generates a spectrum with metallicity :math:`\log Z = +0.1`,
+The example below generates a spectrum with metallicity ``[M/H] = +0.1``,
 temperature :math:`T_{\text{eff}} = 10000 \text{K}`, and gravity
 :math:`\log g = 3.0`::
 

@@ -223,7 +223,7 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     spa7 = _interpolate_spectrum(spa5, spa6, t_eff)
 
     sp = spa7[0]
-    sp.meta['expr'] = '{0}(T_eff={1:g},Z={2:g},log_g={3:g})'.format(
+    sp.meta['expr'] = '{0}(T_eff={1:g},metallicity={2:g},log_g={3:g})'.format(
         gridname, t_eff, metallicity, log_g)
 
     return sp
