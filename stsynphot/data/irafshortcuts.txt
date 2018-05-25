@@ -28,6 +28,7 @@ crjwstotecomp   comp/jwstote
 crmiricomp      comp/miri
 crnircamcomp    comp/nircam
 crnirspeccomp   comp/nirspec
+crnirisscomp    comp/niriss
 crgrid          grid
 crgridagn       grid/agn
 crgridbk        grid/bkmodels
