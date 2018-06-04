@@ -20,7 +20,6 @@ environment:
 
       # We test Python 2.7 and 3.6
 
-      # TODO: Use Astropy lts after 3.0 is out.
       - PYTHON_VERSION: "2.7"
         ASTROPY_VERSION: "stable"
         NUMPY_VERSION: "stable"
@@ -42,7 +41,9 @@ install:
     #- "python -m pip install --upgrade pip"
 
     # SYNPHOT (DEV)
-    - "pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot_refactor"
+    #- "pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot"
+    # SYNPHOT (STABLE)
+    - "pip -q install synphot"
 
 # Not a .NET project, we build the package in the install step instead
 build: false
