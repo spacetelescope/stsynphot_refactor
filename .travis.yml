@@ -58,7 +58,7 @@ matrix:
 
         # Do a test in older Python 3.
         - python: 3.5
-          env: SETUP_CMD='test --open-files'
+          env: SETUP_CMD='test --open-files' SYNPHOT_VERSION=stable
 
         # TODO: Use Astropy lts after 3.0 is out.
         # Do a test in Python 2.
@@ -110,7 +110,8 @@ install:
     # other dependencies.
 
     # SYNPHOT
-    - if [[ $SYNPHOT_VERSION == development ]]; then pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot_refactor; fi
+    - if [[ $SYNPHOT_VERSION == development ]]; then pip -q install git+http://github.com/spacetelescope/synphot_refactor.git#egg=synphot; fi
+    - if [[ $SYNPHOT_VERSION == stable ]]; then pip -q install synphot; fi
 
 script:
     # Only needed for remote data.

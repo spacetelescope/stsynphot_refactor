@@ -3,4 +3,4 @@ scipy>=0.18
 matplotlib
 astropy-helpers
 astropy
--e git+https://github.com/spacetelescope/synphot_refactor.git#egg=synphot
+synphot

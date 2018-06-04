@@ -300,8 +300,8 @@ def read_graphtable(filename, tab_ext=1):
 
     """
     graph_dtypes = {
-        'COMPNAME': np.str, 'KEYWORD': np.str, 'INNODE': np.int,
-        'OUTNODE': np.int, 'THCOMPNAME': np.str, 'COMMENT': np.str}
+        'COMPNAME': np.str_, 'KEYWORD': np.str_, 'INNODE': np.int32,
+        'OUTNODE': np.int32, 'THCOMPNAME': np.str_, 'COMMENT': np.str_}
     data = _read_table(filename, tab_ext, graph_dtypes)
 
     # Get primary area
@@ -355,8 +355,8 @@ def read_comptable(filename, tab_ext=1):
 
     """
     return _read_table(filename, tab_ext,
-                       {'TIME': np.str, 'COMPNAME': np.str,
-                        'FILENAME': np.str, 'COMMENT': np.str})
+                       {'TIME': np.str_, 'COMPNAME': np.str_,
+                        'FILENAME': np.str_, 'COMMENT': np.str_})
 
 
 def read_catalog(filename, tab_ext=1):
@@ -395,8 +395,8 @@ def read_catalog(filename, tab_ext=1):
         Data table.
 
     """
-    return _read_table(filename, tab_ext, {'INDEX': np.str,
-                                           'FILENAME': np.str})
+    return _read_table(filename, tab_ext, {'INDEX': np.str_,
+                                           'FILENAME': np.str_})
 
 
 def read_wavecat(filename):
