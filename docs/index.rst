@@ -30,12 +30,12 @@ cross-instrument simulations and examine the transmission curve of the
 Optical Telescope Assembly (OTA) and spectra of calibration targets.
 
 If you use **stsynphot** in your work, please cite it as,
-"*Lim, P. L., et al. 2016, stsynphot User's Guide
-(Baltimore, MD: STScI), http://stsynphot.readthedocs.io/en/latest/*"
+`CITATION <https://github.com/spacetelescope/stsynphot_refactor/blob/master/CITATION>`_
+for details on how to cite it in your publications.
 
 If you have questions or concerns regarding the software, please open an issue
 at https://github.com/spacetelescope/stsynphot_refactor/issues (if not already
-reported) or contact STScI Help Desk via ``help[at]stsci.edu``.
+reported) or contact `STScI Help Desk <https://hsthelp.stsci.edu>`_.
 
 
 .. _stsynphot-installation-setup:
