@@ -194,7 +194,7 @@ class CommCase(object):
         # TODO: Failure due to different wavesets for blackbody; Ignore?
         try:
             self._assert_allclose(wave, self.spref.wave, rtol=thresh)
-        except (AssertionError, ValueError) as e:
+        except (AssertionError, ValueError):
             self._has_obswave = False  # Skip obs waveset tests
             if 'bb(' in self.spectrum:
                 pytest.xfail('Blackbody waveset implementations are different')
@@ -214,7 +214,7 @@ class CommCase(object):
         # TODO: Failure due to different wavesets for blackbody; Ignore?
         try:
             self._assert_allclose(wave, self.obsref.wave, rtol=thresh)
-        except (AssertionError, ValueError) as e:
+        except (AssertionError, ValueError):
             if 'bb(' in self.spectrum:
                 pytest.xfail('Blackbody waveset implementations are different')
             elif 'unit(' in self.spectrum:
