@@ -289,7 +289,7 @@ class BaseObservationMode(object):
         # Get wavelength set
         try:
             self.binset, self.bandwave = WAVECAT.load_waveset(self._obsmode)
-        except (KeyError, exceptions.AmbiguousObsmode) as e:
+        except (KeyError, exceptions.AmbiguousObsmode):
             self.binset = ''
             self.bandwave = None
 
