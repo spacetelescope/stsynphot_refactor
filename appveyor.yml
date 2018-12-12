@@ -13,19 +13,13 @@ environment:
       # For this package-template, we include examples of Cython modules,
       # so Cython is required for testing. If your package does not include
       # Cython code, you can set CONDA_DEPENDENCIES=''
-      #CONDA_DEPENDENCIES: "Cython"
       CONDA_DEPENDENCIES: "Cython jinja2 scipy"
 
   matrix:
 
-      # We test Python 2.7 and 3.6
-
-      - PYTHON_VERSION: "2.7"
+      # We test only 3.7
+      - PYTHON_VERSION: "3.7"
         ASTROPY_VERSION: "stable"
-        NUMPY_VERSION: "stable"
-
-      - PYTHON_VERSION: "3.6"
-        ASTROPY_VERSION: "development"
         NUMPY_VERSION: "stable"
 
 platform:
@@ -51,7 +45,7 @@ build: false
 test_script:
     # Only needed for remote data.
     # Without this, there will be a warning but does not affect tests.
-    #- "SET PYSYN_CDBS=ftp://ftp.stsci.edu/cdbs/"
+    #- "SET PYSYN_CDBS=http://ssb.stsci.edu/cdbs_open/cdbs/"
     #- "%CMD_IN_ENV% python setup.py test --remote-data"
 
     - "%CMD_IN_ENV% python setup.py test"

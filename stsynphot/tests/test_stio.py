@@ -62,12 +62,11 @@ class TestGetLatestFile(object):
         self.datadir = _find_pkg_data_path('data')
 
     @pytest.mark.remote_data
-    def test_ftp(self):
-        """Remote FTP path."""
-        template = 'ftp://ftp.stsci.edu/cdbs/mtab/OLD_FILES/n*tmg.fits'
-        ans = 'ftp://ftp.stsci.edu/cdbs/mtab/OLD_FILES/n9i1408hm_tmg.fits'
-        filename = stio.get_latest_file(template, raise_error=True)
-        assert filename == ans
+    def test_http(self):
+        """Remote HTTP path."""
+        path = 'http://ssb.stsci.edu/cdbs_open/cdbs/mtab/OLD_FILES/'
+        filename = stio.get_latest_file(path + 'n*tmg.fits', raise_error=True)
+        assert filename == path + 'n9i1408hm_tmg.fits'
 
     def test_local(self):
         """Local data path."""

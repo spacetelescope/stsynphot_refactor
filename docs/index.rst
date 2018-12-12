@@ -98,7 +98,7 @@ synphot data file locations within the Python session**. For example::
 
     >>> from synphot.config import conf as syn_conf
     >>> print(syn_conf.johnson_v_file)
-    ftp://ftp.stsci.edu/cdbs/comp/nonhst/johnson_v_004_syn.fits
+    http://ssb.stsci.edu/cdbs/comp/nonhst/johnson_v_004_syn.fits
     >>> from stsynphot.config import conf
     >>> print(conf.rootdir)
     /my/local/dir/cdbs/

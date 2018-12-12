@@ -165,9 +165,20 @@ def get_latest_file(template, raise_error=False, err_msg=''):
 
     """
     path, pattern = os.path.split(irafconvert(template))
+    path_lc = path.lower()
+
+    # Remote HTTP directory
+    if path_lc.startswith('http:'):
+        from astropy.extern.six.moves.urllib import request
+        from bs4 import BeautifulSoup
+
+        with request.urlopen(path) as fin:
+            soup = BeautifulSoup(fin, 'html.parser')
+
+        allfiles = [x.text for x in soup.find_all("a")]
 
     # Remote FTP directory
-    if path.lower().startswith('ftp:'):
+    elif path_lc.startswith('ftp:'):
         from astropy.extern.six.moves.urllib import request
 
         response = request.urlopen(path).read().decode('utf-8').splitlines()
