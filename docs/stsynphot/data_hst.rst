@@ -6,27 +6,17 @@ HST data files
 ==============
 
 These data files are needed for calculations involving HST bandpasses.
-To install them locally via anonymous FTP::
+To install them locally, first download
+http://ssb.stsci.edu/cdbs/tarfiles/synphot1.tar.gz .
+Move it to the appropriate location and then extract it::
 
-    $ cd /my/local/dir/cdbs
-    $ ftp ftp.stsci.edu
-    Name: anonymous
-    Password: (Enter your email address)
-    ftp> cd cdbs/tarfiles
-    ftp> get synphot1.tar.gz
-    ftp> quit
     $ tar -xzf synphot1.tar.gz
     $ rm synphot1.tar.gz
 
 .. note::
 
     Downloading and extracting the files might take a while as the
-    tarball itself is almost 100 MB. This is recommended for first-time
-    installation.
-
-    If you only need select files, you can also choose to download them
-    individually from ftp://ftp.stsci.edu/cdbs/ to the relevant sub-directory.
-    This is recommended for updating existing installation.
+    tarball itself is almost 100 MB.
 
 Once installation is complete, you will see some sub-directories containing
 data as described below:

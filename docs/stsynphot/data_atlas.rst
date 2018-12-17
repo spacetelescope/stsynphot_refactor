@@ -6,19 +6,16 @@ Atlases and calibration spectra files
 =====================================
 
 These data files are needed for calculations involving source spectra.
-To install them locally via anonymous FTP::
+To install them locally, first download these tarballs:
 
-    $ cd /my/local/dir/cdbs
-    $ ftp ftp.stsci.edu
-    Name: anonymous
-    Password: (Enter your email address)
-    ftp> cd cdbs/tarfiles
-    ftp> get synphot2.tar.gz
-    ftp> get synphot3.tar.gz
-    ftp> get synphot4.tar.gz
-    ftp> get synphot5.tar.gz
-    ftp> get synphot6.tar.gz
-    ftp> quit
+* http://ssb.stsci.edu/cdbs/tarfiles/synphot2.tar.gz
+* http://ssb.stsci.edu/cdbs/tarfiles/synphot3.tar.gz
+* http://ssb.stsci.edu/cdbs/tarfiles/synphot4.tar.gz
+* http://ssb.stsci.edu/cdbs/tarfiles/synphot5.tar.gz
+* http://ssb.stsci.edu/cdbs/tarfiles/synphot6.tar.gz
+
+Move them to the appropriate location and then extract them::
+
     $ tar -xzf synphot2.tar.gz
     $ tar -xzf synphot3.tar.gz
     $ tar -xzf synphot4.tar.gz
@@ -29,12 +26,7 @@ To install them locally via anonymous FTP::
 .. note::
 
     Downloading and extracting the files might take a while as the
-    tarballs combined are almost 700 MB. This is recommended for first-time
-    installation.
-
-    If you only need select files, you can also choose to download them
-    individually from ftp://ftp.stsci.edu/cdbs/ to the relevant sub-directory.
-    This is recommended for updating existing installation.
+    tarballs combined are almost 700 MB.
 
 Once installation is complete, you will see some sub-directories containing
 data as described below:

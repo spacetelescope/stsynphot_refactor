@@ -133,7 +133,7 @@ needs to be normalized to literature value
     >>> import stsynphot as STS
     >>> from synphot import units, SourceSpectrum, SpectralElement, Observation
     >>> v_band = SpectralElement.from_filter('johnson_v')
-    >>> sun_file = 'ftp://ftp.stsci.edu/cdbs/calspec/sun_reference_stis_002.fits'
+    >>> sun_file = 'http://ssb.stsci.edu/cdbs/calspec/sun_reference_stis_002.fits'
     >>> sun_raw = SourceSpectrum.from_file(sun_file)
     >>> sun = sun_raw.normalize(4.83 * units.VEGAMAG, v_band, vegaspec=STS.Vega)
     >>> for obsmode in ['acs,wfc1,f555w', 'wfc3,uvis2,f336w', 'wfc3,ir,f160w']:

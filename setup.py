@@ -105,9 +105,8 @@ setup(name=PACKAGENAME,
       version=VERSION,
       description=DESCRIPTION,
       scripts=scripts,
-      install_requires=['numpy', 'astropy'],  # 'numpy>=1.9', 'astropy>=1.3', 'scipy>=0.14', 'synphot>=0.1'
-      tests_require=['pytest', 'pytest-remotedata', 'pytest-doctestplus',
-                     'pytest-openfiles'],
+      install_requires=['numpy', 'astropy'],  # 'numpy>=1.9', 'astropy>=1.3', 'scipy>=0.14', 'synphot>=0.1', 'beautifulsoup4'
+      tests_require=['pytest', 'pytest-remotedata', 'pytest-openfiles', 'ci-watson'],
       author=AUTHOR,
       author_email=AUTHOR_EMAIL,
       license=LICENSE,
