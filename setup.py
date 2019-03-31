@@ -8,7 +8,6 @@ import sys
 import ah_bootstrap
 from setuptools import setup
 
-# A dirty hack to get around some early import/configurations ambiguities
 import builtins
 builtins._ASTROPY_SETUP_ = True
 
