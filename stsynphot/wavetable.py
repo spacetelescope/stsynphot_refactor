@@ -4,7 +4,6 @@ which is used by ETC to select an appropriate wavelength set
 for a given observation mode for count rate calculations.
 
 """
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import warnings
@@ -17,10 +16,7 @@ from astropy import units as u
 from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
-try:
-    from synphot import units
-except ImportError:  # This is so RTD would build successfully
-    pass
+from synphot import units
 
 # LOCAL
 from . import exceptions, stio

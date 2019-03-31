@@ -1,7 +1,6 @@
 """This module contains WFC3/UVIS1 commissioning tests.
 Adapted from ``astrolib/pysynphot/from_commissioning/wfc3_uvis1/test*.py`` .
 """
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os

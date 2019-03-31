@@ -1,5 +1,4 @@
 """Utility functions for commissioning tests."""
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os

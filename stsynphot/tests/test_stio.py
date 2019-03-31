@@ -6,7 +6,6 @@
     ``read_*()`` functions are tested in other modules where they are used.
 
 """
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os

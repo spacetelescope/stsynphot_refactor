@@ -3,7 +3,6 @@ Adapted from ``astrolib/pysynphot/from_commissioning/acs/test1.py``,
 ``astrolib/pysynphot/from_commissioning/acs/test2.py``, and most of
 ``astrolib/pysynphot/from_commissioning/acs/test3.py``.
 """
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os

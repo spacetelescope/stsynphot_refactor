@@ -1,7 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """This module handles graph and component (optical or thermal) tables."""
-from __future__ import absolute_import, division, print_function
-from astropy.extern import six
 
 # THIRD-PARTY
 import numpy as np
@@ -10,10 +8,7 @@ import numpy as np
 from astropy import log
 
 # SYNPHOT
-try:
-    from synphot import exceptions as synexceptions
-except ImportError:  # This is so RTD would build successfully
-    pass
+from synphot import exceptions as synexceptions
 
 # LOCAL
 from . import exceptions, stio
@@ -262,7 +257,7 @@ class CompTable(object):
         self.name = compfile
         self.compnames = np.array([s.lower() for s in data['COMPNAME']])
         self.filenames = np.array(
-            list(six.moves.map(stio.irafconvert, data['FILENAME'])))
+            list(map(stio.irafconvert, data['FILENAME'])))
 
     def get_filenames(self, compnames):
         """Get filenames of given component names.

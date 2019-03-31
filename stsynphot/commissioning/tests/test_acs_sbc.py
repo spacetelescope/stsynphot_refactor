@@ -8,7 +8,6 @@ Adapted from ``astrolib/pysynphot/from_commissioning/acs/test3.py``
     Therefore, Test622 to Test 657 were not ported over.
 
 """
-from __future__ import absolute_import, division, print_function
 
 # LOCAL
 from ..utils import CommCase

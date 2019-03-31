@@ -36,6 +36,5 @@ To rerun only failed tests from the last run, add ``--lf`` in the list of
 and is useful for debugging.
 
 """
-from __future__ import absolute_import, division, print_function
 
 from . import utils  # noqa

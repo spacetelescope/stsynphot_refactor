@@ -7,14 +7,12 @@
 # The parser builds its internal tables by reading the docstring,
 # so you cannot put documentation here.
 #
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import re
 
 # ASTROPY
 from astropy import log
-from astropy.extern import six
 
 # LOCAL
 from .exceptions import ParserError, GenericASTTraversalPruningException
@@ -396,7 +394,7 @@ class GenericParser(object):
             sortlist.append((len(rhs), name))
             name2index[name] = i
         sortlist.sort()
-        outlist = list(six.moves.map(lambda ab: ab[1], sortlist))
+        outlist = list(map(lambda ab: ab[1], sortlist))
         return children[name2index[self.resolve(outlist)]]
 
     def resolve(self, list):
