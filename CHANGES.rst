@@ -2,7 +2,7 @@
 ==================
 
 - Removed Python 2 support. This version is only compatible with Python 3.5
-  or later.
+  or later. [#67]
 
 0.1.1 (2018-07-18)
 ==================
