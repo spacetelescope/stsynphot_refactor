@@ -43,20 +43,21 @@ reported) or contact `STScI Help Desk <https://hsthelp.stsci.edu>`_.
 Installation and Setup
 ======================
 
-**stsynphot** works under both Python 2 and 3. It requires the following
+**stsynphot** works for Python 3.5 or later only. It requires the following
 packages:
 
-* numpy (>= 1.9)
-* astropy (>= 1.3)
-* scipy (>= 0.14)
-* synphot (>= 0.1)
+* numpy
+* astropy
+* scipy
+* synphot
+* beautifulsoup4
 * matplotlib (optional for plotting)
 
 You can install **stsynphot** using one of the following ways:
 
 * From `AstroConda <http://astroconda.readthedocs.io/en/latest/>`_::
 
-    conda install stsynphot
+    conda install stsynphot -c http://ssb.stsci.edu/astroconda
 
 * From standalone release::
 

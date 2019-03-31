@@ -1,6 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """This module contains spectrum classes specific to STScI formats."""
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os
@@ -16,14 +15,11 @@ from astropy import units as u
 from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
-try:
-    from synphot import binning, reddening, units
-    from synphot import exceptions as synexceptions
-    from synphot.config import conf as synconf
-    from synphot.models import Empirical1D
-    from synphot.spectrum import SourceSpectrum, SpectralElement
-except ImportError:  # This is so RTD would build successfully
-    pass
+from synphot import binning, reddening, units
+from synphot import exceptions as synexceptions
+from synphot.config import conf as synconf
+from synphot.models import Empirical1D
+from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
 from . import stio

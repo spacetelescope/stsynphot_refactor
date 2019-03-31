@@ -1,6 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """This module handles :ref:`catalog spectra <stsynphot-spec-atlas>`."""
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import numbers
@@ -13,13 +12,10 @@ import numpy as np
 from astropy import units as u
 
 # SYNPHOT
-try:
-    from synphot import exceptions as synexceptions
-    from synphot import units
-    from synphot.spectrum import SourceSpectrum
-    from synphot.utils import validate_totalflux
-except ImportError:  # This is so RTD would build successfully
-    pass
+from synphot import exceptions as synexceptions
+from synphot import units
+from synphot.spectrum import SourceSpectrum
+from synphot.utils import validate_totalflux
 
 # LOCAL
 from . import exceptions, stio

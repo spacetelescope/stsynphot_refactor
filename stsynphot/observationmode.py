@@ -1,6 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Module to handle observations based on observation modes."""
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import re
@@ -16,15 +15,12 @@ from astropy.utils.decorators import lazyproperty
 from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
-try:
-    from synphot import exceptions as synexceptions
-    from synphot import units
-    from synphot.models import Empirical1D
-    from synphot.spectrum import SourceSpectrum, SpectralElement
-    from synphot.thermal import ThermalSpectralElement
-    from synphot.utils import merge_wavelengths
-except ImportError:  # This is so RTD would build successfully
-    pass
+from synphot import exceptions as synexceptions
+from synphot import units
+from synphot.models import Empirical1D
+from synphot.spectrum import SourceSpectrum, SpectralElement
+from synphot.thermal import ThermalSpectralElement
+from synphot.utils import merge_wavelengths
 
 # LOCAL
 from . import exceptions, stio

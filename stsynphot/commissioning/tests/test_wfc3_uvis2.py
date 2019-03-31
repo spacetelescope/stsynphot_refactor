@@ -2,7 +2,6 @@
 Adapted from ``astrolib/pysynphot/from_commissioning/wfc3_uvis1/test*.py``
 but using the other detector.
 """
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os

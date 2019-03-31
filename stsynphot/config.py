@@ -10,10 +10,6 @@ directories to be configured properly. It also overwrites
 ``synphot`` configurable items.
 
 """
-from __future__ import absolute_import, division, print_function
-from astropy.extern.six import itervalues
-from astropy.extern.six.moves import map
-
 # STDLIB
 import os
 
@@ -23,11 +19,8 @@ from astropy import log
 from astropy.config import ConfigNamespace, ConfigItem
 
 # SYNPHOT
-try:
-    from synphot.config import Conf as synconf
-    from synphot.utils import generate_wavelengths
-except ImportError:  # This is so RTD would build successfully
-    pass
+from synphot.config import Conf as synconf
+from synphot.utils import generate_wavelengths
 
 __all__ = ['conf', 'getref', 'showref', 'overwrite_synphot_config']
 
@@ -82,7 +75,7 @@ class Conf(ConfigNamespace):
 
 def _get_synphot_cfgitems():
     """Iterator for ``synphot`` configuration items."""
-    for c in itervalues(synconf.__dict__):
+    for c in synconf.__dict__.values():
         if isinstance(c, ConfigItem):
             yield c
 

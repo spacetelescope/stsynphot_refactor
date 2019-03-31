@@ -1,7 +1,6 @@
 """This module contains STIS/NUVMAMA commissioning tests.
 Adapted from ``astrolib/pysynphot/from_commissioning/stis/test*.py``.
 """
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os

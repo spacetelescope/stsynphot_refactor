@@ -7,7 +7,6 @@
     are not affected by CDBS changes.
 
 """
-from __future__ import absolute_import, division, print_function
 
 # THIRD-PARTY
 import numpy as np

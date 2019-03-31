@@ -5,9 +5,6 @@
 * Basic ASCII - See `astropy.io.ascii`
 
 """
-from __future__ import absolute_import, division, print_function
-from astropy.extern import six
-
 # STDLIB
 import fnmatch
 import re
@@ -24,11 +21,8 @@ from astropy.utils.data import _find_pkg_data_path
 from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
-try:
-    from synphot import exceptions as synexceptions
-    from synphot import units
-except ImportError:  # This is so RTD would build successfully
-    pass
+from synphot import exceptions as synexceptions
+from synphot import units
 
 __all__ = ['irafconvert', 'get_latest_file', 'read_graphtable',
            'read_comptable', 'read_catalog', 'read_wavecat', 'read_waveset',
@@ -110,7 +104,7 @@ def irafconvert(iraf_filename, sep='$'):
         Input is not a string.
 
     """
-    if not isinstance(iraf_filename, six.string_types):
+    if not isinstance(iraf_filename, str):
         raise TypeError('{0} is not a string.'.format(iraf_filename))
 
     # Nothing needs to be done
@@ -169,7 +163,7 @@ def get_latest_file(template, raise_error=False, err_msg=''):
 
     # Remote HTTP directory
     if path_lc.startswith('http:'):
-        from astropy.extern.six.moves.urllib import request
+        from urllib import request
         from bs4 import BeautifulSoup
 
         with request.urlopen(path) as fin:
@@ -179,7 +173,7 @@ def get_latest_file(template, raise_error=False, err_msg=''):
 
     # Remote FTP directory
     elif path_lc.startswith('ftp:'):
-        from astropy.extern.six.moves.urllib import request
+        from urllib import request
 
         response = request.urlopen(path).read().decode('utf-8').splitlines()
         allfiles = list(set([x.split()[-1] for x in response]))  # Rid symlink

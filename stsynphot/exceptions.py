@@ -1,12 +1,8 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Custom exceptions for `stsynphot` to raise."""
-from __future__ import absolute_import, division, print_function
 
 # SYNPHOT
-try:
-    from synphot.exceptions import SynphotError
-except ImportError:  # This is so RTD would build successfully
-    pass
+from synphot.exceptions import SynphotError
 
 __all__ = ['ParserError', 'GenericASTTraversalPruningException',
            'ParameterOutOfBounds', 'GraphtabError', 'UnusedKeyword',

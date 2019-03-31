@@ -12,7 +12,6 @@ Adapted from ``astrolib/pysynphot/from_commissioning/acs/test5.py``,
     Therefore, testing for WFC1 alone is sufficient.
 
 """
-from __future__ import absolute_import, division, print_function
 
 # STDLIB
 import os

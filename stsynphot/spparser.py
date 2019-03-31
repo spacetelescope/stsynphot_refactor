@@ -16,21 +16,15 @@ See :ref:`stsynphot-parser` for more details and
     IRAF SYNPHOT extinction names are obsolete and no longer supported.
 
 """
-from __future__ import absolute_import, division, print_function
-from astropy.extern import six
-
 # ASTROPY
 from astropy import log
 
 # SYNPHOT
-try:
-    from synphot import exceptions as synexceptions
-    from synphot import units
-    from synphot.models import (BlackBodyNorm1D, Box1D, ConstFlux1D,
-                                GaussianFlux1D, PowerLawFlux1D)
-    from synphot.spectrum import SourceSpectrum, SpectralElement
-except ImportError:  # This is so RTD would build successfully
-    pass
+from synphot import exceptions as synexceptions
+from synphot import units
+from synphot.models import (BlackBodyNorm1D, Box1D, ConstFlux1D,
+                            GaussianFlux1D, PowerLawFlux1D)
+from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
 from . import exceptions, spectrum
@@ -59,7 +53,7 @@ def _convertstr(value):
     string to spectrum object.
 
     """
-    if not isinstance(value, six.string_types):
+    if not isinstance(value, str):
         return value
     value = irafconvert(value)
     try:
@@ -406,7 +400,7 @@ class Interpreter(GenericASTMatcher):
                 sp = args[0]
 
                 # ETC generates junk (i.e., 'null') sometimes
-                if isinstance(sp, six.string_types) and sp != 'null':
+                if isinstance(sp, str) and sp != 'null':
                     sp = SourceSpectrum.from_file(irafconvert(sp))
 
                 if isinstance(sp, SourceSpectrum):
