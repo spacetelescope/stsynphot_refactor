@@ -72,7 +72,7 @@ available in CRDS are from "the Grids of ATLAS9-ODFNEW Models and Fluxes" from
 `Dr. F. Castelli's webpage <http://wwwuser.oats.inaf.it/castelli/grids.html>`_
 (created on January 2007) and also available from
 `Dr. R. Kurucz's webpage <http://kurucz.harvard.edu>`_. See
-`Castelli-Kurucz 2004 atlas README file <http://www.stsci.edu/hst/observatory/crds/castelli_kurucz_atlas.html>`_
+`Castelli-Kurucz 2004 atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/castelli-and-kurucz-atlas.html>`_
 for more details.
 The atlas data files are organized in a similar naming convention as
 :ref:`stsynphot-appendixa-kurucz1993`, and are easily accessible using
@@ -267,7 +267,7 @@ limit of the instrument. As a result, **stsynphot** may underestimate the total
 counts. Users should check that the wavelength range of the spectrum they are
 using is compatible with the wavelength range of the calculation they require.
 
-See `CALSPEC Calibration Database <http://www.stsci.edu/hst/observatory/crds/calspec.html>`_
+See `CALSPEC Calibration Database <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html>`_
 for available spectra and their descriptions.
 
 
@@ -283,7 +283,7 @@ stellar spectra, encompassing all normal spectral types and luminosity
 classes at solar abundance, and metal-weak and metal-rich F-K dwarf
 and G-K giant components. Each spectrum in the library is a combination of
 several sources overlapping in wavelength coverage. See
-`Pickles library README file <http://www.stsci.edu/hst/observatory/crds/pickles_atlas.html>`_
+`Pickles library README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/pickles-atlas.html>`_
 for more details.
 
 The library data were obtained from
@@ -330,7 +330,7 @@ atmospheres. It consists of 1434 files, each of which represents a metal-line
 blanketed flux spectrum for a theoretical stellar model atmosphere.
 Data files are named "bk_mnnnn.fits", where ``m`` is the block code and
 ``nnnn`` the sequence number. See
-`Buser-Kurucz atlas README file <http://www.stsci.edu/hst/observatory/crds/bkmodels.html>`_
+`Buser-Kurucz atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/buser-kurucz-atlas.html>`_
 for more details, in including the mapping of filenames to their respective
 parameter specifications.
 
@@ -353,7 +353,7 @@ The ``$PYSYN_CDBS/grid/bz77`` directory contains 77 stellar spectra that are
 frequently used in the synthesis of galaxy spectra. They were provided by
 Gustavo Bruzual. Each spectrum is stored in a table named "bz_nn.fits",
 where ``nn`` runs from 1 to 77. See
-`Bruzual atlas README file <http://www.stsci.edu/hst/observatory/crds/bz77.html>`_
+`Bruzual atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/bruzual-atlas.html>`_
 for a mapping of filenames to their respective spectral types.
 
 The example below loads a source spectrum of spectral type G5V from the atlas::
@@ -377,7 +377,7 @@ luminosity classes from the observations of
 The spectra cover the wavelength range 3130 to 10800 Angstrom.
 Each spectrum is stored in a table named "gs_nnn.fits",
 where ``nnn`` runs from 1 to 175. See
-`Gunn-Stryker atlas README file <http://www.stsci.edu/hst/observatory/crds/gs.html>`_
+`Gunn-Stryker atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/gunn-stryker-atlas-list.html>`_
 for a mapping of filenames to their respective spectral types.
 
 The example below loads a source spectrum of spectral type G5V from the atlas::
@@ -402,7 +402,7 @@ sources. The IR and the optical data are tied together by the :math:`V – K`
 colors.
 Each spectrum is stored in a table named "bpgs_nnn.fits",
 where ``nnn`` runs from 1 to 175. See
-`Bruzual-Persson-Gunn-Stryker atlas README file <http://www.stsci.edu/hst/observatory/crds/bpgs.html>`_
+`Bruzual-Persson-Gunn-Stryker atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/bruzual-persson-gunn-stryker-atlas-list.html>`_
 for a mapping of filenames to their respective spectral types.
 
 Note that the spectral data for all of the stars in this atlas have been
@@ -436,7 +436,7 @@ They cover the wavelength range 3510 to 7427 Angstroms at a resolution of
 approximately 4.5 Angstrom.
 Each spectrum is stored in a table named "jc_nnn.fits",
 where ``nnn`` runs from 1 to 161. See
-`Jacoby-Hunter-Christian atlas README file <http://www.stsci.edu/hst/observatory/crds/JHC.html>`_
+`Jacoby-Hunter-Christian atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/jacoby-hunter-christian-atlas.html>`_
 for a mapping of filenames to their respective spectral types.
 
 The example below loads a source spectrum of spectral type G0V from the atlas::
@@ -463,7 +463,7 @@ Each spectrum has 1187 wavelength points covering the 0.01 to 100 micron range.
 The flux unit is solar luminosity per Angstrom.
 The nebular contribution to the SED (i.e., emission lines and nebular
 continuum) is not included in the spectra. See
-`Bruzual-Charlot atlas README file <http://www.stsci.edu/hst/observatory/crds/cdbs_bc95.html>`_
+`Bruzual-Charlot atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/the-bruzual-charlot-atlas.html>`_
 for available spectra and their descriptions.
 
 The example below loads a galaxy spectrum with Salpeter IMF containing mass
@@ -490,7 +490,7 @@ types (:ref:`Kinney et al. 1996 <stsynphot-ref-kinney1996>`) and starburst
 galaxies (:ref:`Calzetti et al. 1994 <stsynphot-ref-calzetti1994>`).
 The flux of the spectral templates has been normalized to a visual magnitude
 of 12.5 STMAG. See
-`Kinney-Calzetti atlas README file <http://www.stsci.edu/hst/observatory/crds/cdbs_kc96.html>`_
+`Kinney-Calzetti atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/the-kinney-calzetti-spetral-atlas.html>`_
 for more details.
 
 The example below loads a galaxy spectrum from the elliptical template::
@@ -515,7 +515,7 @@ J. R. Walsh, private communication).
 The flux of the LINER and Seyfert 2 templates is normalized to a Johnson *V*
 magnitude of 12.5 STMAG, while the Seyfert 1 and QSO templates are
 normalized to a Johnson *B* magnitude of 12.5 STMAG. See
-`AGN atlas README file <http://www.stsci.edu/hst/observatory/crds/cdbs_agn.html>`_
+`AGN atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/the-agn-atlas.html>`_
 for more details.
 
 The example below loads a Seyfert 2 spectrum::
@@ -535,7 +535,7 @@ Galactic Atlas
 The ``$PYSYN_CDBS/grid/galactic`` directory contains the model spectra of
 Orion nebula and NGC 7009 planetary nebula (J. R. Walsh, private
 communication). See
-`Galactic atlas README file <http://www.stsci.edu/hst/observatory/crds/cdbs_galactic.html>`_
+`Galactic atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/the-galactic-emission-line-object-atlas.html>`_
 for more details.
 
 The example below loads the spectrum for Orion nebula::
@@ -555,7 +555,7 @@ Other Non-Stellar Objects
 
 The ``$PYSYN_CDBS/etc/source`` directory contains spectra for
 `various non-stellar objects used in ETC <http://etc.stsci.edu/etcstatic/users_guide/1_ref_2_spectral_distribution.html#non-stellar-spectra>`_.
-See `Non-stellar objects README file <http://www.stsci.edu/hst/observatory/crds/non-stellar.html>`_
+See `Non-stellar objects README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/non-stellar-spectra.html>`_
 for more details.
 
 The example below loads a spectrum for Gliese 229B brown dwarf::

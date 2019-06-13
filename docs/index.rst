@@ -71,7 +71,7 @@ You can install **stsynphot** using one of the following ways:
 
 As with ASTROLIB PYSYNPHOT, the data files for **stsynphot** are distributed
 separately by
-`Calibration Reference Data System <http://www.stsci.edu/hst/observatory/crds/throughput.html>`_.
+`Calibration Reference Data System <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/synphot-throughput-tables.html>`_.
 They are expected to follow a certain directory structure under the root
 directory, identified by the ``PYSYN_CDBS`` environment variable that *must* be
 set prior to using this package. In the examples below, the root directory is
@@ -304,7 +304,7 @@ Calzetti, D., Kinney, A. L., & Storchi-Bergmann, T. 1994, ApJ, 429, 582
 
 .. _stsynphot-ref-demarchi2004:
 
-De Marchi, G. et al. 2004, ISR ACS 2004-08: Detector Quantum Efficiency and Photometric Zero Points of the ACS (Baltimore, MD: STScI), http://www.stsci.edu/hst/acs/documents/isrs/isr0408.pdf
+De Marchi, G. et al. 2004, ISR ACS 2004-08: Detector Quantum Efficiency and Photometric Zero Points of the ACS (Baltimore, MD: STScI), http://www.stsci.edu/hst/instrumentation/acs/documentation/instrument-science-reports-isrs/_documents/isr0408.pdf
 
 .. _stsynphot-ref-diaz2012:
 
