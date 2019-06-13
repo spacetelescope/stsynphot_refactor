@@ -5,11 +5,9 @@ stsynphot
     :target: http://stsynphot.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://travis-ci.org/spacetelescope/stsynphot_refactor.svg?branch=master
-    :target: https://travis-ci.org/spacetelescope/stsynphot_refactor
-
-.. image:: https://ci.appveyor.com/api/projects/status/h6e7fycv3jww0d94/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/pllim/stsynphot-refactor/branch/master
+.. image:: https://dev.azure.com/spacetelescope/stsynphot_refactor/_apis/build/status/spacetelescope.stsynphot_refactor?branchName=master
+    :target: https://dev.azure.com/spacetelescope/stsynphot_refactor/_build/latest?definitionId=10&branchName=master
+    :alt: Build Status
 
 .. image:: https://codecov.io/gh/spacetelescope/stsynphot_refactor/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/spacetelescope/stsynphot_refactor
