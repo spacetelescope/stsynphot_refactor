@@ -10,8 +10,8 @@ and model data, which are available in FITS table format for use
 with **stsynphot**. They are as tabulated below.
 
 Current descriptions and access to all available
-calibration spectra and astronomical catalogs be found at the
-`CRDS website <http://www.stsci.edu/hst/observatory/crds/astronomical_catalogs.html>`_,
+calibration spectra and astronomical catalogs be found at
+`HLSP Reference Atlases <https://archive.stsci.edu/hlsp/reference-atlases>`_,
 which supersedes this documentation in case of conflicting information.
 The data files are available at STScI on all science computing clusters in the
 ``$PYSYN_CDBS`` directory. Off-site users can obtain these data via
