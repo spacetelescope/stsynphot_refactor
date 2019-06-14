@@ -7,6 +7,7 @@ parameters:
   astropyCmd: 'pip install astropy'
   synphotCmd: 'pip install synphot'
   pythonVersion: '3.7'
+  pytestExtraArgs: ''
 
 jobs:
 - job: ${{ parameters.name }}
@@ -22,11 +23,12 @@ jobs:
       architecture: 'x64'
 
   - script: |
+      export PYTEST_EXTRA_ARGS=${{ parameters.pytestExtraArgs }}
       sudo apt-get install libxml2-utils
       python -m pip install --upgrade pip setuptools
       ${{ parameters.numpyCmd }}
       pip install scipy beautifulsoup4 pytest-astropy
       ${{ parameters.astropyCmd }}
       ${{ parameters.synphotCmd }}
-      python setup.py test --open-files
+      python setup.py test --open-files $(PYTEST_EXTRA_ARGS)
     displayName: 'Run tests'

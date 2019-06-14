@@ -13,3 +13,4 @@ jobs:
       name: 'Weekly_Dev'
       astropyCmd: 'pip install git+https://github.com/astropy/astropy.git@master#egg=astropy'
       synphotCmd: 'pip install git+https://github.com/spacetelescope/synphot_refactor.git@master#egg=synphot'
+      pytestExtraArgs: '--remote-data'
