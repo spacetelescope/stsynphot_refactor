@@ -55,12 +55,13 @@ stages:
         python -m pip install --upgrade pip setuptools
         pip install numpy scipy beautifulsoup4 astropy pytest-astropy synphot codecov
         python setup.py test --coverage --open-files --remote-data
+      env:
+        PYSYN_CDBS: $(PYSYN_CDBS)
       displayName: 'Run tests'
 
     - script: codecov -t $codecov_token
       env:
         codecov_token: $(CODECOV_TOKEN)
-        PYSYN_CDBS: http://ssb.stsci.edu/cdbs_open/cdbs/
       displayName: 'Calculate coverage'
 
   - template: azure-templates.yml
