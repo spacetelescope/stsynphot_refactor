@@ -1,7 +1,7 @@
 include README.rst
 include CHANGES.rst
 include LICENSE
-include CITATION
+include CITATION.md
 
 include ah_bootstrap.py
 include setup.cfg
