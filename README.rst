@@ -1,6 +1,9 @@
 stsynphot
 =========
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3247832.svg
+   :target: https://doi.org/10.5281/zenodo.3247832
+
 .. image:: https://readthedocs.org/projects/stsynphot/badge/?version=latest
     :target: http://stsynphot.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
