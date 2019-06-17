@@ -55,9 +55,13 @@ packages:
 
 You can install **stsynphot** using one of the following ways:
 
-* From `AstroConda <http://astroconda.readthedocs.io/en/latest/>`_::
+* From `AstroConda <https://astroconda.readthedocs.io/en/latest/>`_::
 
     conda install stsynphot -c http://ssb.stsci.edu/astroconda
+
+* From ``conda-forge`` channel::
+
+    conda install stsynphot -c conda-forge
 
 * From standalone release::
 
@@ -304,7 +308,7 @@ Calzetti, D., Kinney, A. L., & Storchi-Bergmann, T. 1994, ApJ, 429, 582
 
 .. _stsynphot-ref-demarchi2004:
 
-De Marchi, G. et al. 2004, ISR ACS 2004-08: Detector Quantum Efficiency and Photometric Zero Points of the ACS (Baltimore, MD: STScI), http://www.stsci.edu/hst/instrumentation/acs/documentation/instrument-science-reports-isrs/_documents/isr0408.pdf
+De Marchi, G. et al. 2004, ISR ACS 2004-08: Detector Quantum Efficiency and Photometric Zero Points of the ACS (Baltimore, MD: STScI), http://www.stsci.edu/files/live/sites/www/files/home/hst/instrumentation/acs/documentation/instrument-science-reports-isrs/_documents/isr0408.pdf
 
 .. _stsynphot-ref-diaz2012:
 
