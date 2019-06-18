@@ -30,7 +30,7 @@ features below that are ideally suited for predicting exposure times
 
 #. The input parameters were originally structured to mimic what is contained
    in the exposure logsheets found in HST observing proposals in
-   `Astronomer's Proposal Tool (APT) <http://www.stsci.edu/hst/proposing/apt>`_.
+   `Astronomer's Proposal Tool (APT) <http://www.stsci.edu/scientific-community/software/astronomers-proposal-tool-apt.html>`_.
 #. For the spectroscopic instruments, it will automatically search for and
    use a wavelength binning that is appropriate for the selected instrumental
    dispersion mode.
