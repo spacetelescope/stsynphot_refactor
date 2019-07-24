@@ -4,6 +4,7 @@ parameters:
   name: 'Default'  # Defaults for any parameters that aren't specified
   vmImage: 'Ubuntu-16.04'
   numpyCmd: 'pip install numpy'
+  scipyCmd: 'pip install scipy'
   astropyCmd: 'pip install astropy'
   synphotCmd: 'pip install synphot'
   pythonVersion: '3.7'
@@ -29,6 +30,7 @@ jobs:
     displayName: Set var on Linux/Darwin
 
   # Disable --remote-data for Windows regardless of pytestExtraArgs
+  # due to some problem with parsing the args in powershell
   - powershell: |
       Set-Variable -Name PYTEST_EXTRA_ARGS -Value ''
       Write-Host "##vso[task.setvariable variable=PYTEST_EXTRA_ARGS]$PYTEST_EXTRA_ARGS"
@@ -39,7 +41,8 @@ jobs:
       sudo apt-get install libxml2-utils
       python -m pip install --upgrade pip setuptools
       ${{ parameters.numpyCmd }}
-      pip install scipy beautifulsoup4 pytest-astropy
+      ${{ parameters.scipyCmd }}
+      pip install beautifulsoup4 pytest-astropy
       ${{ parameters.astropyCmd }}
       ${{ parameters.synphotCmd }}
       python setup.py test --open-files $(PYTEST_EXTRA_ARGS)
