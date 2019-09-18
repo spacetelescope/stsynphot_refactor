@@ -166,7 +166,7 @@ def get_latest_file(template, raise_error=False, err_msg=''):
         from urllib import request
         from bs4 import BeautifulSoup
 
-        with request.urlopen(path) as fin:
+        with request.urlopen(path) as fin:  # nosec
             soup = BeautifulSoup(fin, 'html.parser')
 
         allfiles = [x.text for x in soup.find_all("a")]
@@ -175,7 +175,7 @@ def get_latest_file(template, raise_error=False, err_msg=''):
     elif path_lc.startswith('ftp:'):
         from urllib import request
 
-        response = request.urlopen(path).read().decode('utf-8').splitlines()
+        response = request.urlopen(path).read().decode('utf-8').splitlines()  # nosec  # noqa
         allfiles = list(set([x.split()[-1] for x in response]))  # Rid symlink
 
     # Local directory

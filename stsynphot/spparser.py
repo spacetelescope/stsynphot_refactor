@@ -134,12 +134,12 @@ class BaseScanner(GenericScanner):
     def t_lparens(self, s):
         # Left parenthesis regular expression.
         r' \( '
-        self.rv.append(Token(token_type='LPAREN'))
+        self.rv.append(Token(token_type='LPAREN'))  # nosec
 
     def t_rparens(self, s):
         # Right parenthesis regular expression.
         r' \) '
-        self.rv.append(Token(token_type='RPAREN'))
+        self.rv.append(Token(token_type='RPAREN'))  # nosec
 
     def t_comma(self, s):
         # Comma regular expression.
@@ -149,17 +149,17 @@ class BaseScanner(GenericScanner):
     def t_integer(self, s):
         # Integer regular expression.
         r' \d+ '
-        self.rv.append(Token(token_type='INTEGER', attr=s))
+        self.rv.append(Token(token_type='INTEGER', attr=s))  # nosec
 
     def t_identifier(self, s):
         # Identifier regular expression.
         r' [$a-z_A-Z/\//][\w/\.\$:#]*'
-        self.rv.append(Token(token_type='IDENTIFIER', attr=s))
+        self.rv.append(Token(token_type='IDENTIFIER', attr=s))  # nosec
 
     def t_filelist(self, s):
         # File list regular expression.
         r' @\w+'
-        self.rv.append(Token(token_type='FILELIST', attr=s[1:]))
+        self.rv.append(Token(token_type='FILELIST', attr=s[1:]))  # nosec
 
 
 class Scanner(BaseScanner):
@@ -167,12 +167,12 @@ class Scanner(BaseScanner):
     def t_float(self, s):
         # Float regular expression.
         r' ((\d*\.\d+)|(\d+\.d*)|(\d+)) ([eE][-+]?\d+)?'
-        self.rv.append(Token(token_type='FLOAT', attr=s))
+        self.rv.append(Token(token_type='FLOAT', attr=s))  # nosec
 
     def t_divop(self, s):
         # Division operation regular expression.
         r' \s/\s '
-        self.rv.append(Token(token_type='/'))
+        self.rv.append(Token(token_type='/'))  # nosec
 
 
 class BaseParser(GenericASTBuilder):
