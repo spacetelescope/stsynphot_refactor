@@ -23,6 +23,7 @@ from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
 from . import stio
+from .exceptions import PixscaleNotFoundError
 
 __all__ = ['reset_cache', 'interpolate_spectral_element',
            'ObservationSpectralElement', 'band', 'ebmvx', 'load_vega', 'Vega']
@@ -346,12 +347,12 @@ class ObservationSpectralElement(SpectralElement):
 
         Raises
         ------
-        synphot.exceptions.SynphotError
-            Calculation failed.
+        stsynphot.exceptions.PixscaleNotFoundError
+            Undefined pixel scale for the given observation mode.
 
         """
         if self.obsmode.pixscale is None:
-            raise synexceptions.SynphotError(
+            raise PixscaleNotFoundError(
                 'Undefined pixel scale for {0}.'.format(self.obsmode))
 
         if area is None:

@@ -3,6 +3,8 @@
 
 - Removed Python 2 support. This version is only compatible with Python 3.5
   or later. [#67]
+- Invalid ``pixscale`` in ``thermback`` calculation now raises
+  ``PixscaleNotFoundError`` instead of ``SynphotError``. [#88]
 
 0.1.1 (2018-07-18)
 ==================

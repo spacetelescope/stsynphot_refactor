@@ -42,3 +42,8 @@ class IncompleteObsmode(GraphtabError):
 class AmbiguousObsmode(GraphtabError):
     """Ambiguous observation mode is not allowed in graph table."""
     pass
+
+
+class PixscaleNotFoundError(SynphotError):
+    """Undefined pixel scale for a given observation mode."""
+    pass
