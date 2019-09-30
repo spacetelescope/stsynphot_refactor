@@ -26,6 +26,7 @@ from synphot.spectrum import SourceSpectrum, SpectralElement
 # LOCAL
 from .. import spectrum
 from ..config import conf
+from ..exceptions import PixscaleNotFoundError
 from ..stio import irafconvert
 
 _IS_PY32 = (sys.version_info >= (3, 2)) & (sys.version_info < (3, 3))
@@ -253,7 +254,7 @@ class TestObservationSpectralElement(object):
         np.testing.assert_allclose(obs1(w), obs2(w))
 
         # No pixel scale
-        with pytest.raises(synexceptions.SynphotError):
+        with pytest.raises(PixscaleNotFoundError):
             obs1.thermback()
 
         # No binset
