@@ -101,5 +101,5 @@ def test_read_table_exception():
     with pytest.raises(synexceptions.SynphotError):
         stio._read_table(
             tabname, 1,
-            {'COMPNAME': np.str, 'KEYWORD': np.str, 'INNODE': np.str,
-             'OUTNODE': np.int, 'THCOMPNAME': np.str, 'COMMENT': np.str})
+            {'COMPNAME': np.str_, 'KEYWORD': np.str_, 'INNODE': np.str_,
+             'OUTNODE': np.int64, 'THCOMPNAME': np.str_, 'COMMENT': np.str_})
