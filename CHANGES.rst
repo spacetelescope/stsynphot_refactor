@@ -5,6 +5,8 @@
   or later. [#67]
 - Invalid ``pixscale`` in ``thermback`` calculation now raises
   ``PixscaleNotFoundError`` instead of ``SynphotError``. [#88]
+- Invalid filename lookup by component in ``tables`` now raises
+  ``GraphtabError`` instead of ``SynphotError``. [#89]
 
 0.1.1 (2018-07-18)
 ==================

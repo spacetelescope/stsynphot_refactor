@@ -86,5 +86,5 @@ class TestCompTable(object):
         assert files[0].endswith('wfc3_ir_wmring_001_th.fits')
 
     def test_exceptions(self):
-        with pytest.raises(synexceptions.SynphotError):
+        with pytest.raises(exceptions.GraphtabError):
             self.ct.get_filenames(['foo'])
