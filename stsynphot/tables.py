@@ -276,7 +276,7 @@ class CompTable(object):
 
         Raises
         ------
-        synphot.exceptions.SynphotError
+        stsynphot.exceptions.GraphtabError
             Unmatched component name.
 
         """
@@ -286,7 +286,7 @@ class CompTable(object):
             if compname not in (None, '', conf.clear_filter):
                 index = np.where(self.compnames == compname)[0]
                 if len(index) < 1:
-                    raise synexceptions.SynphotError(
+                    raise exceptions.GraphtabError(
                         'Cannot find {0} in {1}.'.format(compname, self.name))
                 files.append(self.filenames[index[0]].lstrip())
             else:
