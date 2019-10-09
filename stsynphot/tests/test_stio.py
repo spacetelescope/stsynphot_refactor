@@ -9,6 +9,7 @@
 
 # STDLIB
 import os
+import warnings
 
 # THIRD-PARTY
 import numpy as np
@@ -16,6 +17,7 @@ import pytest
 
 # ASTROPY
 from astropy.utils.data import _find_pkg_data_path, get_pkg_data_filename
+from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
@@ -64,7 +66,13 @@ class TestGetLatestFile(object):
     def test_http(self):
         """Remote HTTP path."""
         path = 'http://ssb.stsci.edu/cdbs_open/cdbs/mtab/OLD_FILES/'
-        filename = stio.get_latest_file(path + 'n*tmg.fits', raise_error=True)
+        with warnings.catch_warnings():
+            # Warning issued from html5lib 1.0.1
+            warnings.filterwarnings(
+                'ignore', message=r'.*Using or importing the ABC.*',
+                category=DeprecationWarning)
+            filename = stio.get_latest_file(
+                path + 'n*tmg.fits', raise_error=True)
         assert filename == path + 'n9i1408hm_tmg.fits'
 
     def test_local(self):
@@ -76,8 +84,9 @@ class TestGetLatestFile(object):
 
     def test_bogus(self):
         """Bogus data path."""
-        filename = stio.get_latest_file(
-            os.path.join('foo', 'foo', '*tmg.fits'))
+        with pytest.warns(AstropyUserWarning, match=r'No files found'):
+            filename = stio.get_latest_file(
+                os.path.join('foo', 'foo', '*tmg.fits'))
         assert filename == ''
 
     def test_no_files(self):
@@ -85,7 +94,8 @@ class TestGetLatestFile(object):
         template = os.path.join(self.datadir, '*dummy')
 
         # Warning only
-        filename = stio.get_latest_file(template)
+        with pytest.warns(AstropyUserWarning, match=r'No files found'):
+            filename = stio.get_latest_file(template)
         assert filename == ''
 
         # Raise error

@@ -13,6 +13,7 @@ import os
 
 # THIRD-PARTY
 import pytest
+from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
@@ -84,7 +85,9 @@ class TestRenormPartialOverlap(object):
     def test_partial(self):
         """Warning only."""
         input_str = 'rn({0}, band(johnson, u), 15, abmag)'.format(self.fname)
-        sp = spparser.parse_spec(input_str)
+        with pytest.warns(AstropyUserWarning,
+                          match=r'Spectrum is not defined everywhere'):
+            sp = spparser.parse_spec(input_str)
         assert isinstance(sp, SourceSpectrum)
         assert 'force_renorm' in sp.warnings
 

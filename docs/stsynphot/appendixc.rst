@@ -403,13 +403,13 @@ The example below displays the header keywords mentioned above::
     ...     'nic2_f110w_002_th.fits')
     >>> with fits.open(filename) as pf:
     ...     print(pf[1].header)
-    ....
+    ...
     BEAMFILL=                   1. / Fraction of beam filled by this component
     DEFT    =                 77.1 / Default temperature in kelvins
     THTYPE  = 'THRU    '           / Thermal type (opaque/thru/numeric/clear)
     THCMPNAM= 'nic2_f110w'         / Name of thermal component
     THMODE  = 'f110w   '           / Keyword in obsmode to specify temperature
-    ....
+    ...
 
 
 .. _stsynphot-parameterized:
