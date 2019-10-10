@@ -176,11 +176,11 @@ of the :ref:`stsynphot-nonhst-johnson` *UBV* and the
 SDSS
 ----
 
-The `Sloan Digital Sky Survey (SDSS) <http://www.sdss.org/>`_ *ugriz* filter
+The `Sloan Digital Sky Survey (SDSS) <https://www.sdss.org/>`_ *ugriz* filter
 throughputs were provided by Sebastian Jester on behalf of the SDSS team,
 as described in :ref:`Gunn et al. (2001) <stsynphot-ref-gunn2001>`.
 The filter curves are shown in the
-`SDSS filter response plot <http://www.sdss.org/dr1/instruments/imager/index.html#filters>`_. For example::
+`SDSS filter response plot <http://classic.sdss.org/dr1/instruments/imager/index.html#filters>`_. For example::
 
     >>> import stsynphot as STS
     >>> bp = STS.band('sdss,g')
@@ -209,7 +209,7 @@ large extended sources (larger than about 80 pixels in size)
 because the extended IR scattering wings in these bands,
 which do not affect the photometry of point sources, begin to be
 included. The modified curves are shown in an
-`updated SDSS system response plot <http://www.sdss.org/dr3/instruments/imager/#filters>`_.
+`updated SDSS system response plot <http://classic.sdss.org/dr3/instruments/imager/#filters>`_.
 
 The SDSS photometry is intended to be on the AB system
 (:ref:`Oke & Gunn 1983 <stsynphot-ref-oke1983>`), by which a 0-magnitude object
@@ -234,7 +234,7 @@ See :ref:`Holberg & Bergeron (2006) <stsynphot-ref-holberg2006>` for a
 calibration of SDSS magnitudes using Vega as a reference spectrum.
 Further information about SDSS photometric calibration and the "asinh"
 magnitude system can be found at
-`SDSS Photometric Flux Calibration webpage <http://www.sdss.org/dr3/algorithms/fluxcal.html>`_.
+`SDSS Photometric Flux Calibration webpage <http://classic.sdss.org/dr3/algorithms/fluxcal.html>`_.
 
 
 .. _stsynphot-nonhst-stromgren:
@@ -322,7 +322,7 @@ Bessell
 The Bessell *JHK* filter curves are taken from
 :ref:`Bessell & Brett (1988) <stsynphot-ref-bessell1988>`, Table IV.
 These curves include the mean atmospheric transmission equivalent to 1.2
-air masses of a standard `KPNO <http://www.noao.edu/kpno/>`_  atmosphere.
+air masses of a standard `KPNO <https://www.noao.edu/kpno/>`_  atmosphere.
 For example::
 
     >>> import stsynphot as STS
@@ -346,7 +346,7 @@ For example::
 KPNO
 ^^^^
 
-The `Kitt Peak National Observatory (KPNO) <http://www.noao.edu/kpno/>`_ *JHK*
+The `Kitt Peak National Observatory (KPNO) <https://www.noao.edu/kpno/>`_ *JHK*
 filter curves are taken from the tracings of the Simultaneous Quad Infrared
 Image Device (SQIID) filter set, which were provided by Richard Joyce from the
 observatory. For example::

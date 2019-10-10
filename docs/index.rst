@@ -332,7 +332,7 @@ Fukugita, M., Ichikawa, T., Gunn, J. E., Doi, M., Shimasaku, K., & Schneider, D.
 
 .. _stsynphot-ref-gunn2001:
 
-`Gunn, J. E., Hogg, D., Finkbeiner, D., & Schlegel, D. 2001, Photometry White Paper <http://www.sdss.org/dr3/algorithms/sdssphot.ps>`_
+`Gunn, J. E., Hogg, D., Finkbeiner, D., & Schlegel, D. 2001, Photometry White Paper <http://classic.sdss.org/dr3/algorithms/sdssphot.ps>`_
 
 .. _stsynphot-ref-gunn1983:
 
@@ -388,7 +388,7 @@ Lim, P. L., Diaz, R. I., & Laidler, V. 2015, PySynphot User's Guide (Baltimore, 
 
 .. _stsynphot-ref-lim2016:
 
-Lim, P. L., et al. 2016, synphot User's Guide (Baltimore, MD: STScI), http://synphot.readthedocs.io/en/latest/
+Lim, P. L., et al. 2016, synphot User's Guide (Baltimore, MD: STScI), https://synphot.readthedocs.io/en/latest/
 
 .. _stsynphot-ref-lub1977:
 
