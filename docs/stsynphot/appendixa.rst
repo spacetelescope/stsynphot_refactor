@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _stsynphot-appendixa:
 
 Appendix A: Catalogs and Spectral Atlases
@@ -82,8 +80,8 @@ The example below generates a spectrum with metallicity ``[M/H] = +0.1``,
 temperature :math:`T_{\text{eff}} = 10000 \text{K}`, and gravity
 :math:`\log g = 3.0`::
 
-    >>> import stsynphot as STS
-    >>> sp = STS.grid_to_spec('ck04models', 10000, 0.1, 3.0)
+    >>> import stsynphot as stsyn
+    >>> sp = stsyn.grid_to_spec('ck04models', 10000, 0.1, 3.0)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-kurucz1993:
@@ -125,9 +123,9 @@ columns in the file are filled with zeroes::
     >>> from astropy.io import fits
     >>> filename = os.path.join(
     ...     os.environ['PYSYN_CDBS'], 'grid', 'k93models',
-    ...     'kp00', 'kp00_8000.fits')
-    >>> hdr = fits.getheader(filename)
-    >>> hdr
+    ...     'kp00', 'kp00_8000.fits')  # doctest: +SKIP
+    >>> hdr = fits.getheader(filename)  # doctest: +SKIP
+    >>> hdr  # doctest: +SKIP
     SIMPLE  =                    T / file does conform to FITS standard
     BITPIX  =                   16 / number of bits per data pixel
     NAXIS   =                    0 / number of data axes
@@ -166,16 +164,16 @@ means :math:`\log g = 3.0`::
 
     >>> filename = os.path.join(
     ...     os.environ['PYSYN_CDBS'], 'grid', 'k93models',
-    ...     'kp01', 'kp01_10000.fits')
-    >>> spec = fits.getdata(filename)
-    >>> wave = spec['WAVELENGTH']
-    >>> flux = spec['g30']
+    ...     'kp01', 'kp01_10000.fits')  # doctest: +SKIP
+    >>> spec = fits.getdata(filename)  # doctest: +SKIP
+    >>> wave = spec['WAVELENGTH']  # doctest: +SKIP
+    >>> flux = spec['g30']  # doctest: +SKIP
 
 The easier way is to use :func:`~stsynphot.catalog.grid_to_spec` (also see
 :ref:`stsynphot-spec-atlas`). Equivalent to the example above::
 
-    >>> import stsynphot as STS
-    >>> sp = STS.grid_to_spec('k93models', 10000, 0.1, 3.0)
+    >>> import stsynphot as stsyn
+    >>> sp = stsyn.grid_to_spec('k93models', 10000, 0.1, 3.0)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-phoenix:
@@ -205,8 +203,8 @@ The example below generates a spectrum with metallicity ``[M/H] = +0.1``,
 temperature :math:`T_{\text{eff}} = 10000 \text{K}`, and gravity
 :math:`\log g = 3.0`::
 
-    >>> import stsynphot as STS
-    >>> sp = STS.grid_to_spec('phoenix', 10000, 0.1, 3.0)
+    >>> import stsynphot as stsyn
+    >>> sp = stsyn.grid_to_spec('phoenix', 10000, 0.1, 3.0)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-calspec:
@@ -225,9 +223,9 @@ the header from G191B2B spectrum and then loads it into **stsynphot**::
     >>> from astropy.io import fits
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'calspec', 'g191b2b_mod_010.fits')
-    >>> hdr = fits.getheader(filename)
-    >>> hdr
+    ...     os.environ['PYSYN_CDBS'], 'calspec', 'g191b2b_mod_010.fits')  # doctest: +SKIP
+    >>> hdr = fits.getheader(filename)  # doctest: +SKIP
+    >>> hdr  # doctest: +SKIP
     SIMPLE  =                    T / Fits standard
     BITPIX  =                   16 / Bits per pixel
     NAXIS   =                    0 / Number of axes
@@ -259,7 +257,7 @@ the header from G191B2B spectrum and then loads it into **stsynphot**::
     HISTORY Vega Flux(5556A)=3.44e-9 (Bohlin 2014, AJ, 147, 127)
     HISTORY INPUT FILE: /internal/1/wd/dat/g191.rauch59000-nlte
     HISTORY Written by MAKE_MOD_CALSPEC.pro  23-Dec-2014 10:20:09.00
-    >>> sp = SourceSpectrum.from_file(filename)
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 Note that in some cases, the calibration spectrum is truncated in the blue or
 the red at wavelength longer or shorter, respectively, than the sensitivity
@@ -307,8 +305,8 @@ subset of the library::
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
     ...     os.environ['PYSYN_CDBS'], 'grid', 'pickles',
-    ...     'dat_uvk', 'pickles_uk_27.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     'dat_uvk', 'pickles_uk_27.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-bkmodels:
@@ -340,8 +338,8 @@ The example below loads Block S (models for the Sun and Vega) with
     >>> import os
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'grid', 'bkmodels', 'bk_s0001.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     os.environ['PYSYN_CDBS'], 'grid', 'bkmodels', 'bk_s0001.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-bz77:
@@ -361,8 +359,8 @@ The example below loads a source spectrum of spectral type G5V from the atlas::
     >>> import os
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'grid', 'bz77', 'bz_27.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     os.environ['PYSYN_CDBS'], 'grid', 'bz77', 'bz_27.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-gs:
@@ -385,8 +383,8 @@ The example below loads a source spectrum of spectral type G5V from the atlas::
     >>> import os
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'grid', 'gunnstryker', 'gs_44.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     os.environ['PYSYN_CDBS'], 'grid', 'gunnstryker', 'gs_44.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-bpgs:
@@ -419,8 +417,8 @@ The example below loads a source spectrum of spectral type G5V from the atlas::
     >>> import os
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'grid', 'bpgs', 'bpgs_44.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     os.environ['PYSYN_CDBS'], 'grid', 'bpgs', 'bpgs_44.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-jacobi:
@@ -444,8 +442,8 @@ The example below loads a source spectrum of spectral type G0V from the atlas::
     >>> import os
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'grid', 'jacobi', 'jc_43.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     os.environ['PYSYN_CDBS'], 'grid', 'jacobi', 'jc_43.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-bc95:
@@ -474,8 +472,8 @@ instantaneous burst::
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
     ...     os.environ['PYSYN_CDBS'], 'grid', 'bc95',
-    ...     'templates', 'bc95_c_50E5.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     'templates', 'bc95_c_50E5.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-kc96:
@@ -499,8 +497,8 @@ The example below loads a galaxy spectrum from the elliptical template::
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
     ...     os.environ['PYSYN_CDBS'], 'grid', 'kc96',
-    ...     'elliptical_template.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     'elliptical_template.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-agn:
@@ -523,8 +521,8 @@ The example below loads a Seyfert 2 spectrum::
     >>> import os
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'grid', 'agn', 'seyfert2_template.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     os.environ['PYSYN_CDBS'], 'grid', 'agn', 'seyfert2_template.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-galactic:
@@ -544,8 +542,8 @@ The example below loads the spectrum for Orion nebula::
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
     ...     os.environ['PYSYN_CDBS'], 'grid', 'galactic',
-    ...     'orion_template.fits')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     'orion_template.fits')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP
 
 
 .. _stsynphot-appendixa-etcsource:
@@ -563,5 +561,5 @@ The example below loads a spectrum for Gliese 229B brown dwarf::
     >>> import os
     >>> from synphot import SourceSpectrum
     >>> filename = os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'etc', 'source', 'gl229b_001.dat')
-    >>> sp = SourceSpectrum.from_file(filename)
+    ...     os.environ['PYSYN_CDBS'], 'etc', 'source', 'gl229b_001.dat')  # doctest: +SKIP
+    >>> sp = SourceSpectrum.from_file(filename)  # doctest: +SKIP

@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _stsynphot-spec-main:
 
 Source Spectrum
@@ -30,7 +28,7 @@ features below that are ideally suited for predicting exposure times
 
 #. The input parameters were originally structured to mimic what is contained
    in the exposure logsheets found in HST observing proposals in
-   `Astronomer's Proposal Tool (APT) <http://www.stsci.edu/scientific-community/software/astronomers-proposal-tool-apt.html>`_.
+   `Astronomer's Proposal Tool (APT) <http://www.stsci.edu/scientific-community/software/astronomers-proposal-tool-apt>`_.
 #. For the spectroscopic instruments, it will automatically search for and
    use a wavelength binning that is appropriate for the selected instrumental
    dispersion mode.
@@ -55,20 +53,20 @@ or :ref:`stsynphot-appendixa-kc96`. The example below plots the spectra of
 a starburst and a Seyfert 1 galaxies from their respective atlases::
 
     >>> import os
-    >>> import matplotlib.pyplot as plt
+    >>> import matplotlib.pyplot as plt  # doctest: +SKIP
     >>> from synphot import SourceSpectrum
     >>> starburst = SourceSpectrum.from_file(os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'grid', 'kc96', 'starb2_template.fits'))
+    ...     os.environ['PYSYN_CDBS'], 'grid', 'kc96', 'starb2_template.fits'))  # doctest: +SKIP
     >>> seyfert1 = SourceSpectrum.from_file(os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'grid', 'agn', 'seyfert1_template.fits'))
+    ...     os.environ['PYSYN_CDBS'], 'grid', 'agn', 'seyfert1_template.fits'))  # doctest: +SKIP
     >>> wave = range(1500, 7000)
     >>> plt.semilogy(wave, starburst(wave, flux_unit='flam'), 'r',
-    ...              wave, seyfert1(wave, flux_unit='flam'), 'b')
-    >>> plt.xlim(1500, 7000)
-    >>> plt.ylim(1E-14, 2E-12)
-    >>> plt.xlabel('Wavelength (Angstrom)')
-    >>> plt.ylabel('Flux (FLAM)')
-    >>> plt.legend(['Starburst 2', 'Seyfert 1'], loc='upper right')
+    ...              wave, seyfert1(wave, flux_unit='flam'), 'b')  # doctest: +SKIP
+    >>> plt.xlim(1500, 7000)  # doctest: +SKIP
+    >>> plt.ylim(1E-14, 2E-12)  # doctest: +SKIP
+    >>> plt.xlabel('Wavelength (Angstrom)')  # doctest: +SKIP
+    >>> plt.ylabel('Flux (FLAM)')  # doctest: +SKIP
+    >>> plt.legend(['Starburst 2', 'Seyfert 1'], loc='upper right')  # doctest: +SKIP
 
 .. image:: images/AGN_compare.png
     :width: 600px
@@ -96,8 +94,8 @@ The example below obtains the spectrum for a
 :math:`T_{\text{eff}} = 6000 \; \text{K}`, ``[M/H] = 0``, and
 :math:`\log g = 4.3`::
 
-    >>> import stsynphot as STS
-    >>> sp = STS.grid_to_spec('k93models', 6440, 0, 4.3)
+    >>> import stsynphot as stsyn
+    >>> sp = stsyn.grid_to_spec('k93models', 6440, 0, 4.3)  # doctest: +SKIP
 
 For completeness, the Kurucz spectrum is plotted below in comparison with
 the Seyfert 1 from above. Note that the Kurucz spectrum has arbitrary
@@ -105,11 +103,11 @@ flux values and would need to be renormalize using
 :meth:`~synphot.spectrum.BaseSourceSpectrum.normalize` (not done here)::
 
     >>> plt.semilogy(wave, sp(wave, flux_unit='flam'), 'r',
-    ...              wave, seyfert1(wave, flux_unit='flam'), 'b')
-    >>> plt.xlim(1500, 6000)
-    >>> plt.xlabel('Wavelength (Angstrom)')
-    >>> plt.ylabel('Flux (FLAM)')
-    >>> plt.legend(['Kurucz', 'Seyfert 1'], loc='center right')
+    ...              wave, seyfert1(wave, flux_unit='flam'), 'b')  # doctest: +SKIP
+    >>> plt.xlim(1500, 6000)  # doctest: +SKIP
+    >>> plt.xlabel('Wavelength (Angstrom)')  # doctest: +SKIP
+    >>> plt.ylabel('Flux (FLAM)')  # doctest: +SKIP
+    >>> plt.legend(['Kurucz', 'Seyfert 1'], loc='center right')  # doctest: +SKIP
 
 .. image:: images/spec_atlas_ex.png
     :width: 600px

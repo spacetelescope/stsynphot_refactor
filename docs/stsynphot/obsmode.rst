@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _stsynphot-obsmode:
 
 Observation Modes
@@ -37,12 +35,12 @@ Examples
 Create a bandpass for HST/ACS instrument with its WFC1 detector and F555W
 filter::
 
-    >>> import stsynphot as STS
-    >>> bp_acs = STS.band('acs,wfc1,f555w')
+    >>> import stsynphot as stsyn
+    >>> bp_acs = stsyn.band('acs,wfc1,f555w')  # doctest: +SKIP
 
 To see which throughput tables are being used, as set by CRDS::
 
-    >>> bp_acs.showfiles()
+    >>> bp_acs.showfiles()  # doctest: +SKIP
     /my/local/dir/cdbs/comp/ota/hst_ota_007_syn.fits
     /my/local/dir/cdbs/comp/acs/acs_wfc_im123_004_syn.fits
     /my/local/dir/cdbs/comp/acs/acs_f555w_wfc_005_syn.fits
@@ -51,17 +49,17 @@ To see which throughput tables are being used, as set by CRDS::
 
 Create a bandpass for Johnson *V*::
 
-    >>> bp_v = STS.band('johnson,v')
+    >>> bp_v = stsyn.band('johnson,v')  # doctest: +SKIP
 
 Compare them in a plot::
 
-    >>> import matplotlib.pyplot as plt
+    >>> import matplotlib.pyplot as plt  # doctest: +SKIP
     >>> from astropy.visualization import quantity_support
-    >>> quantity_support()
+    >>> quantity_support()  # doctest: +SKIP
     >>> plt.plot(bp_acs.waveset, bp_acs(bp_acs.waveset), 'b',
-    ...          bp_v.waveset, bp_v(bp_v.waveset), 'g--')
-    >>> plt.xlim(4000, 7000)
-    >>> plt.legend([bp_acs.obsmode, bp_v.obsmode], loc='best')
+    ...          bp_v.waveset, bp_v(bp_v.waveset), 'g--')  # doctest: +SKIP
+    >>> plt.xlim(4000, 7000)  # doctest: +SKIP
+    >>> plt.legend([bp_acs.obsmode, bp_v.obsmode], loc='best')  # doctest: +SKIP
 
 .. image:: images/acs_v_bp_ex1.png
    :width: 600px
@@ -72,15 +70,15 @@ Then plot the actual bandpass and overlay those components::
 
     >>> from synphot import SpectralElement
     >>> ota = SpectralElement.from_file(
-    ...     '/my/local/dir/cdbs/comp/ota/hst_ota_007_syn.fits')
+    ...     '/my/local/dir/cdbs/comp/ota/hst_ota_007_syn.fits')  # doctest: +SKIP
     >>> ccd = SpectralElement.from_file(
-    ...     '/my/local/dir/cdbs/comp/acs/acs_wfc_ccd1_mjd_021_syn.fits')
-    >>> bp_partial = ota * ccd
-    >>> w = bp_acs.binset  # waveset that is optimal for binning
-    >>> plt.plot(w, ota(w), 'b--', w, ccd(w), 'r--', w, bp_partial(w), 'g', w, bp_acs(w), 'k')
-    >>> plt.xlim(w[0], w[-1])
-    >>> plt.ylim(0, 1.1)
-    >>> plt.legend(['ota', 'ccd', 'ota*ccd', bp_acs.obsmode], loc='upper left', fontsize=12)
+    ...     '/my/local/dir/cdbs/comp/acs/acs_wfc_ccd1_mjd_021_syn.fits')  # doctest: +SKIP
+    >>> bp_partial = ota * ccd  # doctest: +SKIP
+    >>> w = bp_acs.binset  # waveset that is optimal for binning # doctest: +SKIP
+    >>> plt.plot(w, ota(w), 'b--', w, ccd(w), 'r--', w, bp_partial(w), 'g', w, bp_acs(w), 'k')  # doctest: +SKIP
+    >>> plt.xlim(w[0], w[-1])  # doctest: +SKIP
+    >>> plt.ylim(0, 1.1)  # doctest: +SKIP
+    >>> plt.legend(['ota', 'ccd', 'ota*ccd', bp_acs.obsmode], loc='upper left', fontsize=12)  # doctest: +SKIP
 
 .. image:: images/acs_wfc1_f555w_comp_ex1.png
     :width: 600px
@@ -103,12 +101,12 @@ The example below calculates the number of pixels covered from 8600.5 to
 12400.5 Angstrom. Then, it calculates the starting and ending wavelengths
 covered by 3800 pixels centered at 10500 Angstrom::
 
-    >>> import stsynphot as STS
+    >>> import stsynphot as stsyn
     >>> from astropy import units as u
-    >>> bp = STS.band('wfc3,ir,f105w')
-    >>> bp.binned_pixelrange([8600.5, 12400.5] * u.AA)
+    >>> bp = stsyn.band('wfc3,ir,f105w')  # doctest: +SKIP
+    >>> bp.binned_pixelrange([8600.5, 12400.5] * u.AA)  # doctest: +SKIP
     3800
-    >>> bp.binned_waverange(10500 * u.AA, 3800)
+    >>> bp.binned_waverange(10500 * u.AA, 3800)  # doctest: +SKIP
     <Quantity [  8600.5, 12400.5] Angstrom>
 
 
@@ -125,19 +123,19 @@ For non-IR detectors, calling this method will raise ``NotImplementedError``.
 
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp_wfc3 = STS.band('wfc3,ir,f105w')
-    >>> bp_wfc3.thermback()
+    >>> import stsynphot as stsyn
+    >>> bp_wfc3 = stsyn.band('wfc3,ir,f105w')  # doctest: +SKIP
+    >>> bp_wfc3.thermback()  # doctest: +SKIP
     <Quantity 0.05118250271971978 ct / (pix s)>
-    >>> bp_acs = STS.band('acs,wfc1,f555w')
-    >>> bp_acs.thermback()
+    >>> bp_acs = stsyn.band('acs,wfc1,f555w')  # doctest: +SKIP
+    >>> bp_acs.thermback()  # doctest: +SKIP
     ...
     NotImplementedError: No thermal support provided for acs,wfc1,f555w
 
 To plot the thermal spectrum for WFC3/IR bandpass above::
 
-    >>> thsp = bp_wfc3.obsmode.thermal_spectrum()
-    >>> thsp.plot(left=14000, right=18500)
+    >>> thsp = bp_wfc3.obsmode.thermal_spectrum()  # doctest: +SKIP
+    >>> thsp.plot(left=14000, right=18500)  # doctest: +SKIP
 
 .. image:: images/wfc3_ir_therm_spec.png
     :width: 600px
@@ -180,20 +178,19 @@ The example below (adapted from an example in the documentation of IRAF SYNPHOT
 ``calcphot`` task) shows you how to calculate the color indices of a
 2500 K blackbody in Cousins *I* and HST/WFC3 UVIS1 F814W bandpasses::
 
-    >>> import stsynphot as STS
+    >>> import stsynphot as stsyn
     >>> from synphot import SourceSpectrum, Observation
     >>> from synphot.models import BlackBodyNorm1D
     >>> # Create the blackbody
     >>> bb = SourceSpectrum(BlackBodyNorm1D, temperature=2500)
     >>> # Create WFC3 observation
-    >>> obs_wfc3 = Observation(bb, STS.band('wfc3,uvis1,f814w'))
+    >>> obs_wfc3 = Observation(bb, stsyn.band('wfc3,uvis1,f814w'))  # doctest: +SKIP
     >>> # Create Cousins I observation using WFC3 binning for consistency
-    >>> obs_i = Observation(bb, STS.band('i'), binset=obs_wfc3.binset)
+    >>> obs_i = Observation(bb, stsyn.band('i'), binset=obs_wfc3.binset)  # doctest: +SKIP
     >>> # Color index in instrumental magnitude
-    >>> area = STS.conf.area
-    >>> obs_i.effstim('obmag', area=area) - \
-    ... obs_wfc3.effstim('obmag', area=area)
+    >>> area = stsyn.conf.area
+    >>> obs_i.effstim('obmag', area=area) - obs_wfc3.effstim('obmag', area=area)  # doctest: +SKIP
     <Quantity -1.2186293262909498 OBMAG>
     >>> # Color index in FLA
-    >>> obs_i.effstim('flam') / obs_wfc3.effstim('flam')
-    >>> <Quantity 0.9493324538593665>
+    >>> obs_i.effstim('flam') / obs_wfc3.effstim('flam')  # doctest: +SKIP
+    <Quantity 0.9493324538593665>

@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _jwst_data_files:
 
 JWST data files (coming soon)

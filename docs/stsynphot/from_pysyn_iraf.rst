@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _stsynphot-switcher:
 
 Switching from Legacy Software
@@ -164,7 +162,7 @@ IRAF setup::
 Python imports::
 
     >>> import os
-    >>> import stsynphot as STS
+    >>> import stsynphot as stsyn
     >>> from synphot import units, SourceSpectrum, Observation
     >>> from synphot.models import BlackBodyNorm1D
 
@@ -184,13 +182,13 @@ The blackbody spectrum is normalized to be 18.6 VEGAMAG in *V*-band::
 .. code-block:: python
 
     >>> rnbb = SourceSpectrum(BlackBodyNorm1D, temperature=5000).normalize(
-    ...     18.6 * units.VEGAMAG, band=STS.band('v'), vegaspec=STS.Vega)
-    >>> obs = Observation(rnbb, STS.band('wfpc,f555w'))
+    ...     18.6 * units.VEGAMAG, band=stsyn.band('v'), vegaspec=stsyn.Vega)  # doctest: +SKIP
+    >>> obs = Observation(rnbb, stsyn.band('wfpc,f555w'))  # doctest: +SKIP
     >>> print('Pivot Wavelength: {:.3f}\n'
     ...       'Equiv Gaussian FWHM: {:.3f}\n'
     ...       'Countrate: {:.4f}'.format(
     ...           obs.bandpass.pivot(), obs.bandpass.fwhm(),
-    ...           obs.countrate(STS.conf.area)))
+    ...           obs.countrate(stsyn.conf.area)))  # doctest: +SKIP
     Pivot Wavelength: 5467.651 Angstrom
     Equiv Gaussian FWHM: 1200.923 Angstrom
     Countrate: 416.4439 ct / s
@@ -213,13 +211,13 @@ WFC1 F555W bandpass for :math:`E(B-V)` values of 0.0, 0.25, and 0.5::
 
     >>> law = 'mwavg'  # stsynphot has no obsolete ebmv(), so use this instead
     >>> sp = SourceSpectrum(BlackBodyNorm1D, temperature=5000)
-    >>> bp = STS.band('acs,wfc1,f555w')
-    >>> for ebv in (0.0, 0.25, 0.5):
+    >>> bp = stsyn.band('acs,wfc1,f555w')  # doctest: +SKIP
+    >>> for ebv in (0.0, 0.25, 0.5):  # doctest: +SKIP
     ...     if ebv == 0:
     ...         print('VZERO\tOBMAG')  # Header
-    ...     obs = Observation(sp * STS.ebmvx(law, ebv), bp)
+    ...     obs = Observation(sp * stsyn.ebmvx(law, ebv), bp)
     ...     print('{}\t{:.4f}'.format(
-    ...         ebv, obs.effstim(units.OBMAG, area=STS.conf.area)))
+    ...         ebv, obs.effstim(units.OBMAG, area=stsyn.conf.area)))
     VZERO   OBMAG
     0.0	    -10.0118 OBMAG
     0.25    -9.2167 OBMAG
@@ -240,11 +238,11 @@ proper magnitude of 9.5 VEGAMAG in *U*-band::
 .. code-block:: python
 
     >>> filename = os.path.join(
-    ...     os.environ['PYSYN_CDBS'], 'calspec', 'bd_75d325_stis_003.fits')
+    ...     os.environ['PYSYN_CDBS'], 'calspec', 'bd_75d325_stis_003.fits')  # doctest: +SKIP
     >>> sp = SourceSpectrum.from_file(filename).normalize(
-    ...     9.5 * units.VEGAMAG, band=STS.band('u'), vegaspec=STS.Vega)
-    >>> obs = Observation(sp, STS.band('acs,sbc,f125lp'))
-    >>> obs.plot(flux_unit=units.FLAM, left=1200, right=2000)
+    ...     9.5 * units.VEGAMAG, band=stsyn.band('u'), vegaspec=stsyn.Vega)  # doctest: +SKIP
+    >>> obs = Observation(sp, stsyn.band('acs,sbc,f125lp'))  # doctest: +SKIP
+    >>> obs.plot(flux_unit=units.FLAM, left=1200, right=2000)  # doctest: +SKIP
 
 .. image:: images/bd75325_plspec_ex2.png
     :width: 600px
@@ -328,11 +326,11 @@ These are the reddening laws (``law``) recognized by the parser for the
 This example shows how a blackbody can be generated using both the parser and
 the Pythonic command. It also shows that they are equivalent::
 
-    >>> import stsynphot as STS
+    >>> import stsynphot as stsyn
     >>> from synphot import SourceSpectrum
     >>> from synphot.models import BlackBodyNorm1D
     >>> from numpy.testing import assert_allclose
-    >>> bb1 = STS.parse_spec('bb(5000)')
+    >>> bb1 = stsyn.parse_spec('bb(5000)')
     >>> bb2 = SourceSpectrum(BlackBodyNorm1D, temperature=5000)
     >>> assert_allclose(bb1.integrate(), bb2.integrate())
 
@@ -343,11 +341,11 @@ Even though the Pythonic way takes more lines of codes to accomplish, one
 might also argue that it is more readable::
 
     >>> from astropy import units as u
-    >>> sp1 = STS.parse_spec(
+    >>> sp1 = stsyn.parse_spec(
     ...     'ebmvx(0.1, lmcavg) * z(rn(icat(k93models, 5000, -0.5, 4.4), '
-    ...     'band(johnson,v), 18, abmag), 0.01)')
-    >>> rnsp = STS.grid_to_spec('k93models', 5000, -0.5, 4.4).normalize(
-    ...     18 * u.ABmag, band=STS.band('johnson,v'))
-    >>> rnsp.z = 0.01
-    >>> sp2 = STS.ebmvx('lmcavg', 0.1) * rnsp
-    >>> assert_allclose(sp1.integrate(), sp2.integrate())
+    ...     'band(johnson,v), 18, abmag), 0.01)')  # doctest: +SKIP
+    >>> rnsp = stsyn.grid_to_spec('k93models', 5000, -0.5, 4.4).normalize(
+    ...     18 * u.ABmag, band=stsyn.band('johnson,v'))  # doctest: +SKIP
+    >>> rnsp.z = 0.01  # doctest: +SKIP
+    >>> sp2 = stsyn.ebmvx('lmcavg', 0.1) * rnsp  # doctest: +SKIP
+    >>> assert_allclose(sp1.integrate(), sp2.integrate())  # doctest: +SKIP

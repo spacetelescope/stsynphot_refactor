@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _stsynphot-refdata:
 
 Reference Data
@@ -47,15 +45,15 @@ can also set them to specific filenames. It is also possible to
 For backward compatibilty, :func:`~stsynphot.config.showref` and
 :func:`~stsynphot.config.getref` convenience functions are provided::
 
-    >>> import stsynphot as STS
-    >>> STS.showref()
+    >>> import stsynphot as stsyn
+    >>> stsyn.showref()  # doctest: +SKIP
     graphtable: /my/local/dir/cdbs/mtab/0bf2050hm_tmg.fits
     comptable : /my/local/dir/cdbs/mtab/0ac1951am_tmc.fits
     thermtable: /my/local/dir/cdbs/mtab/tae17277m_tmt.fits
     area      : 45238.93416
     waveset   : Min: 500, Max: 26000, Num: 10000, Delta: None, Log: True
      [stsynphot.config]
-    >>> STS.getref()
+    >>> stsyn.getref()  # doctest: +SKIP
     {'area': 45238.93416,
      'comptable': '/my/local/dir/cdbs/mtab/0ac1951am_tmc.fits',
      'graphtable': '/my/local/dir/cdbs/mtab/0bf2050hm_tmg.fits',
@@ -67,12 +65,12 @@ To change a configurable item's value, use the machinery of
 Examples shown are only for ``graphtable`` but they are similar for others
 (in fact, usually all the graph and component tables are changed together)::
 
-    >>> STS.conf.graphtable = '/path/to/my_new_tmg.fits'  # Entire session
-    >>> STS.conf.reload('graphtable')  # Reload from stsynphot.cfg
-    >>> STS.conf.reload()  # Reload everything
-    >>> STS.conf.reset('graphtable')  # Reset to software default
-    >>> STS.conf.reset()  # Reset everything
-    >>> with STS.conf.set_temp('graphtable', '/path/to/my_new_tmg.fits'):
+    >>> stsyn.conf.graphtable = '/path/to/my_new_tmg.fits'  # Entire session
+    >>> stsyn.conf.reload('graphtable')  # Reload from stsynphot.cfg
+    >>> stsyn.conf.reload()  # Reload everything
+    >>> stsyn.conf.reset('graphtable')  # Reset to software default
+    >>> stsyn.conf.reset()  # Reset everything
+    >>> with stsyn.conf.set_temp('graphtable', '/path/to/my_new_tmg.fits'):
     ...     pass  # graphtable will only change inside this block
 
 
@@ -92,8 +90,8 @@ observation mode. They can be displayed using
 A bandpass that does not rely on the tables does not have this feature.
 For example::
 
-    >>> bp_hst = STS.band('wfc3,ir,f105w')
-    >>> bp_hst.showfiles()
+    >>> bp_hst = stsyn.band('wfc3,ir,f105w')  # doctest: +SKIP
+    >>> bp_hst.showfiles()  # doctest: +SKIP
     /my/local/dir/cdbs/comp/wfc3/wfc3_ir_primary_001_syn.fits
     /my/local/dir/cdbs/comp/wfc3/wfc3_ir_secondary_001_syn.fits
     /my/local/dir/cdbs/comp/wfc3/wfc3_pom_001_syn.fits
@@ -109,8 +107,8 @@ For example::
     /my/local/dir/cdbs/comp/wfc3/wfc3_ir_cor_004_syn.fits  [...]
 
     >>> from synphot import SpectralElement
-    >>> bp_nonhst = SpectralElement.from_filter('johnson_v')
-    >>> bp_nonhst.showfiles()
+    >>> bp_nonhst = SpectralElement.from_filter('johnson_v')  # doctest: +REMOTE_DATA
+    >>> bp_nonhst.showfiles()  # doctest: +SKIP
     AttributeError: 'SpectralElement' object has no attribute 'showfiles'
 
 
@@ -147,10 +145,10 @@ pre-defined wavelength catalog in ``wavecatfile`` and can be accessed via
 `~stsynphot.spectrum.ObservationSpectralElement.binset`. For example::
 
     >>> from synphot import Observation
-    >>> obs = Observation(STS.Vega, bp_hst, binset=bp_hst.binset)
-    >>> bp_hst.binset
+    >>> obs = Observation(stsyn.Vega, bp_hst, binset=bp_hst.binset)  # doctest: +SKIP
+    >>> bp_hst.binset  # doctest: +SKIP
     <Quantity [  7000.,  7001.,  7002.,...,  17998., 17999., 18000.] Angstrom>
-    >>> obs.binset
+    >>> obs.binset  # doctest: +SKIP
     <Quantity [  7000.,  7001.,  7002.,...,  17998., 17999., 18000.] Angstrom>
 
 For more details on how the catalog works, see the `~stsynphot.wavetable`

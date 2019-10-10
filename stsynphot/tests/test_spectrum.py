@@ -4,8 +4,8 @@
 # STDLIB
 import os
 import shutil
-import sys
 import tempfile
+import warnings
 
 # THIRD-PARTY
 import numpy as np
@@ -16,6 +16,7 @@ from astropy import units as u
 from astropy.io import fits
 from astropy.modeling.models import Const1D
 from astropy.utils.data import get_pkg_data_filename
+from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
 from synphot import units
@@ -29,7 +30,6 @@ from ..config import conf
 from ..exceptions import PixscaleNotFoundError
 from ..stio import irafconvert
 
-_IS_PY32 = (sys.version_info >= (3, 2)) & (sys.version_info < (3, 3))
 GT_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmg.fits'))
 CP_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmc.fits'))
 TH_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmt.fits'))
@@ -84,14 +84,7 @@ class TestInterpolateSpectrum(object):
         is required.
 
         """
-        try:
-            sp = spectrum.interpolate_spectral_element(self.fname_stis, 51000)
-        except RuntimeError:
-            if _IS_PY32:
-                pytest.xfail('python3.2 urllib bug')
-            else:
-                raise
-
+        sp = spectrum.interpolate_spectral_element(self.fname_stis, 51000)
         np.testing.assert_array_equal(sp.waveset[::25].value, self.wave_stis)
         np.testing.assert_allclose(
             sp(sp.waveset[:10]).value,
@@ -105,15 +98,7 @@ class TestInterpolateSpectrum(object):
          (60000, [0, 0.09322135, 0.04873522, 0.01732031, 0.00407352, 0])])
     def test_extrap_mjd(self, interpval, ans):
         """Test extrapolation without using default column."""
-        try:
-            sp = spectrum.interpolate_spectral_element(
-                self.fname_cos, interpval)
-        except RuntimeError:
-            if _IS_PY32:
-                pytest.xfail('python3.2 urllib bug')
-            else:
-                raise
-
+        sp = spectrum.interpolate_spectral_element(self.fname_cos, interpval)
         w = sp.waveset[400:3000:500]
         np.testing.assert_allclose(sp(w).value, ans, rtol=1e-5)
 
@@ -133,7 +118,9 @@ class TestInterpolateSpectrum(object):
 
     def test_default_ramp(self):
         """Test ramp filter using default THROUGHPUT with warning."""
-        sp = spectrum.interpolate_spectral_element(self.fname_ramp, -5)
+        with pytest.warns(AstropyUserWarning,
+                          match=r'Extrapolation not allowed'):
+            sp = spectrum.interpolate_spectral_element(self.fname_ramp, -5)
         np.testing.assert_array_equal(sp(sp.waveset), 0)
         assert sp.warnings['DefaultThroughput']
 
@@ -179,7 +166,9 @@ class TestObservationSpectralElement(object):
         conf.reset('area')
 
     def test_no_zero_bound(self):
-        assert not self.obs.bounded_by_zero(wavelengths=[5000, 6000])
+        with pytest.warns(UserWarning, match=r'Unbounded throughput'):
+            result = self.obs.bounded_by_zero(wavelengths=[5000, 6000])
+        assert not result
 
     def test_other_graph_table(self):
         """Using the graph table with PRIMAREA."""
@@ -213,13 +202,12 @@ class TestObservationSpectralElement(object):
          ('wfpc2,f555w', 4.8967453103320938e-19)])
     def test_uresp(self, obsmode, ans):
         """Unit response for different detector settings."""
-        try:
-            obs = spectrum.band(obsmode, graphtable=GT_FILE, comptable=CP_FILE)
-        except RuntimeError:
-            if _IS_PY32:
-                pytest.xfail('python3.2 urllib bug')
-            else:
-                raise
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                'ignore', message=r'.*not valid flux unit.*',
+                category=AstropyUserWarning)
+            obs = spectrum.band(
+                obsmode, graphtable=GT_FILE, comptable=CP_FILE)
 
         np.testing.assert_allclose(
             obs.unit_response(obs.area).value, ans, rtol=1e-4)
@@ -325,7 +313,9 @@ class TestEbmvx(object):
 def test_vega_dummy():
     """Test that Vega spectrum is loaded properly."""
     # Dummy
-    spectrum.load_vega(vegafile='dummyfile.fits', encoding='binary')
+    with pytest.warns(AstropyUserWarning,
+                      match=r'Failed to load Vega spectrum'):
+        spectrum.load_vega(vegafile='dummyfile.fits', encoding='binary')
     assert spectrum.Vega is None
 
 

@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. include:: appb_ref.txt
 
 .. _stsynphot-appendixb:

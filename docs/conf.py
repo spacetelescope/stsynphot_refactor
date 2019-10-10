@@ -148,3 +148,11 @@ man_pages = [('index', project.lower(), project + u' Documentation',
 intersphinx_mapping.update({
     'astropy': ('https://docs.astropy.org/en/latest/', None),
     'synphot': ('https://synphot.readthedocs.io/en/latest/', None)})
+
+
+# -- Options for linkcheck output -------------------------------------------
+linkcheck_retry = 5
+linkcheck_ignore = ['https://hsthelp.stsci.edu',
+                    'https://www.as.arizona.edu/observing']
+linkcheck_timeout = 180
+linkcheck_anchors = False
