@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _stsynphot_comm_report:
 
 Commissioning Report

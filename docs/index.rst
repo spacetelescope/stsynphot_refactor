@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _stsynphot_index:
 
 *********************************************
@@ -98,16 +96,22 @@ Below are the instructions to install:
    stsynphot/data_hst
    stsynphot/data_jwst
 
+.. testsetup::
+
+    >>> # This is not marked remote data because it is essential for VEGAMAG
+    >>> from stsynphot.spectrum import load_vega
+    >>> load_vega(vegafile='http://ssb.stsci.edu/cdbs/calspec/alpha_lyr_stis_009.fits', encoding='binary')  # doctest: +IGNORE_OUTPUT
+
 To ensure consistency for all data files used, **stsynphot silently overwrites
 synphot data file locations within the Python session**. For example::
 
     >>> from synphot.config import conf as syn_conf
-    >>> print(syn_conf.johnson_v_file)
+    >>> print(syn_conf.johnson_v_file)  # doctest: +IGNORE_OUTPUT
     http://ssb.stsci.edu/cdbs/comp/nonhst/johnson_v_004_syn.fits
     >>> from stsynphot.config import conf
-    >>> print(conf.rootdir)
+    >>> print(conf.rootdir)  # doctest: +IGNORE_OUTPUT
     /my/local/dir/cdbs/
-    >>> print(syn_conf.johnson_v_file)
+    >>> print(syn_conf.johnson_v_file)  # doctest: +IGNORE_OUTPUT
     /my/local/dir/cdbs//comp/nonhst/johnson_v_004_syn.fits
 
 You can also take advantage of
@@ -154,8 +158,8 @@ before proceeding.
 Display the current settings for graph and component tables, telescope area
 (in squared centimeter), and default wavelength set (in Angstrom)::
 
-    >>> import stsynphot as STS
-    >>> STS.showref()
+    >>> import stsynphot as stsyn
+    >>> stsyn.showref()  # doctest: +SKIP
     graphtable: /my/local/dir/cdbs/mtab/07r1502mm_tmg.fits
     comptable : /my/local/dir/cdbs/mtab/07r1502nm_tmc.fits
     thermtable: /my/local/dir/cdbs/mtab/tae17277m_tmt.fits
@@ -168,14 +172,16 @@ consistency, as stated in :ref:`stsynphot-installation-setup` (the double
 slash in path name does not affect software operation)::
 
     >>> import synphot
-    >>> synphot.conf.vega_file
-    '/my/local/dir/cdbs//calspec/alpha_lyr_stis_008.fits'
+    >>> synphot.conf.vega_file  # doctest: +IGNORE_OUTPUT
+    '/my/local/dir/cdbs//calspec/alpha_lyr_stis_009.fits'
 
 Plot the built-in Vega spectrum, which is used to compute VEGAMAG. This is
 pre-loaded at start-up for convenience::
 
     >>> from synphot import units
-    >>> STS.Vega.plot(right=20000, flux_unit=units.FLAM, title='Vega spectrum')
+    >>> stsyn.Vega.plot(
+    ...     right=20000, flux_unit=units.FLAM,
+    ...     title='Vega spectrum')  # doctest: +SKIP
 
 .. image:: stsynphot/images/vega_spec.png
     :width: 600px
@@ -184,8 +190,8 @@ pre-loaded at start-up for convenience::
 Construct a bandpass for HST/ACS camera using WFC1 detector and F555W filter;
 Then, show all the individual throughput files used in its construction::
 
-    >>> bp = STS.band('acs,wfc1,f555w')
-    >>> bp.showfiles()
+    >>> bp = stsyn.band('acs,wfc1,f555w')  # doctest: +SKIP
+    >>> bp.showfiles()  # doctest: +SKIP
     INFO: #Throughput table names:
     /my/local/dir/cdbs/comp/ota/hst_ota_007_syn.fits
     /my/local/dir/cdbs/comp/acs/acs_wfc_im123_004_syn.fits
@@ -198,14 +204,14 @@ star with blackbody temperature of 5770 Kelvin, at solar metallicity, and log
 surface gravity of 4.5, renormalized to 20 VEGAMAG in Johnson *V* filter,
 using IRAF SYNPHOT syntax::
 
-    >>> sp = STS.parse_spec(
-    ...     'rn(icat(k93models,5770,0.0,4.5),band(johnson,v),20,vegamag)')
+    >>> sp = stsyn.parse_spec(
+    ...     'rn(icat(k93models,5770,0.0,4.5),band(johnson,v),20,vegamag)')  # doctest: +SKIP
 
 Construct an extinction curve for Milky Way (diffuse) with :math:`E(B-V)` of
 0.7 mag. Then, apply the extinction to the source spectrum from before::
 
-    >>> ext = STS.ebmvx('mwavg', 0.7)
-    >>> sp_ext = sp * ext
+    >>> ext = stsyn.ebmvx('mwavg', 0.7)  # doctest: +REMOTE_DATA
+    >>> sp_ext = sp * ext  # doctest: +SKIP
 
 Construct an observation using the ACS bandpass and the extincted source
 spectrum. (For accurate detector binning, you can pass in the binned wavelength
@@ -214,8 +220,8 @@ observation mode is stored in ``bp.binset``.) Then, compute the count rate
 for HST collecting area::
 
     >>> from synphot import Observation
-    >>> obs = Observation(sp_ext, bp, binset=bp.binset)
-    >>> obs.countrate(area=STS.config.conf.area)
+    >>> obs = Observation(sp_ext, bp, binset=bp.binset)  # doctest: +SKIP
+    >>> obs.countrate(area=stsyn.config.conf.area)  # doctest: +SKIP
     <Quantity 23.839134880103543 ct / s>
 
 To find out exactly how ``bp.binset`` was computed, you can use the following
@@ -224,14 +230,15 @@ mode in use is stored in ``wavecats/acs.dat`` in the **stsynphot** software
 data directory (``synphot$``, which is named so for backward compatibility
 with ASTROLIB PYSYNPHOT)::
 
-    >>> STS.wavetable.WAVECAT['acs,wfc1,f555w']
+    >>> from stsynphot import wavetable
+    >>> wavetable.WAVECAT['acs,wfc1,f555w']
     'synphot$wavecats/acs.dat'
 
 Calculate thermal background for a HST/WFC3 bandpass for its IR detector using
 F110W filter::
 
-    >>> wfc3 = STS.band('wfc3,ir,f110w')
-    >>> wfc3.thermback()
+    >>> wfc3 = stsyn.band('wfc3,ir,f110w')  # doctest: +SKIP
+    >>> wfc3.thermback()  # doctest: +SKIP
     <Quantity 0.051636304994833425 ct / (pix s)>
 
 

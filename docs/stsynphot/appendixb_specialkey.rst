@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. include:: appb_ref.txt
 
 .. _stsynphot-appendixb-special-keywords:
@@ -19,8 +17,8 @@ The HST OTA transmissivity is included by default in the calculation of
 all HST-related observation modes. It can be included or excluded explicitly by
 adding the keywords ``ota`` or ``noota``, respectively; For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('stis,ccd,f25srf2,noota')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('stis,ccd,f25srf2,noota')  # doctest: +SKIP
 
 
 .. _stsynphot-costar:
@@ -44,8 +42,8 @@ versions of the graph table, ``nocostar`` is the default. To explicitly include
 or exclude COSTAR, use the keywords ``costar`` and ``nocostar``, respectively,
 anywhere within your observation mode string; For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('fos,red,4.3,g270h,costar')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('fos,red,4.3,g270h,costar')  # doctest: +SKIP
 
 All current HST instruments (except :ref:`stsynphot-appendixb-fgs`) have
 built-in corrective optics to compensate for the spherical aberration of the
@@ -70,8 +68,8 @@ value, which could be an integer or a floating point.
 to arrive at an estimate of the throughput on the requested date
 (see :ref:`stsynphot-parameterized`). For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('acs,wfc1,f555w,mjd#49486')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('acs,wfc1,f555w,mjd#49486')  # doctest: +SKIP
 
 If not specified, the default is to use
 the latest set of throughput values in the ``THROUGHPUT`` column without any
@@ -134,8 +132,8 @@ When "aper#0" is specified, the user will obtain the number of counts in the
 brightest pixel (i.e., the peak counts of the source centered at that pixel).
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('acs,wfc1,f850lp,aper#0.2')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('acs,wfc1,f850lp,aper#0.2')  # doctest: +SKIP
 
 
 .. _stsynphot-parameterized-temperature:
@@ -160,8 +158,8 @@ table is used to correctly compute the detected signal from a background
 spectrum, which gives the transmission of the grism over its entire bandpass.
 The ``bkg`` keyword cannot be used with non-grism observations. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('wfc3,ir,g102,bkg')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('wfc3,ir,g102,bkg')  # doctest: +SKIP
 
 For NICMOS, all keywords except the detector are parameterized for
 temperature. This includes OTA components that are opaque but thermally
@@ -172,8 +170,8 @@ not enforce this, so the user must specify any non-default temperature for each
 component individually. For example, to specify a primary mirror temperature of
 290 K and then calculate the thermal background:
 
-    >>> bp = STS.band('nicmos,3,f222m,primary#290.0')
-    >>> bp.thermback()
+    >>> bp = stsyn.band('nicmos,3,f222m,primary#290.0')  # doctest: +SKIP
+    >>> bp.thermback()  # doctest: +SKIP
     <Quantity 82.29150427454572 ct / (pix s)>
 
 
@@ -197,5 +195,5 @@ in intervals of approximately 30 days.
 to arrive at an estimate of the throughput on the requested date
 (see :ref:`stsynphot-parameterized`). For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('wfpc2,3,f555w,cont#49800')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('wfpc2,3,f555w,cont#49800')  # doctest: +SKIP

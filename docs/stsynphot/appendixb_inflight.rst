@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. include:: appb_ref.txt
 
 .. _stsynphot-appendixb-inflight:
@@ -21,8 +19,8 @@ The ACS keywords consist of a list of detectors, filters,
 :ref:`extraction apertures <stsynphot-parameterized-aper>`, and
 |mjd_par| specifications. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('acs,wfc1,f555w')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('acs,wfc1,f555w')  # doctest: +SKIP
 
 +---------------+-----------------------------------------------------------------+
 |Description    |Keywords                                                         |
@@ -69,8 +67,8 @@ To use a ramp filter in simulations, use the keyword syntax
 and ``cenwave`` the desired central wavelength in Angstrom.
 Also see :ref:`stsynphot-parameterized` for more information. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('acs,wfc1,fr388n#3880')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('acs,wfc1,fr388n#3880')  # doctest: +SKIP
 
 
 .. _stsynphot-appendixb-cos:
@@ -97,8 +95,8 @@ Science Aperture will be included by default if neither is specified.
 
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('cos,nuv,g185m,c1786')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('cos,nuv,g185m,c1786')  # doctest: +SKIP
 
 +----------------+------------------------------------+
 |Description     |Keywords                            |
@@ -147,8 +145,8 @@ axis. Some of the filter names are aliases for other filters. For instance,
 ``astroclear`` is an alias for F605W, ``clear`` for F583W, ``red`` for
 F650W, and ``yellow`` for 550W. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('fgs,f583w,y')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('fgs,f583w,y')  # doctest: +SKIP
 
 +-----------+-----------------------------------------------------------+
 |Description|Keywords                                                   |
@@ -177,8 +175,8 @@ For thermal calculations, all component keywords, except the detector, may be
 
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('nicmos,1,f090m,dn,primary#270')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('nicmos,1,f090m,dn,primary#270')  # doctest: +SKIP
 
 +-----------------+-----------------------------------------------------------------+
 |Description      |Keywords                                                         |
@@ -241,25 +239,25 @@ units of electrons to DN.
 These ``obsmode`` strings are all equivalent, with 50CCD being the unobstructed
 full-field aperture for the CCD detector::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('stis,g430l')
-    >>> bp = STS.band('stis,ccd,g430l')
-    >>> bp = STS.band('stis,ccd,g430l,50ccd')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('stis,g430l')  # doctest: +SKIP
+    >>> bp = stsyn.band('stis,ccd,g430l')  # doctest: +SKIP
+    >>> bp = stsyn.band('stis,ccd,g430l,50ccd')  # doctest: +SKIP
 
 This assumes that an imaging mirror is being used because the detector name is
 specified without a grating::
 
-    >>> bp = STS.band('stis,ccd,f28x50lp')
+    >>> bp = stsyn.band('stis,ccd,f28x50lp')  # doctest: +SKIP
 
 This will calculate results for the entire bandpass of the instrument because
 no central wavelength is specified::
 
-    >>> bp = STS.band('stis,ccd,g430m,52X0.2')
+    >>> bp = stsyn.band('stis,ccd,g430m,52X0.2')  # doctest: +SKIP
 
 This will only calculate results for the wavelength range covered by the
 specified wavelength setting::
 
-    >>> bp = STS.band('stis,ccd,g430m,52X0.2,c4451')
+    >>> bp = stsyn.band('stis,ccd,g430m,52X0.2,c4451')  # doctest: +SKIP
 
 +-----------+---------------------------------------------------------------------+
 |Description|Keywords                                                             |
@@ -311,8 +309,8 @@ The WFC3 keywords consist of a list of detectors, filters, |mjd_par|, and
 for each of its 2 channels (UVIS and IR), in addition to other special keyword,
 as tabulated below. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('wfc3,uvis1,f218w')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('wfc3,uvis1,f218w')  # doctest: +SKIP
 
 +------------------------+-------------------------------------------------+
 |Description             |Keywords                                         |
@@ -366,5 +364,5 @@ However, the appropriate count rate for SNR calculations should be in
 electrons with a correction for this quantum yield effect; That is,
 users should specify the ``qyc`` keyword but not ``dn``. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('wfc3,uvis1,f218w,qyc')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('wfc3,uvis1,f218w,qyc')  # doctest: +SKIP

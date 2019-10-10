@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _atlas_data_files:
 
 Atlases and calibration spectra files

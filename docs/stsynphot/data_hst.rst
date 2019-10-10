@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _hst_data_files:
 
 HST data files

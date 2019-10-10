@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. _stsynphot-appendixc:
 
 Appendix C: TMG, TMC, and TMT Files
@@ -400,9 +398,9 @@ The example below displays the header keywords mentioned above::
     >>> from astropy.io import fits
     >>> filename = os.path.join(
     ...     os.environ['PYSYN_CDBS'], 'comp', 'nicmos',
-    ...     'nic2_f110w_002_th.fits')
-    >>> with fits.open(filename) as pf:
-    ...     print(pf[1].header)
+    ...     'nic2_f110w_002_th.fits')  # doctest: +SKIP
+    >>> with fits.open(filename) as pf:  # doctest: +SKIP
+    ...     print(pf[1].header)  # doctest: +SKIP
     ...
     BEAMFILL=                   1. / Fraction of beam filled by this component
     DEFT    =                 77.1 / Default temperature in kelvins

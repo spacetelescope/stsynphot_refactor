@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. include:: appb_ref.txt
 
 .. _stsynphot-appendixb-nonhst:
@@ -15,16 +13,16 @@ needed) are as tabulated below.
 Non-HST filters are specified using the name of the filter system,
 followed by the desired band name. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('cousins,i')
-    >>> bp = STS.band('stromgren,u')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('cousins,i')  # doctest: +SKIP
+    >>> bp = stsyn.band('stromgren,u')  # doctest: +SKIP
 
 If the name of the filter system is omitted for any of the common *UBVRIJHK*
 filters, the defaults are Johnson *UBV*, Cousins *RI*, and Bessell *JHK*.
 For example, the following are equivalent:
 
-    >>> bp = STS.band('v')
-    >>> bp = STS.band('johnson,v')
+    >>> bp = stsyn.band('v')  # doctest: +SKIP
+    >>> bp = stsyn.band('johnson,v')  # doctest: +SKIP
 
 +------------------+-------------+
 |System Name       |Band Name    |
@@ -121,8 +119,8 @@ The Cousins *RI* throughputs are taken from
 :ref:`Bessell (1983) <stsynphot-ref-bessell1983>`. They have been transformed
 into photon-counting form. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('cousins,i')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('cousins,i')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-galex:
@@ -141,8 +139,8 @@ represent the true total throughput, including obscuration by the secondary
 mirror, reflectivity of the mirrors, sensitivity of the detector, and so forth.
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('galex,fuv')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('galex,fuv')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-johnson:
@@ -154,8 +152,8 @@ The throughput data for the Johnson *UBV* bands were obtained from
 :ref:`Maiz Apellaniz (2006) <stsynphot-ref-maiz2006>`, while the *RIJK* bands
 from :ref:`Johnson (1965) <stsynphot-ref-johnson1965>`. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('johnson,v')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('johnson,v')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-landolt:
@@ -167,8 +165,8 @@ The :ref:`Landolt (1983) <stsynphot-ref-landolt1983>` *UBVRI* system is made up
 of the :ref:`stsynphot-nonhst-johnson` *UBV* and the
 :ref:`stsynphot-nonhst-cousins` *RI* bandpass. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('landolt,v')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('landolt,v')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-sdss:
@@ -182,8 +180,8 @@ as described in :ref:`Gunn et al. (2001) <stsynphot-ref-gunn2001>`.
 The filter curves are shown in the
 `SDSS filter response plot <http://classic.sdss.org/dr1/instruments/imager/index.html#filters>`_. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('sdss,g')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('sdss,g')  # doctest: +SKIP
 
 The throughput data give the system photon response to point sources of the
 2.5-m SDSS survey telescope, including extinction through an airmass of 1.3 at
@@ -245,8 +243,8 @@ Stromgren
 The Stromgren *uvby* throughputs are taken from
 :ref:`Maiz Apellaniz (2006) <stsynphot-ref-maiz2006>`. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('stromgren,y')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('stromgren,y')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-deprecated:
@@ -292,8 +290,8 @@ The Astronomical Netherlands Satellite (ANS) system is a set of UV filters used
 by the satellite, as described in
 :ref:`van Duinen et al. (1975) <stsynphot-ref-vanduinen1975>`. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('ans,1550')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('ans,1550')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-baum:
@@ -310,8 +308,8 @@ by the spectral response curve of the ground-based CCD (measured
 in the laboratory) and twice by the spectral reflectance of aluminum
 (:ref:`Harris et al. 1991 <stsynphot-ref-harris1991>`). For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('baum,f336w')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('baum,f336w')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-bessell:
@@ -325,8 +323,8 @@ These curves include the mean atmospheric transmission equivalent to 1.2
 air masses of a standard `KPNO <https://www.noao.edu/kpno/>`_  atmosphere.
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('bessell,k')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('bessell,k')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-eso:
@@ -337,8 +335,8 @@ ESO
 The 530 ESO band throughput tables were received from Jan Koornneef in 1990.
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('eso,198')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('eso,198')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-kpno:
@@ -351,8 +349,8 @@ filter curves are taken from the tracings of the Simultaneous Quad Infrared
 Image Device (SQIID) filter set, which were provided by Richard Joyce from the
 observatory. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('kpno,k')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('kpno,k')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-steward:
@@ -364,8 +362,8 @@ The `Steward Observatory <https://www.as.arizona.edu/observing>`_ *JHK* filter
 curves are from data provided by Marcia Rieke from the observatory.
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('steward,k')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('steward,k')  # doctest: +SKIP
 
 
 .. _stsynphot-nonhst-walraven:
@@ -376,5 +374,5 @@ Walraven
 The throughput data for the Walraven *VBLUW* bands are from
 :ref:`Lub & Pel (1977) <stsynphot-ref-lub1977>`, Table 6. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('walraven,v')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('walraven,v')  # doctest: +SKIP

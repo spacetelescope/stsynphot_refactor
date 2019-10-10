@@ -1,5 +1,3 @@
-.. doctest-skip-all
-
 .. include:: appb_ref.txt
 
 .. _stsynphot-appendixb-legacy:
@@ -25,8 +23,8 @@ miscellaneous keywords. The ``f/48`` detector has 2 filter wheels and the
 The miscellaneous keywords include the :ref:`stsynphot-costar` and
 the occulting fingers. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('foc,costar,f/96,f410m')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('foc,costar,f/96,f410m')  # doctest: +SKIP
 
 +--------------+--------------------------------------------------+
 |Description   |Keywords                                          |
@@ -113,25 +111,25 @@ The FOS keywords consist of a list of detectors, apertures, gratings, and
 polarimeter waveplates and waveplate position angles.
 :ref:`stsynphot-costar` keyword is also accepted. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('fos,costar,blue,g160l')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('fos,costar,blue,g160l')  # doctest: +SKIP
 
 The waveplate keywords indicate whether Waveplate A or  B is being used and
 the angle of the waveplate. The waveplate keyword syntax is ``POLpa-wp``,
 where ``pa`` is the position angle in degrees, and ``wp`` is the A or B
 waveplate::
 
-    >>> bp = STS.band('fos,blue,g130h,pol135-a')
+    >>> bp = stsyn.band('fos,blue,g130h,pol135-a')  # doctest: +SKIP
 
 The ``upper`` and ``lower`` aperture keywords are only recognized when used
 in conjunction with one of the paired apertures::
 
-    >>> bp = STS.band('fos,blue,g130h,upper,1.0-pair')
+    >>> bp = stsyn.band('fos,blue,g130h,upper,1.0-pair')  # doctest: +SKIP
 
 The ``order0`` keyword is only available in conjunction with the ``g160l``
 grating and the ``blue`` detector::
 
-    >>> bp = STS.band('fos,blue,g160l,order0')
+    >>> bp = stsyn.band('fos,blue,g160l,order0')  # doctest: +SKIP
 
 +-----------+--------------------------------------------------+
 |Description|Keywords                                          |
@@ -164,14 +162,14 @@ The GHRS keywords consist of a list of detectors, apertures, gratings
 or mirrors, and Echelle mode orders. :ref:`stsynphot-costar` keyword
 is also accepted. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('hrs,costar,lsa,g160m')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('hrs,costar,lsa,g160m')  # doctest: +SKIP
 
 The Echelle mode orders are used with the keywords ``echa`` and ``echb``.
 Orders 18 to 33 are valid with Echelle mode B, while orders 33 to 53 with
 mode A. For example::
 
-    >>> bp = STS.band('hrs,costar,lsa,echa,33')
+    >>> bp = stsyn.band('hrs,costar,lsa,echa,33')  # doctest: +SKIP
 
 +-----------+--------------------------------------------------+
 |Description|Keywords                                          |
@@ -200,8 +198,8 @@ with all detectors; Refer to the HSP Instrument Handbook for
 further information. The polarization detector also has angle
 and type keywords. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('hsp,uv1,f220w,c')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('hsp,uv1,f220w,c')  # doctest: +SKIP
 
 +------------------+-------------------------------------------------+
 |Description       |Keywords                                         |
@@ -253,8 +251,8 @@ and ``pc`` is 6.
 
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('wfpc,4,f194w,dn')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('wfpc,4,f194w,dn')  # doctest: +SKIP
 
 +---------------+-------------------------------+
 |Decription     |Keywords                       |
@@ -317,8 +315,8 @@ Wide Field Camera. If a detector is not specified, the default is Detector 4.
 
 For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('wfpc2,2,f450w,a2d7,cont#50180')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('wfpc2,2,f450w,a2d7,cont#50180')  # doctest: +SKIP
 
 +---------------+------------------------------------------------------+
 |Description    |Keywords                                              |
@@ -393,8 +391,8 @@ by the PC, it is necessary to rotate the quad filters as follow
 The nominal positions are represented as ``fquvn``, ``fqch4n``, and ``polq``
 keywords. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('wfpc2,2,fqch4n')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('wfpc2,2,fqch4n')  # doctest: +SKIP
 
 
 .. _stsynphot-wfpc2-ramp:
@@ -409,5 +407,5 @@ the central wavelength. To use a WFPC2 ramp filter in simulations, use the
 keyword syntax ``lrf#cenwave``, where ``cenwave`` is the desired central
 wavelength in Angstrom. For example::
 
-    >>> import stsynphot as STS
-    >>> bp = STS.band('wfpc2,3,lrf#4861')
+    >>> import stsynphot as stsyn
+    >>> bp = stsyn.band('wfpc2,3,lrf#4861')  # doctest: +SKIP
