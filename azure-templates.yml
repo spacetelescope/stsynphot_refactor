@@ -6,7 +6,7 @@ parameters:
   numpyCmd: 'pip install numpy'
   scipyCmd: 'pip install scipy'
   astropyCmd: 'pip install git+https://github.com/astropy/astropy@v4.0rc1'
-  synphotCmd: 'pip install synphot'
+  synphotCmd: 'pip install git+https://github.com/spacetelescope/synphot_refactor'
   pythonVersion: '3.7'
   pytestExtraArgs: ''
 
