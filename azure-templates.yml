@@ -5,7 +5,7 @@ parameters:
   vmImage: 'Ubuntu-16.04'
   numpyCmd: 'pip install numpy'
   scipyCmd: 'pip install scipy'
-  astropyCmd: 'pip install astropy'
+  astropyCmd: 'pip install git+https://github.com/astropy/astropy@v4.0rc1'
   synphotCmd: 'pip install synphot'
   pythonVersion: '3.7'
   pytestExtraArgs: ''
