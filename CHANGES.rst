@@ -1,8 +1,9 @@
-0.2.0 (unreleased)
+0.2.0 (2019-11-19)
 ==================
 
 - Removed Python 2 support. This version is only compatible with Python 3.5
   or later. [#67]
+- Compatibility with ``astropy`` 4.0 models. [#81]
 - Invalid ``pixscale`` in ``thermback`` calculation now raises
   ``PixscaleNotFoundError`` instead of ``SynphotError``. [#88]
 - Invalid filename lookup by component in ``tables`` now raises
