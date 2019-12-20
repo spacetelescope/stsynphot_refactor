@@ -436,8 +436,10 @@ def read_wavecat(filename):
 
     """
     return ascii.read(
-        filename, header_start=None, names=(str('OBSMODE'), str('FILENAME')),
-        converters={'OBSMODE': np.str, 'FILENAME': np.str})
+        filename, names=('OBSMODE', 'FILENAME'),
+        guess=False, format='no_header',
+        converters={'OBSMODE': [ascii.convert_numpy(str)],
+                    'FILENAME': [ascii.convert_numpy(str)]})
 
 
 def read_waveset(filename, wave_unit=u.AA):
@@ -472,8 +474,8 @@ def read_waveset(filename, wave_unit=u.AA):
     """
     wave_unit = units.validate_wave_unit(wave_unit)
     data = ascii.read(
-        filename, header_start=None, data_start=0, names=(str('WAVELENGTH'), ),
-        converters={'WAVELENGTH': np.float})
+        filename, guess=False, format='no_header', names=('WAVELENGTH', ),
+        converters={'WAVELENGTH': [ascii.convert_numpy(float)]})
     waveset = data['WAVELENGTH'].data
 
     if not isinstance(waveset, u.Quantity):
@@ -515,10 +517,12 @@ def read_detector_pars(filename):
 
     """
     return ascii.read(
-        filename, header_start=None,
-        names=(str('OBSMODE'), str('SCALE'), str('NX'), str('NY')),
-        converters={'OBSMODE': np.str, 'SCALE': np.float,
-                    'NX': np.int, 'NY': np.int})
+        filename, guess=False, format='no_header', delimiter=r'\s',
+        names=('OBSMODE', 'SCALE', 'NX', 'NY'),
+        converters={'OBSMODE': [ascii.convert_numpy(str)],
+                    'SCALE': [ascii.convert_numpy(float)],
+                    'NX': [ascii.convert_numpy(int)],
+                    'NY': [ascii.convert_numpy(int)]})
 
 
 def read_interp_spec(filename, tab_ext=1):

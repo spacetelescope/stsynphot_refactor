@@ -67,6 +67,7 @@ Examples shown are only for ``graphtable`` but they are similar for others
 
     >>> stsyn.conf.graphtable = '/path/to/my_new_tmg.fits'  # Entire session
     >>> stsyn.conf.reload('graphtable')  # Reload from stsynphot.cfg
+    'mtab$*_tmg.fits'
     >>> stsyn.conf.reload()  # Reload everything
     >>> stsyn.conf.reset('graphtable')  # Reset to software default
     >>> stsyn.conf.reset()  # Reset everything

@@ -45,7 +45,8 @@ jobs:
       pip install beautifulsoup4 pytest-astropy
       ${{ parameters.astropyCmd }}
       ${{ parameters.synphotCmd }}
-      python setup.py test --open-files $(PYTEST_EXTRA_ARGS)
+      pip install -e .
+      pytest --pyargs stsynphot docs --open-files $(PYTEST_EXTRA_ARGS)
     env:
       PYSYN_CDBS: $(PYSYN_CDBS)
     displayName: 'Run tests'

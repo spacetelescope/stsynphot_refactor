@@ -69,7 +69,7 @@ You can install **stsynphot** using one of the following ways:
 
     git clone https://github.com/spacetelescope/stsynphot_refactor.git
     cd stsynphot_refactor
-    python setup.py install
+    pip install -e .
 
 As with ASTROLIB PYSYNPHOT, the data files for **stsynphot** are distributed
 separately by
