@@ -1,8 +1,8 @@
 stsynphot
 =========
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3547958.svg
-   :target: https://doi.org/10.5281/zenodo.3547958
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3588574.svg
+   :target: https://doi.org/10.5281/zenodo.3588574
 
 .. image:: https://readthedocs.org/projects/stsynphot/badge/?version=latest
     :target: http://stsynphot.readthedocs.io/en/latest/?badge=latest
