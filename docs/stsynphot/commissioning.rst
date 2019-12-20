@@ -24,11 +24,9 @@ commissioning process was performed to verify that the results
 produced by **stsynphot** are either as good as, or better than, the results
 obtained using ASTROLIB PYSYNPHOT for the same calculations.
 
-There are two ways to run the tests, either by using ``setup.py`` from the
-source directory or ``stsynphot.test()`` in a Python session. For example,
-this runs all the commissioning tests in addition to regular unit tests::
+This runs all the commissioning tests in addition to regular unit tests::
 
-    python setup.py test --remote-data --args="--slow --html=/path/to/report.html"
+    pytest --pyargs stsynphot docs --remote-data --slow --html=/path/to/report.html
 
 Since this involves detail comparison with ASTROLIB PYSYNPHOT using various
 spectra and observing modes, it is important that the tests have access to the

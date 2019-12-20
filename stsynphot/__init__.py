@@ -1,19 +1,16 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
-"""
-This is an Astropy affiliated package.
-"""
+# Set up the version
+from pkg_resources import get_distribution, DistributionNotFound
 
-# Affiliated packages may add whatever they like to this file, but
-# should keep this content at the top.
-# ----------------------------------------------------------------------------
-from ._astropy_init import *
-# ----------------------------------------------------------------------------
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    # package is not installed
+    __version__ = 'unknown'
 
-# For egg_info test builds to pass, put package imports here.
-if not _ASTROPY_SETUP_:
-    # STSYNPHOT UI
-    from .config import getref, showref, conf
-    from .spectrum import band, ebmvx, Vega
-    from .catalog import grid_to_spec
-    from .spparser import parse_spec
+# STSYNPHOT UI
+from .config import getref, showref, conf  # noqa
+from .spectrum import band, ebmvx, Vega  # noqa
+from .catalog import grid_to_spec  # noqa
+from .spparser import parse_spec  # noqa
