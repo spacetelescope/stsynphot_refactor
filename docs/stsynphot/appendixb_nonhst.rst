@@ -291,8 +291,7 @@ WFIRST
 ------
 
 Phase B estimates of the WFIRST integrated system throughputs have been taken from
-the `WFIRST Reference Information <https://wfirst.gsfc.nasa.gov/science/WFIRST_Reference_Information.html>`_ page at GSFC. 
-for more information. For example:
+the `WFIRST Reference Information <https://wfirst.gsfc.nasa.gov/science/WFIRST_Reference_Information.html>`_ page at GSFC. For example:
 
 >>> import stsynphot as stsyn
 >>> bp = stsyn.band('wfirst,wfi,f062')  # doctest: +SKIP
