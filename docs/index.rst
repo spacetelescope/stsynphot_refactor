@@ -313,6 +313,10 @@ Bohlin, R. C. & Gilliland, R. L. 2004, AJ, 127, 3508
 
 Calzetti, D., Kinney, A. L., & Storchi-Bergmann, T. 1994, ApJ, 429, 582
 
+.. _stsynphot-ref-cohen2003:
+
+Cohen, M., Wheaton, W. A., & Megeath, S. T. 2003, AJ, 126, 1090
+
 .. _stsynphot-ref-demarchi2004:
 
 De Marchi, G. et al. 2004, ISR ACS 2004-08: Detector Quantum Efficiency and Photometric Zero Points of the ACS (Baltimore, MD: STScI), http://www.stsci.edu/files/live/sites/www/files/home/hst/instrumentation/acs/documentation/instrument-science-reports-isrs/_documents/isr0408.pdf
