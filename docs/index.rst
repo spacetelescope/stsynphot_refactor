@@ -309,6 +309,10 @@ Bohlin, R. C., Dickinson, M. E., & Calzetti, D. 2001, AJ, 122, 2118
 
 Bohlin, R. C. & Gilliland, R. L. 2004, AJ, 127, 3508
 
+.. _stsynphot-ref-brown2014:
+
+Brown, M. J. I., et al. 2014, ApJS, 212, 18
+
 .. _stsynphot-ref-calzetti1994:
 
 Calzetti, D., Kinney, A. L., & Storchi-Bergmann, T. 1994, ApJ, 429, 582
