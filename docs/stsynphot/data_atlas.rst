@@ -14,7 +14,7 @@ Then, move them to the appropriate location and extract them::
 .. note::
 
     Downloading and extracting the files might take a while as the
-    tarballs combined are almost 700 MB.
+    tarballs combined are over 700 MB.
 
 Once installation is complete, you will see some sub-directories containing
 data as described below:
@@ -31,6 +31,8 @@ data as described below:
 |Buser-Kurucz stellar atlas                |grid/bkmodels   |
 +------------------------------------------+----------------+
 |Bruzual-Persson-Gunn-Stryker stellar atlas|grid/bpgs       |
++------------------------------------------+----------------+
+|Brown galaxy atlas                        |grid/brown      |
 +------------------------------------------+----------------+
 |Bruzual stellar atlas                     |grid/bz77       |
 +------------------------------------------+----------------+
