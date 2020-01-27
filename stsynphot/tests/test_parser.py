@@ -27,9 +27,12 @@ from .. import catalog, exceptions, observationmode, spectrum, spparser
 from ..config import conf
 
 
-def _single_functioncall(input_str, ans_cls, ans_model):
+def _single_functioncall(input_str, ans_cls, ans_model, ans_name):
     sp = spparser.parse_spec(input_str)
     assert isinstance(sp, ans_cls)
+
+    if ans_name:
+        assert sp.meta['expr'] == ans_name
 
     # Do not check composite model
     if ans_model is not None:
@@ -37,42 +40,57 @@ def _single_functioncall(input_str, ans_cls, ans_model):
 
 
 @pytest.mark.parametrize(
-    ('input_str', 'ans_cls', 'ans_model'),
-    [('unit(1, flam)', SourceSpectrum, ConstFlux1D),
-     ('bb(5000)', SourceSpectrum, None),
-     ('pl(5000, 1, flam)', SourceSpectrum, PowerLawFlux1D),
-     ('box(5000, 1)', SpectralElement, Box1D),
-     ('em(5000, 25, 1, flam)', SourceSpectrum, Gaussian1D),
-     ('rn(bb(5000), box(5000, 10), 17, abmag)', SourceSpectrum, None),
-     ('z(null, 0.1)', SourceSpectrum, ConstFlux1D),
-     ('z(em(5000, 25, 1, flam), 0.1)', SourceSpectrum, None)])
-def test_single_functioncall(input_str, ans_cls, ans_model):
+    ('input_str', 'ans_cls', 'ans_model', 'ans_name'),
+    [('unit(1, flam)', SourceSpectrum, ConstFlux1D,
+      'unit(1.0,flam)'),
+     ('bb(5000)', SourceSpectrum, None,
+      'bb(5000.0)'),
+     ('pl(5000, 1, flam)', SourceSpectrum, PowerLawFlux1D,
+      'pl(5000.0,1.0,flam)'),
+     ('box(5000, 1)', SpectralElement, Box1D,
+      'box(5000.0,1.0)'),
+     ('em(5000, 25, 1, flam)', SourceSpectrum, Gaussian1D,
+      'em(5000, 25, 1, FLAM)'),
+     ('rn(bb(5000), box(5000, 10), 17, abmag)', SourceSpectrum, None,
+      'rn(bb(5000.0),box(5000.0,10.0),17.0,abmag)'),
+     ('z(null, 0.1)', SourceSpectrum, ConstFlux1D,
+      'z(null,0.1)'),
+     ('z(em(5000, 25, 1, flam), 0.1)', SourceSpectrum, None,
+      'z(em(5000, 25, 1, FLAM),0.1)')])
+def test_single_functioncall(input_str, ans_cls, ans_model, ans_name):
     """Test parser function calls."""
-    _single_functioncall(input_str, ans_cls, ans_model)
+    _single_functioncall(input_str, ans_cls, ans_model, ans_name)
 
 
 @pytest.mark.remote_data
 @pytest.mark.parametrize(
-    ('input_str', 'ans_cls', 'ans_model'),
-    [('spec(crcalspec$alpha_lyr_stis_007.fits)', SourceSpectrum, Empirical1D),
-     ('band(v)', spectrum.ObservationSpectralElement, Empirical1D),
-     ('icat(k93models, 5000, 0.5, 0)', SourceSpectrum, None),
-     ('ebmvx(0.3, mwavg)', ExtinctionCurve, Empirical1D),
+    ('input_str', 'ans_cls', 'ans_model', 'ans_name'),
+    [('spec(crcalspec$alpha_lyr_stis_007.fits)', SourceSpectrum, Empirical1D,
+      'spec(crcalspec$alpha_lyr_stis_007.fits)'),
+     ('band(v)', spectrum.ObservationSpectralElement, Empirical1D, 'band(v)'),
+     ('icat(k93models, 5000, 0.5, 0)', SourceSpectrum, None,
+      'k93models(T_eff=5000,metallicity=0.5,log_g=0)'),
+     ('ebmvx(0.3, mwavg)', ExtinctionCurve, Empirical1D, 'ebmvx(0.3,mwavg)'),
      ('rn(crcalspec$gd71_mod_005.fits, box(5000, 10), 17, vegamag)',
-      SourceSpectrum, None),
+      SourceSpectrum, None,
+      'rn(crcalspec$gd71_mod_005.fits,box(5000.0,10.0),17.0,vegamag)'),
      ('rn(icat(k93models, 5000, 0.5, 0), '
       'cracscomp$acs_f814w_hrc_006_syn.fits, 17, obmag)',
-      SourceSpectrum, None),
+      SourceSpectrum, None,
+      'rn(k93models(T_eff=5000,metallicity=0.5,log_g=0),'
+      'cracscomp$acs_f814w_hrc_006_syn.fits,17.0,obmag)'),
      ('rn(pl(5000, 1, flam), band(v), 1, photlam)',
-      SourceSpectrum, None),
+      SourceSpectrum, None, 'rn(pl(5000.0,1.0,flam),band(v),1.0,photlam)'),
      ('rn(unit(1,flam), band(acs, wfc1, fr388n#3881.0), 10, abmag)',
-      SourceSpectrum, None),
+      SourceSpectrum, None,
+      'rn(unit(1.0,flam),band(acs,wfc1,fr388n#3881.0),10.0,abmag)'),
      ('rn(crcalspec$bd_75d325_stis_002.fits, band(u), 9.5, vegamag) * '
-      'band(fos, blue, 4.3, g160l)', SourceSpectrum, None),
-     ('z(crcalspec$alpha_lyr_stis_007.fits, 0.1)', SourceSpectrum, None)])
-def test_single_functioncall_remote(input_str, ans_cls, ans_model):
+      'band(fos, blue, 4.3, g160l)', SourceSpectrum, None, ''),
+     ('z(crcalspec$alpha_lyr_stis_007.fits, 0.1)', SourceSpectrum, None,
+      'z(crcalspec$alpha_lyr_stis_007.fits,0.1)')])
+def test_single_functioncall_remote(input_str, ans_cls, ans_model, ans_name):
     """Test parser function calls with remote data."""
-    _single_functioncall(input_str, ans_cls, ans_model)
+    _single_functioncall(input_str, ans_cls, ans_model, ans_name)
 
 
 @pytest.mark.remote_data
@@ -90,6 +108,10 @@ class TestRenormPartialOverlap(object):
             sp = spparser.parse_spec(input_str)
         assert isinstance(sp, SourceSpectrum)
         assert 'force_renorm' in sp.warnings
+
+        name = sp.meta['expr']
+        assert (name.startswith('rn(') and
+                name.endswith('qso_fos_001.dat,band(johnson,u),15.0,abmag)'))
 
     def test_disjoint(self):
         """Raise error."""

@@ -1,6 +1,13 @@
 0.3.0 (unreleased)
 ==================
 
+0.2.2 (unreleased)
+==================
+
+- Fix total flux unit handling for ``em`` spectrum generated from
+  ``parse_spec``. [#102]
+- Fix ``.meta['expr']`` value for normalized spectrum generated from
+  ``parse_spec``. [#102]
 
 0.2.1 (2019-12-20)
 ==================
