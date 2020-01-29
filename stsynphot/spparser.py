@@ -18,6 +18,7 @@ See :ref:`stsynphot-parser` for more details and
 """
 # ASTROPY
 from astropy import log
+from astropy import units as u
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
@@ -283,6 +284,16 @@ class Interpreter(GenericASTMatcher):
         except AttributeError:
             pass  # We only care about this for relatively simple constructs.
 
+    @staticmethod
+    def _get_names_from_tree_values(args):
+        names = []
+        for arg in args:
+            if hasattr(arg, 'meta') and 'expr' in arg.meta:
+                names.append(arg.meta['expr'])
+            else:
+                names.append(str(arg))
+        return '(' + ','.join(names) + ')'
+
     def p_functioncall(self, tree):
         # Where all the real interpreter action is.
         # Note that things that should only be done at the top level
@@ -294,7 +305,8 @@ class Interpreter(GenericASTMatcher):
             args = tree[2].value
 
         fname = tree[0].value
-        metadata = {'expr': '{0}{1}'.format(fname, tuple(args))}
+        metadata = {'expr': '{0}{1}'.format(
+            fname, self._get_names_from_tree_values(args))}
 
         if fname not in _SYFUNCTIONS:
             log.error('Unknown function: {0}'.format(fname))
@@ -317,7 +329,7 @@ class Interpreter(GenericASTMatcher):
             # Black body
             elif fname == 'bb':
                 tree.value = SourceSpectrum(
-                    BlackBodyNorm1D, temperature=args[0])
+                    BlackBodyNorm1D, temperature=args[0]*u.K)
 
             # Power law
             elif fname == 'pl':
@@ -327,7 +339,7 @@ class Interpreter(GenericASTMatcher):
                 try:
                     fluxunit = units.validate_unit(args[2])
                     tree.value = SourceSpectrum(
-                        PowerLawFlux1D, amplitude=1*fluxunit, x_0=args[0],
+                        PowerLawFlux1D, amplitude=1*fluxunit, x_0=args[0]*u.AA,
                         alpha=-args[1], meta=metadata)
                 except (synexceptions.SynphotError, NotImplementedError) as e:
                     log.error(str(e))
@@ -336,7 +348,7 @@ class Interpreter(GenericASTMatcher):
             # Box throughput
             elif fname == 'box':
                 tree.value = SpectralElement(
-                    Box1D, amplitude=1, x_0=args[0], width=args[1],
+                    Box1D, amplitude=1, x_0=args[0]*u.AA, width=args[1]*u.AA,
                     meta=metadata)
 
             # Source spectrum from file
@@ -346,7 +358,7 @@ class Interpreter(GenericASTMatcher):
 
             # Passband
             elif fname == 'band':
-                tree.value = spectrum.band(tree[2].svalue)
+                tree.value = spectrum.band(tree[2].svalue)  # string value
                 tree.value.meta.update(metadata)
 
             # Gaussian emission line
@@ -354,12 +366,12 @@ class Interpreter(GenericASTMatcher):
                 if args[3] not in _SYFORMS:
                     log.error('Unrecognized unit: {0}'.format(args[3]))
                     self.error(fname)
-                x0 = args[0]
+                x0 = args[0] * u.AA
                 fluxunit = units.validate_unit(args[3])
-                totflux = units.convert_flux(
-                    x0, args[2] * fluxunit, units.PHOTLAM).value
+                totflux = args[2] * (fluxunit * u.AA)
                 tree.value = SourceSpectrum(
-                    GaussianFlux1D, total_flux=totflux, mean=x0, fwhm=args[1])
+                    GaussianFlux1D, total_flux=totflux, mean=x0,
+                    fwhm=args[1]*u.AA)
 
             # Catalog interpolation
             elif fname == 'icat':
@@ -407,7 +419,8 @@ class Interpreter(GenericASTMatcher):
                     tree.value = sp
                     tree.value.z = args[1]
                 else:
-                    tree.value = SourceSpectrum(ConstFlux1D, amplitude=1)
+                    tree.value = SourceSpectrum(
+                        ConstFlux1D, amplitude=1*units.PHOTLAM)
 
                 tree.value.meta.update(metadata)
 
