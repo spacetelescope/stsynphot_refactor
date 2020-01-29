@@ -1,7 +1,4 @@
-0.2.2 (unreleased)
-==================
-
-0.2.2 (unreleased)
+0.2.2 (2020-01-29)
 ==================
 
 - Fix total flux unit handling for ``em`` spectrum generated from
