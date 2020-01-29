@@ -288,9 +288,9 @@ class Interpreter(GenericASTMatcher):
     def _get_names_from_tree_values(args):
         names = []
         for arg in args:
-            try:
+            if hasattr(arg, 'meta') and 'expr' in arg.meta:
                 names.append(arg.meta['expr'])
-            except Exception:
+            else:
                 names.append(str(arg))
         return '(' + ','.join(names) + ')'
 
