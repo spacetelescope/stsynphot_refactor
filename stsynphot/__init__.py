@@ -1,11 +1,10 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
-# Set up the version
-try:
-    from .version import version as __version__
-except ImportError:
-    # package is not installed
-    __version__ = 'unknown'
+# Packages may add whatever they like to this file, but
+# should keep this content at the top.
+# ----------------------------------------------------------------------------
+from ._astropy_init import *  # noqa
+# ----------------------------------------------------------------------------
 
 # STSYNPHOT UI
 from .config import getref, showref, conf  # noqa
