@@ -1,11 +1,9 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 # Set up the version
-from pkg_resources import get_distribution, DistributionNotFound
-
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+    from .version import version as __version__
+except ImportError:
     # package is not installed
     __version__ = 'unknown'
 
