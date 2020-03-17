@@ -76,6 +76,7 @@ class TestCompTable(object):
         self.ct = CompTable(get_pkg_data_filename('data/tables_tmc.fits'))
         self.tt = CompTable(get_pkg_data_filename('data/tables_tmt.fits'))
 
+    @pytest.mark.filterwarnings('ignore:Invalid keyword')
     def test_optical_files(self):
         files = self.ct.get_filenames(['clear', None, '', 'wfc3_ir_mask'])
         np.testing.assert_array_equal(files[:3], 'clear')
