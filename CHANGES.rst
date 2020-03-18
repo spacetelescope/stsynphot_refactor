@@ -1,6 +1,8 @@
 0.3.0 (unreleased)
 ==================
 
+- Fix compatibility with Windows in regards to path handling. [#107]
+
 0.2.2 (2020-01-29)
 ==================
 
