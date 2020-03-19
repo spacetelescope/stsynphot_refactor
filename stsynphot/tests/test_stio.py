@@ -104,7 +104,8 @@ class TestGetLatestFile:
         try:
             os.chdir(self.datadir)
             ans = 'tables_tmg.fits'
-            assert stio.get_latest_file(ans, raise_error=True) == './' + ans
+            assert (stio.get_latest_file(ans, raise_error=True) ==
+                    os.path.join('.', ans))
         finally:
             os.chdir(curdir)
 
