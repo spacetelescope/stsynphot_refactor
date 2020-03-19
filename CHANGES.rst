@@ -5,7 +5,7 @@
 - Fix a bug in ``stio.get_latest_file`` to recognize file in current directory.
   [#108]
 - Dropped support for Python 3.5. This package now requires Python 3.6 or
-  later. [#109]
+  later. It also now requires ``astropy`` 3 or later. [#109]
 
 0.2.2 (2020-01-29)
 ==================
