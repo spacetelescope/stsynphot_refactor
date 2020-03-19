@@ -37,8 +37,9 @@ class TestIRAFConvert(object):
         else:
             os.environ['MYTESTPATH'] = '/path1/path2/'
 
-    def test_irafconvert_noop(self):
-        in_str = 'mypath/image.fits'
+    @pytest.mark.parametrize('in_str', ('mypath/image.fits',
+                                        'C:\\mypath\\image.fits'))
+    def test_irafconvert_noop(self, in_str):
         assert stio.irafconvert(in_str) == in_str
 
     def test_irafconvert_mytestpath(self):
@@ -52,21 +53,11 @@ class TestIRAFConvert(object):
         assert stio.irafconvert(in_str) == ans
 
     @pytest.mark.parametrize(
-        ('in_str', 'ans'),
-        [('CRREFER$image.fits', (conf.rootdir, 'image.fits')),
-         ('mtab$image.fits', (conf.rootdir, 'mtab', 'image.fits'))
-         ])
-    def test_irafconvert(self, in_str, ans):
-        if conf.rootdir.startswith(('ftp', 'http')):
-            sep = '/'
-        else:
-            sep = os.sep
-
-        if conf.rootdir.endswith(sep):
-            ans = conf.rootdir + sep.join(ans[1:])
-        else:
-            ans = sep.join(ans)
-
+        ('in_str', 'args'),
+        [('CRREFER$image.fits', ('image.fits', )),
+         ('mtab$image.fits', ('mtab', 'image.fits'))])
+    def test_irafconvert(self, in_str, args):
+        ans = stio.resolve_filename(conf.rootdir, *args)
         assert stio.irafconvert(in_str) == ans
 
     def test_irafconvert_data(self):
