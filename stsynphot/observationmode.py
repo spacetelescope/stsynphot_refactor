@@ -50,7 +50,7 @@ def reset_cache():
     _DETECTORDICT.clear()
 
 
-class Component(object):
+class Component:
     """Class to handle individual components in `BaseObservationMode`.
 
     Parameters
@@ -165,7 +165,7 @@ def _process_graphtable(graphtable):
     return gt, gtname, primary_area
 
 
-class BaseObservationMode(object):
+class BaseObservationMode:
     """Base class to handle an observation that uses the graph
     and optical component tables, common to both optical and
     thermal observation modes.

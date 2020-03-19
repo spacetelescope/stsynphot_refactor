@@ -33,7 +33,7 @@ _N_SPEC = 1999.0
 WAVECAT = None
 
 
-class WaveCatalog(object):
+class WaveCatalog:
     """Class to handle ``stsynphot.config.conf.wavecatfile`` initialization
     and access.
 

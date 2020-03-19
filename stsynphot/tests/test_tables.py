@@ -29,7 +29,7 @@ def test_custom_primarea():
     assert gt.primary_area.value == 100
 
 
-class TestGraphTable(object):
+class TestGraphTable:
     """Test graph table."""
     def setup_class(self):
         self.gt = GraphTable(get_pkg_data_filename('data/tables_tmg.fits'))
@@ -70,7 +70,7 @@ class TestGraphTable(object):
             self.gt.get_comp_from_gt(['acs'], 1)
 
 
-class TestCompTable(object):
+class TestCompTable:
     """Test optical and thermal component tables."""
     def setup_class(self):
         self.ct = CompTable(get_pkg_data_filename('data/tables_tmc.fits'))

@@ -68,7 +68,7 @@ def count_outliers(data, sigma=3.0):
 @use_pysynphot
 @slow
 @pytest.mark.remote_data
-class CommCase(object):
+class CommCase:
     """Base class for commissioning tests."""
     obsmode = None  # Observation mode string
     spectrum = None  # SYNPHOT-like string to construct spectrum

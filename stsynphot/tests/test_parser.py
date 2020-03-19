@@ -271,7 +271,7 @@ def test_remote_z_vega():
 
 
 @pytest.mark.remote_data
-class TestRenormPartialOverlap(object):
+class TestRenormPartialOverlap:
     """Test handling of ``rn(...)`` syntax for partial overlap."""
     def setup_class(self):
         self.fname = resolve_filename(
@@ -298,7 +298,7 @@ class TestRenormPartialOverlap(object):
 
 
 @pytest.mark.remote_data
-class TestEnvVar(object):
+class TestEnvVar:
     """Test syntax using PYSYN_CDBS environment variable."""
     def setup_class(self):
         self.old_path = os.environ.get('PYSYN_CDBS')
@@ -334,7 +334,7 @@ def test_parser_exception(input_str):
         spparser.parse_spec(input_str)
 
 
-class TestTokens(object):
+class TestTokens:
     """Test underlying parser engine."""
     def setup_class(self):
         self.scanner = spparser.Scanner()

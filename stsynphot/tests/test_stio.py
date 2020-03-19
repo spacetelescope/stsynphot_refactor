@@ -28,7 +28,7 @@ from .. import stio
 from ..config import conf
 
 
-class TestIRAFConvert(object):
+class TestIRAFConvert:
     """Test IRAF filename conversions."""
     def setup_class(self):
         self.is_win = sys.platform.startswith('win')
@@ -74,7 +74,7 @@ class TestIRAFConvert(object):
         del os.environ['MYTESTPATH']
 
 
-class TestGetLatestFile(object):
+class TestGetLatestFile:
     """Test getting latest file."""
     def setup_class(self):
         self.datadir = _find_pkg_data_path('data')

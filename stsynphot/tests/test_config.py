@@ -17,7 +17,7 @@ from .. import config
 from ..stio import get_latest_file, irafconvert
 
 
-class TestOverwriteSynphot(object):
+class TestOverwriteSynphot:
     """Test if overwriting ``synphot`` defaults is successful."""
     def setup_class(self):
         # For some reason, this does not automatically execute during testing.
@@ -38,7 +38,7 @@ class TestOverwriteSynphot(object):
 
 
 @pytest.mark.remote_data
-class TestConfigChanges(object):
+class TestConfigChanges:
     def setup_class(self):
         self.def_dict = config.getref()
 
