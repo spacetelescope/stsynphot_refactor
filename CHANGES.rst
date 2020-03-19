@@ -2,6 +2,8 @@
 ==================
 
 - Fix compatibility with Windows in regards to path handling. [#107]
+- Fix a bug in ``stio.get_latest_file`` to recognize file in current directory.
+  [#108]
 
 0.2.2 (2020-01-29)
 ==================

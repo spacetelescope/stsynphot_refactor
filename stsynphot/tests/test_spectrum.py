@@ -36,7 +36,7 @@ TH_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmt.fits'))
 
 
 @pytest.mark.remote_data
-class TestInterpolateSpectrum(object):
+class TestInterpolateSpectrum:
     """Test spectrum interpolation."""
     def setup_class(self):
         self.fname_acs = irafconvert(
@@ -141,7 +141,7 @@ class TestInterpolateSpectrum(object):
 
 
 @pytest.mark.remote_data
-class TestObservationSpectralElement(object):
+class TestObservationSpectralElement:
     """Test ``ObservationSpectralElement`` and ``band()``."""
     def setup_class(self):
         self.outdir = tempfile.mkdtemp()
@@ -285,7 +285,7 @@ class TestObservationSpectralElement(object):
 
 
 @pytest.mark.remote_data
-class TestEbmvx(object):
+class TestEbmvx:
     """Test extinction curve and related cache."""
     def setup_class(self):
         self.ec_mwavg = spectrum.ebmvx('mwavg', 0.3)

@@ -47,7 +47,7 @@ def _dump(tokens, states):  # pragma: no cover
     log.info(out_str)
 
 
-class GenericScanner(object):
+class GenericScanner:
     def __init__(self):
         pattern = self.reflect()
         self.re = re.compile(pattern, re.VERBOSE)
@@ -92,7 +92,7 @@ class GenericScanner(object):
         pass
 
 
-class GenericParser(object):
+class GenericParser:
     def __init__(self, start):
         self.rules = {}
         self.rule2func = {}
@@ -450,7 +450,7 @@ class GenericASTBuilder(GenericParser):
 #  of a subtree, call the prune() method -- this only makes sense for a
 #  preorder traversal.  Node type is determined via the typestring() method.
 #
-class GenericASTTraversal(object):
+class GenericASTTraversal:
     def __init__(self, ast):
         self.ast = ast
 

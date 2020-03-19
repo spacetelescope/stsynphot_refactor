@@ -64,7 +64,7 @@ def _convertstr(value):
     return sp
 
 
-class Token(object):
+class Token:
     # Class to handle token.
     def __init__(self, token_type=None, attr=None):
         self.type = token_type
@@ -86,7 +86,7 @@ class Token(object):
             return self.type
 
 
-class AST(object):
+class AST:
     # Class to handle Abstract Syntax Tree (AST).
     def __init__(self, ast_type):
         self.type = ast_type

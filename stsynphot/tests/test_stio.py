@@ -28,7 +28,7 @@ from .. import stio
 from ..config import conf
 
 
-class TestIRAFConvert(object):
+class TestIRAFConvert:
     """Test IRAF filename conversions."""
     def setup_class(self):
         self.is_win = sys.platform.startswith('win')
@@ -74,7 +74,7 @@ class TestIRAFConvert(object):
         del os.environ['MYTESTPATH']
 
 
-class TestGetLatestFile(object):
+class TestGetLatestFile:
     """Test getting latest file."""
     def setup_class(self):
         self.datadir = _find_pkg_data_path('data')
@@ -98,6 +98,16 @@ class TestGetLatestFile(object):
         ans = os.path.join(self.datadir, 'tables_tmg.fits')
         filename = stio.get_latest_file(template, raise_error=True)
         assert filename == ans
+
+    def test_local_curdir(self):
+        curdir = os.getcwd()
+        try:
+            os.chdir(self.datadir)
+            ans = 'tables_tmg.fits'
+            assert (stio.get_latest_file(ans, raise_error=True) ==
+                    os.path.join('.', ans))
+        finally:
+            os.chdir(curdir)
 
     def test_bogus(self):
         """Bogus data path."""

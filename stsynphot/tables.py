@@ -18,7 +18,7 @@ from .stio import get_latest_file, irafconvert
 __all__ = ['GraphTable', 'CompTable']
 
 
-class GraphTable(object):
+class GraphTable:
     """Class to handle graph table.
 
     Table is parsed with :func:`~stsynphot.stio.read_graphtable`.
@@ -222,7 +222,7 @@ class GraphTable(object):
         return components, thcomponents
 
 
-class CompTable(object):
+class CompTable:
     """Class to handle component table (optical or thermal).
 
     Table is parsed with :func:`~stsynphot.stio.read_comptable`.

@@ -26,7 +26,7 @@ TH_FILE = get_pkg_data_filename('data/tables_tmt.fits')
 
 
 @pytest.mark.remote_data
-class TestComponent(object):
+class TestComponent:
     """Test optical component."""
     def setup_class(self):
         self.path = irafconvert('cracscomp$')
@@ -60,7 +60,7 @@ class TestComponent(object):
 
 
 @pytest.mark.remote_data
-class TestThermalComponent(object):
+class TestThermalComponent:
     """Test thermal component."""
     def setup_class(self):
         self.cp_name = irafconvert('crwfc3comp$wfc3_ir_win_001_syn.fits')
@@ -95,7 +95,7 @@ class TestThermalComponent(object):
         assert c.emissivity is None
 
 
-class TestProcessGraphTable(object):
+class TestProcessGraphTable:
     """Test graph table processing logic."""
     @pytest.mark.remote_data
     def test_default(self):
@@ -116,7 +116,7 @@ class TestProcessGraphTable(object):
 
 
 @pytest.mark.remote_data
-class TestObservationMode(object):
+class TestObservationMode:
     """Test observation mode."""
     def setup_class(self):
         observationmode.reset_cache()
@@ -201,7 +201,7 @@ class TestObservationMode(object):
 
 
 @pytest.mark.remote_data
-class TestThermalObservationMode(object):
+class TestThermalObservationMode:
     """Test thermal observation mode.
 
     .. note:: to_spectrum() method is tested in TestObservationMode.
