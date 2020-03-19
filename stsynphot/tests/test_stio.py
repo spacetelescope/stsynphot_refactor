@@ -99,6 +99,15 @@ class TestGetLatestFile:
         filename = stio.get_latest_file(template, raise_error=True)
         assert filename == ans
 
+    def test_local_curdir(self):
+        curdir = os.getcwd()
+        try:
+            os.chdir(self.datadir)
+            ans = 'tables_tmg.fits'
+            assert stio.get_latest_file(ans, raise_error=True) == './' + ans
+        finally:
+            os.chdir(curdir)
+
     def test_bogus(self):
         """Bogus data path."""
         with pytest.warns(AstropyUserWarning, match=r'No files found'):

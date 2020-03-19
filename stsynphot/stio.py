@@ -198,6 +198,9 @@ def get_latest_file(template, raise_error=False, err_msg=''):
     path, pattern = os.path.split(irafconvert(template))
     path_lc = path.lower()
 
+    if not path:
+        path = os.curdir
+
     # Remote HTTP directory
     if path_lc.startswith('http:'):
         from urllib import request
