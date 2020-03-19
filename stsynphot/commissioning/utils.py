@@ -155,8 +155,9 @@ class CommCase:
 
         n = np.count_nonzero(
             abs(actual - desired) > atol + rtol * abs(desired))
-        msg = 'obsmode: {0}\nspectrum: {1}\n(mismatch {2}/{3})'.format(
-            self.obsmode, self.spectrum, n, ntot)
+        msg = (f'obsmode: {self.obsmode}\n'
+               f'spectrum: {self.spectrum}\n'
+               f'(mismatch {n}/{ntot})')
         assert_allclose(actual, desired, rtol=rtol, atol=atol, err_msg=msg)
 
     # TODO: Confirm whether non-default atol is acceptable.
@@ -274,7 +275,7 @@ class CommCase:
             except AssertionError as e:
                 if 'unit(' in self.spectrum:
                     pytest.xfail('Flat does not use default waveset anymore:\n'
-                                 '{0}'.format(str(e)))
+                                 f'{repr(e)}')
                 else:
                     raise
 

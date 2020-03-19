@@ -152,5 +152,5 @@ def showref():  # pragma: no cover
     """Show the values of select configurable items."""
     info_str = '\n'
     for x in _get_ref_cfgitems():
-        info_str += '{0:10s}: {1}\n'.format(*x)
+        info_str += f'{x[0]:10s}: {x[1]}\n'
     log.info(info_str)

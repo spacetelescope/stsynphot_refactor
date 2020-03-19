@@ -271,7 +271,7 @@ class Interpreter(GenericASTMatcher):
     def p_value_paren(self, tree):
         """ V ::= value ( LPAREN V RPAREN ) """
         tree.value = _convertstr(tree[1].value)
-        tree.svalue = "(%s)" % str(tree[1].value)
+        tree.svalue = f'({str(tree[1].value):s})'
 
     def p_arglist(self, tree):
         """ V ::= arglist ( V , V ) """
@@ -280,7 +280,7 @@ class Interpreter(GenericASTMatcher):
         else:
             tree.value = [tree[0].value, tree[2].value]
         try:
-            tree.svalue = '{0:s},{1:s}'.format(tree[0].svalue, tree[2].svalue)
+            tree.svalue = f'{tree[0].svalue:s},{tree[2].svalue:s}'
         except AttributeError:
             pass  # We only care about this for relatively simple constructs.
 
@@ -292,7 +292,7 @@ class Interpreter(GenericASTMatcher):
                 names.append(arg.meta['expr'])
             else:
                 names.append(str(arg))
-        return '(' + ','.join(names) + ')'
+        return f"({','.join(names)})"
 
     def p_functioncall(self, tree):
         # Where all the real interpreter action is.
@@ -305,18 +305,17 @@ class Interpreter(GenericASTMatcher):
             args = tree[2].value
 
         fname = tree[0].value
-        metadata = {'expr': '{0}{1}'.format(
-            fname, self._get_names_from_tree_values(args))}
+        metadata = {'expr': f'{fname}{self._get_names_from_tree_values(args)}'}
 
         if fname not in _SYFUNCTIONS:
-            log.error('Unknown function: {0}'.format(fname))
+            log.error(f'Unknown function: {fname}')
             self.error(fname)
 
         else:
             # Constant spectrum
             if fname == 'unit':
                 if args[1] not in _SYFORMS:
-                    log.error('Unrecognized unit: {0}'.format(args[1]))
+                    log.error(f'Unrecognized unit: {args[1]}')
                     self.error(fname)
                 try:
                     fluxunit = units.validate_unit(args[1])
@@ -334,7 +333,7 @@ class Interpreter(GenericASTMatcher):
             # Power law
             elif fname == 'pl':
                 if args[2] not in _SYFORMS:
-                    log.error('Unrecognized unit: {0}'.format(args[2]))
+                    log.error(f'Unrecognized unit: {args[2]}')
                     self.error(fname)
                 try:
                     fluxunit = units.validate_unit(args[2])
@@ -364,7 +363,7 @@ class Interpreter(GenericASTMatcher):
             # Gaussian emission line
             elif fname == 'em':
                 if args[3] not in _SYFORMS:
-                    log.error('Unrecognized unit: {0}'.format(args[3]))
+                    log.error(f'Unrecognized unit: {args[3]}')
                     self.error(fname)
                 x0 = args[0] * u.AA
                 fluxunit = units.validate_unit(args[3])
@@ -435,8 +434,8 @@ class Interpreter(GenericASTMatcher):
 
             # Default
             else:
-                tree.value = ('would call {0} with the following args: '
-                              '{1}'.format(fname, repr(args)))
+                tree.value = (f'would call {fname} with the following args: '
+                              f'{repr(args)}')
 
 
 def tokens_info(tlist):  # pragma: no cover
@@ -449,7 +448,7 @@ def tokens_info(tlist):  # pragma: no cover
 
     """
     for token in tlist:
-        log.info('{0} {1}'.format(token.type, token.attr))
+        log.info(f'{token.type} {token.attr}')
 
 
 def scan(input_str):

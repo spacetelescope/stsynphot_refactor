@@ -245,7 +245,7 @@ class BaseObservationMode:
                 if '#' in m:
                     key, val = m.split('#')
                     self.pardict[key] = float(val)
-                    self.modes.append('{0:s}#'.format(key))
+                    self.modes.append(f'{key:s}#')
                 else:
                     self.modes.append(m)
         else:
@@ -343,7 +343,7 @@ class BaseObservationMode:
         info_str = '#Throughput table names:\n'
         for name in self._throughput_filenames:
             if name != conf.clear_filter:
-                info_str += '{0}\n'.format(name)
+                info_str += f'{name}\n'
         log.info(info_str.rstrip())
 
 
@@ -413,8 +413,7 @@ class ObservationMode(BaseObservationMode):
         except IndexError as e:  # pragma: no cover
             thru = None
             warnings.warn(
-                'Graph table is broken: {0}'.format(str(e)),
-                AstropyUserWarning)
+                f'Graph table is broken: {repr(e)}', AstropyUserWarning)
         return thru
 
     @lazyproperty
@@ -429,7 +428,7 @@ class ObservationMode(BaseObservationMode):
         x = self.throughput.waveset
         y = self.throughput(x)
         thru = y.value * x.value * self._constant.value
-        meta = {'expr': 'Sensitivity for {0}'.format(self._obsmode)}
+        meta = {'expr': f'Sensitivity for {self._obsmode}'}
         return SpectralElement(
             Empirical1D, points=x, lookup_table=thru, meta=meta)
 
@@ -461,8 +460,7 @@ class ObservationMode(BaseObservationMode):
         try:
             sp = thom.to_spectrum()
         except IndexError as e:  # pragma: no cover
-            raise synexceptions.SynphotError(
-                'Broken graph table: {0}'.format(str(e)))
+            raise synexceptions.SynphotError(f'Broken graph table: {repr(e)}')
 
         return sp
 
@@ -504,7 +502,7 @@ class ThermalObservationMode(BaseObservationMode):
         # "0.0" was added in tae17277m_tmt.fits (Apr 2017).
         if set(self.thcompnames).issubset(set([conf.clear_filter, '', '0.0'])):
             raise NotImplementedError(
-                'No thermal support provided for {0}'.format(self._obsmode))
+                f'No thermal support provided for {self._obsmode}')
 
         # Use default thermal component table if not given
         if thermtable is None:
@@ -539,7 +537,7 @@ class ThermalObservationMode(BaseObservationMode):
         return components
 
     def __str__(self):
-        return '{0} (thermal)'.format(self._obsmode)
+        return f'{self._obsmode} (thermal)'
 
     def _merge_em_wave(self):
         """Merge emissivity wavelength sets in Angstrom."""
@@ -630,6 +628,6 @@ class ThermalObservationMode(BaseObservationMode):
                 y = sp(x)
                 sp = SourceSpectrum(Empirical1D, points=x, lookup_table=y)
 
-        meta = {'expr': '{0} ThermalSpectrum'.format(self._obsmode)}
+        meta = {'expr': f'{self._obsmode} ThermalSpectrum'}
         sp.meta.update(meta)
         return sp

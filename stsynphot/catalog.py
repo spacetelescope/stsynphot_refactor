@@ -48,12 +48,12 @@ def _break_list(in_list, index, parameter):
 
     if upper_array.size == 0:
         raise exceptions.ParameterOutOfBounds(
-            "Parameter '{0}' exceeds data. Max allowed={1}, "
-            "entered={2}.".format(_PARAM_NAMES[index], array.max(), parameter))
+            f"Parameter '{_PARAM_NAMES[index]}' exceeds data. "
+            f"Max allowed={array.max()}, entered={parameter}.")
     if lower_array.size == 0:
         raise exceptions.ParameterOutOfBounds(
-            "Parameter '{0}' exceeds data. Min allowed={1}, "
-            "entered={2}.".format(_PARAM_NAMES[index], array.min(), parameter))
+            f"Parameter '{_PARAM_NAMES[index]}' exceeds data. "
+            f"Min allowed={array.min()}, entered={parameter}.")
 
     upper = upper_array.min()
     lower = lower_array.max()
@@ -84,7 +84,7 @@ def _get_spectrum(parlist, catdir):
         validate_totalflux(totflux)
     except synexceptions.SynphotError:
         raise exceptions.ParameterOutOfBounds(
-            "Parameter '{0}' has no valid data.".format(parlist))
+            f"Parameter '{parlist}' has no valid data.")
 
     result = [member for member in parlist]
     result.pop()
@@ -164,7 +164,7 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
         catdir = 'crgridphoenix$'
     else:
         raise synexceptions.SynphotError(
-            '{0} is not a supported catalog grid.'.format(gridname))
+            f'{gridname} is not a supported catalog grid.')
 
     metallicity = _par_from_parser(metallicity)
     if isinstance(metallicity, u.Quantity):
@@ -183,7 +183,7 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     # If not cached, read from grid catalog and cache it
     if filename not in _CACHE:
         data = stio.read_catalog(filename)  # Ext 1
-        _CACHE[filename] = [[float(x) for x in index.split(',')] +
+        _CACHE[filename] = [list(map(float, index.split(','))) +
                             [data['FILENAME'][i]]
                             for i, index in enumerate(data['INDEX'])]
 
@@ -219,7 +219,7 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     spa7 = _interpolate_spectrum(spa5, spa6, t_eff)
 
     sp = spa7[0]
-    sp.meta['expr'] = '{0}(T_eff={1:g},metallicity={2:g},log_g={3:g})'.format(
-        gridname, t_eff, metallicity, log_g)
+    sp.meta['expr'] = (f'{gridname}(T_eff={t_eff:g},'
+                       f'metallicity={metallicity:g},log_g={log_g:g})')
 
     return sp

@@ -54,7 +54,7 @@ rst_epilog += """
 # This does not *have* to match the package name, but typically does
 project = setup_cfg['name']
 author = setup_cfg['author']
-copyright = '{0}, {1}'.format(datetime.datetime.now().year, author)
+copyright = f'{datetime.datetime.now().year}, {author}'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -100,7 +100,7 @@ html_favicon = ''
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = '{0} v{1}'.format(project, release)
+html_title = f'{project} v{release}'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = project + 'doc'
