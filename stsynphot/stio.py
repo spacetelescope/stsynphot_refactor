@@ -9,7 +9,9 @@
 import fnmatch
 import re
 import os
+import sys
 import warnings
+from pathlib import Path
 
 # THIRD-PARTY
 import numpy as np
@@ -24,12 +26,47 @@ from astropy.utils.exceptions import AstropyUserWarning
 from synphot import exceptions as synexceptions
 from synphot import units
 
-__all__ = ['irafconvert', 'get_latest_file', 'read_graphtable',
-           'read_comptable', 'read_catalog', 'read_wavecat', 'read_waveset',
-           'read_detector_pars', 'read_interp_spec']
+__all__ = ['resolve_filename', 'irafconvert', 'get_latest_file',
+           'read_graphtable', 'read_comptable', 'read_catalog', 'read_wavecat',
+           'read_waveset', 'read_detector_pars', 'read_interp_spec']
 
 _irafconvpat = re.compile(r'\$(\w*)')
 _irafconvdata = None
+
+
+def resolve_filename(path, *args):
+    """Resolve filename that could be URL or local file.
+
+    Parameters
+    ----------
+    path : str
+        Root directory or URL.
+
+    args : tuple of str
+        Any sub-path(s) and the actual filename.
+
+    Returns
+    -------
+    reg_filename : str
+        Resolved filename.
+
+    """
+    path_lc = path.lower()
+    if path_lc.startswith(('ftp', 'http')):
+        sep = '/'
+        fname = sep.join(args)
+        if path_lc.endswith(sep):
+            reg_filename = path + fname
+        else:
+            reg_filename = path + sep + fname
+
+        # Catch-all to ensure result is OS-independent.
+        if sys.platform.startswith('win'):
+            reg_filename = reg_filename.replace('\\', sep)
+    else:
+        reg_filename = str(Path(path) / os.sep.join(args))
+
+    return reg_filename
 
 
 def _iraf_decode(irafdir):
@@ -125,7 +162,7 @@ def irafconvert(iraf_filename, sep='$'):
         irafdir, fname = iraf_filename.split(sep)
         path = _iraf_decode(irafdir)
 
-    return os.path.join(path, fname)
+    return resolve_filename(path, fname)
 
 
 # TODO: Use CRDS instead.
@@ -170,6 +207,7 @@ def get_latest_file(template, raise_error=False, err_msg=''):
             soup = BeautifulSoup(fin, 'html.parser')
 
         allfiles = [x.text for x in soup.find_all("a")]
+        sep = '/'
 
     # Remote FTP directory
     elif path_lc.startswith('ftp:'):
@@ -177,10 +215,12 @@ def get_latest_file(template, raise_error=False, err_msg=''):
 
         response = request.urlopen(path).read().decode('utf-8').splitlines()  # nosec  # noqa
         allfiles = list(set([x.split()[-1] for x in response]))  # Rid symlink
+        sep = '/'
 
     # Local directory
     elif os.path.isdir(path):
         allfiles = os.listdir(path)
+        sep = os.sep
 
     # Bogus directory
     else:
@@ -190,7 +230,7 @@ def get_latest_file(template, raise_error=False, err_msg=''):
 
     # Last file in sorted listing
     if matched_files:
-        filename = os.path.join(path, matched_files[-1])
+        filename = path + sep + matched_files[-1]
 
     # No files found
     else:

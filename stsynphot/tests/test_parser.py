@@ -29,6 +29,7 @@ from synphot.spectrum import SourceSpectrum, SpectralElement
 # LOCAL
 from .. import catalog, exceptions, observationmode, spectrum, spparser
 from ..config import conf
+from ..stio import resolve_filename
 
 
 def _single_functioncall(sp, ans_cls, ans_model, ans_name, ans_z=0):
@@ -144,7 +145,7 @@ def test_remote_spec_vegafile():
     _single_functioncall(sp1, SourceSpectrum, Empirical1D,
                          'spec(crcalspec$alpha_lyr_stis_007.fits)')
 
-    sp2 = SourceSpectrum.from_file(os.path.join(
+    sp2 = SourceSpectrum.from_file(resolve_filename(
         os.environ['PYSYN_CDBS'], 'calspec', 'alpha_lyr_stis_007.fits'))
     _compare_spectra(sp1, sp2)
 
@@ -188,7 +189,7 @@ def test_remote_rn_calspec_box():
         sp1, SourceSpectrum, None,
         'rn(crcalspec$gd71_mod_005.fits,box(5000.0,10.0),17.0,vegamag)')
 
-    gd71 = SourceSpectrum.from_file(os.path.join(
+    gd71 = SourceSpectrum.from_file(resolve_filename(
         os.environ['PYSYN_CDBS'], 'calspec', 'gd71_mod_005.fits'))
     box = SpectralElement(Box1D, amplitude=1, x_0=5000 * u.AA, width=10 * u.AA)
     sp2 = gd71.normalize(17 * units.VEGAMAG, band=box, vegaspec=spectrum.Vega)
@@ -206,7 +207,7 @@ def test_remote_rn_icat_k93():
         'cracscomp$acs_f814w_hrc_006_syn.fits,17.0,obmag)')
 
     k93 = catalog.grid_to_spec('k93models', 5000, 0.5, 0)
-    bp = SpectralElement.from_file(os.path.join(
+    bp = SpectralElement.from_file(resolve_filename(
         os.environ['PYSYN_CDBS'], 'comp', 'acs', 'acs_f814w_hrc_006_syn.fits'))
     sp2 = k93.normalize(17 * units.OBMAG, band=bp, area=conf.area)
     _compare_spectra(sp1, sp2)
@@ -247,7 +248,7 @@ def test_remote_rn_calspec_u():
     # NOTE: No expr for this combo.
     _single_functioncall(sp1, SourceSpectrum, None, '')
 
-    bd75 = SourceSpectrum.from_file(os.path.join(
+    bd75 = SourceSpectrum.from_file(resolve_filename(
         os.environ['PYSYN_CDBS'], 'calspec', 'bd_75d325_stis_002.fits'))
     bp_u = SpectralElement.from_filter('johnson_u')
     bd75_norm = bd75.normalize(
@@ -263,7 +264,7 @@ def test_remote_z_vega():
     _single_functioncall(sp1, SourceSpectrum, None,
                          'z(crcalspec$alpha_lyr_stis_007.fits,0.1)', ans_z=0.1)
 
-    sp2 = SourceSpectrum.from_file(os.path.join(
+    sp2 = SourceSpectrum.from_file(resolve_filename(
         os.environ['PYSYN_CDBS'], 'calspec', 'alpha_lyr_stis_007.fits'))
     sp2.z = 0.1
     _compare_spectra(sp1, sp2)
@@ -273,7 +274,7 @@ def test_remote_z_vega():
 class TestRenormPartialOverlap(object):
     """Test handling of ``rn(...)`` syntax for partial overlap."""
     def setup_class(self):
-        self.fname = os.path.join(
+        self.fname = resolve_filename(
             conf.rootdir, 'etc', 'source', 'qso_fos_001.dat')
 
     def test_partial(self):

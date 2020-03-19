@@ -9,6 +9,7 @@
 
 # STDLIB
 import os
+import sys
 import warnings
 
 # THIRD-PARTY
@@ -30,18 +31,34 @@ from ..config import conf
 class TestIRAFConvert(object):
     """Test IRAF filename conversions."""
     def setup_class(self):
-        os.environ['MYTESTPATH'] = '/path1/path2/'
+        self.is_win = sys.platform.startswith('win')
+        if self.is_win:
+            os.environ['MYTESTPATH'] = 'D:\\path1\\path2\\'
+        else:
+            os.environ['MYTESTPATH'] = '/path1/path2/'
+
+    @pytest.mark.parametrize('in_str', ('mypath/image.fits',
+                                        'C:\\mypath\\image.fits'))
+    def test_irafconvert_noop(self, in_str):
+        assert stio.irafconvert(in_str) == in_str
+
+    def test_irafconvert_mytestpath(self):
+        if self.is_win:
+            in_str = '$MYTESTPATH\\\\image.fits'
+            ans = 'D:\\path1\\path2\\image.fits'
+        else:
+            in_str = '$MYTESTPATH//image.fits'
+            ans = '/path1/path2/image.fits'
+
+        assert stio.irafconvert(in_str) == ans
 
     @pytest.mark.parametrize(
-        ('in_str', 'ans'),
-        [('mypath/image.fits', 'mypath/image.fits'),
-         ('$MYTESTPATH//image.fits', '/path1/path2/image.fits'),
-         ('CRREFER$image.fits', os.path.join(conf.rootdir, 'image.fits')),
-         ('mtab$image.fits', os.path.join(conf.rootdir, 'mtab', 'image.fits'))
-         ])
-    def test_irafconvert(self, in_str, ans):
-        out_str = stio.irafconvert(in_str)
-        assert out_str == ans
+        ('in_str', 'args'),
+        [('CRREFER$image.fits', ('image.fits', )),
+         ('mtab$image.fits', ('mtab', 'image.fits'))])
+    def test_irafconvert(self, in_str, args):
+        ans = stio.resolve_filename(conf.rootdir, *args)
+        assert stio.irafconvert(in_str) == ans
 
     def test_irafconvert_data(self):
         out_str = stio.irafconvert('synphot$detectors.dat')

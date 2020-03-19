@@ -102,10 +102,10 @@ stages:
   - template: azure-templates.yml
     parameters:
       name: 'Older_Versions'
-      numpyCmd: 'pip install numpy==1.15.4'
-      astropyCmd: 'pip install astropy==2.0.12'
+      numpyCmd: 'pip install numpy==1.16.6'
+      astropyCmd: 'pip install astropy==3.2.3'
       scipyCmd: 'pip install scipy==1.1.0'
-      synphotCmd: 'pip install synphot==0.1.3'
+      synphotCmd: 'pip install synphot==0.2.1'
       pythonVersion: '3.6'
 
   - template: azure-templates.yml
@@ -113,6 +113,7 @@ stages:
       name: 'Dev_Astropy_Synphot'
       astropyCmd: 'pip install git+https://github.com/astropy/astropy.git@master#egg=astropy'
       synphotCmd: 'pip install git+https://github.com/spacetelescope/synphot_refactor.git@master#egg=synphot'
+      pythonVersion: '3.8'
 
   - template: azure-templates.yml
     parameters:

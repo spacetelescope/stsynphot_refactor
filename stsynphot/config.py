@@ -93,7 +93,7 @@ def overwrite_synphot_config(root):
     subdir_keys = ['calspec', 'extinction', 'nonhst']
 
     # Need this for Windows support
-    if root.startswith('http') or root.startswith('ftp'):
+    if root.startswith(('http', 'ftp')):
         sep = '/'
     else:
         sep = os.sep  # Can be / or \

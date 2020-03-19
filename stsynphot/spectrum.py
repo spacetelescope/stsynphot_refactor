@@ -143,8 +143,12 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
     col_prefix = xre.group('col').upper()
 
     # Read data table
-    data, wave_unit, doshift, extrapolate = stio.read_interp_spec(
-        filename, tab_ext=ext)
+    try:
+        data, wave_unit, doshift, extrapolate = stio.read_interp_spec(
+            filename, tab_ext=ext)
+    except Exception as e:  # pragma: no cover
+        raise IOError('Failed to read {0}[{1}]: {2}'.format(
+            filename, ext, str(e)))
     wave_unit = units.validate_unit(wave_unit)
     wave0 = data['WAVELENGTH']
 
