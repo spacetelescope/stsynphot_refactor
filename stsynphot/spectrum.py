@@ -137,8 +137,8 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
     xre = _interpfilepatt.search(parfilename)
     if xre is None:
         raise synexceptions.SynphotError(
-            '{0} must be in the format of "path/filename.fits'
-            '[col#]"'.format(parfilename))
+            f'{parfilename} must be in the format of "path/filename.fits'
+            '[col#]"')
     filename = parfilename[0:xre.start()]
     col_prefix = xre.group('col').upper()
 
@@ -147,8 +147,7 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
         data, wave_unit, doshift, extrapolate = stio.read_interp_spec(
             filename, tab_ext=ext)
     except Exception as e:  # pragma: no cover
-        raise IOError('Failed to read {0}[{1}]: {2}'.format(
-            filename, ext, str(e)))
+        raise IOError(f'Failed to read {filename}[{ext}]: {repr(e)}')
     wave_unit = units.validate_unit(wave_unit)
     wave0 = data['WAVELENGTH']
 
@@ -165,8 +164,7 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
 
     if len(col_names) < 1:
         raise synexceptions.SynphotError(
-            '{0} contains no interpolated columns for {1}.'.format(
-                filename, col_prefix))
+            f'{filename} contains no interpolated columns for {col_prefix}.')
 
     # Assumes ascending order of parameter values in table.
     min_par = col_pars[0]
@@ -203,16 +201,16 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
         if def_colname in data.names:
             warnings.warn(
                 'Extrapolation not allowed, using default throughput for '
-                '{0}.'.format(parfilename), AstropyUserWarning)
+                f'{parfilename}.', AstropyUserWarning)
             warndict['DefaultThroughput'] = True
             thru = data[def_colname]
 
         # Nothing can be done.
         else:
             raise synexceptions.ExtrapolationNotAllowed(
-                'No default throughput for {0}.'.format(parfilename))
+                f'No default throughput for {parfilename}.')
 
-    meta = {'expr': '{0}#{1:g}'.format(filename, interpval),
+    meta = {'expr': f'{filename}#{interpval:g}',
             'warnings': warndict}
     return SpectralElement(
         Empirical1D, points=wave0 * wave_unit, lookup_table=thru, meta=meta)
@@ -303,8 +301,8 @@ class ObservationSpectralElement(SpectralElement):
 
         if not bounded and verbose:
             warnings.warn(
-                'Unbounded throughput; {0} when expecting '
-                'zeroes.'.format(y, AstropyUserWarning))
+                f'Unbounded throughput; {y} when expecting zeroes.',
+                AstropyUserWarning)
 
         return bounded
 
@@ -357,7 +355,7 @@ class ObservationSpectralElement(SpectralElement):
         """
         if self.obsmode.pixscale is None:
             raise PixscaleNotFoundError(
-                'Undefined pixel scale for {0}.'.format(self.obsmode))
+                f'Undefined pixel scale for {self.obsmode}.')
 
         if area is None:
             area = self.area
@@ -531,8 +529,7 @@ class ObservationSpectralElement(SpectralElement):
             component_dict=component_dict)
 
         if not isinstance(ob.throughput, SpectralElement):  # pragma: no cover
-            raise synexceptions.SynphotError(
-                '{0} has no throughput.'.format(obsmode))
+            raise synexceptions.SynphotError(f'{obsmode} has no throughput.')
 
         return cls(ob.throughput, obsmode=ob)
 
@@ -575,7 +572,7 @@ def ebmvx(redlaw_name, ebv):
 
     if redlaw_name in ('gal3', None):
         m = 'mwavg'
-        log.info('{0} uses {1} reddening law.'.format(redlaw_name, m))
+        log.info(f'{redlaw_name} uses {m} reddening law.')
     else:
         m = redlaw_name
 
@@ -616,9 +613,9 @@ def load_vega(vegafile=None, **kwargs):
         except Exception as e:
             Vega = None
             warnings.warn(
-                'Failed to load Vega spectrum from {0}; Functionality '
-                'involving Vega will be cripped: {1}'.format(
-                    vegafile, str(e)), AstropyUserWarning)
+                f'Failed to load Vega spectrum from {vegafile}; Functionality '
+                f'involving Vega will be cripped: {repr(e)}',
+                AstropyUserWarning)
 
 
 # Load default Vega

@@ -184,11 +184,9 @@ The blackbody spectrum is normalized to be 18.6 VEGAMAG in *V*-band::
     >>> rnbb = SourceSpectrum(BlackBodyNorm1D, temperature=5000).normalize(
     ...     18.6 * units.VEGAMAG, band=stsyn.band('v'), vegaspec=stsyn.Vega)  # doctest: +SKIP
     >>> obs = Observation(rnbb, stsyn.band('wfpc,f555w'))  # doctest: +SKIP
-    >>> print('Pivot Wavelength: {:.3f}\n'
-    ...       'Equiv Gaussian FWHM: {:.3f}\n'
-    ...       'Countrate: {:.4f}'.format(
-    ...           obs.bandpass.pivot(), obs.bandpass.fwhm(),
-    ...           obs.countrate(stsyn.conf.area)))  # doctest: +SKIP
+    >>> print(f'Pivot Wavelength: {obs.bandpass.pivot():.3f}\n'
+    ...       f'Equiv Gaussian FWHM: {obs.bandpass.fwhm():.3f}\n'
+    ...       f'Countrate: {obs.countrate(stsyn.conf.area):.4f}')  # doctest: +SKIP
     Pivot Wavelength: 5467.651 Angstrom
     Equiv Gaussian FWHM: 1200.923 Angstrom
     Countrate: 416.4439 ct / s
@@ -216,8 +214,7 @@ WFC1 F555W bandpass for :math:`E(B-V)` values of 0.0, 0.25, and 0.5::
     ...     if ebv == 0:
     ...         print('VZERO\tOBMAG')  # Header
     ...     obs = Observation(sp * stsyn.ebmvx(law, ebv), bp)
-    ...     print('{}\t{:.4f}'.format(
-    ...         ebv, obs.effstim(units.OBMAG, area=stsyn.conf.area)))
+    ...     print(f'{ebv}\t{obs.effstim(units.OBMAG, area=stsyn.conf.area):.4f}')
     VZERO   OBMAG
     0.0	    -10.0118 OBMAG
     0.25    -9.2167 OBMAG

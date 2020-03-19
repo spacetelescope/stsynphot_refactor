@@ -7,9 +7,6 @@ import numpy as np
 # ASTROPY
 from astropy import log
 
-# SYNPHOT
-from synphot import exceptions as synexceptions
-
 # LOCAL
 from . import exceptions, stio
 from .config import conf
@@ -154,15 +151,14 @@ class GraphTable:
 
         while outnode >= 0:
             if outnode < 0:  # pragma: no cover
-                log.debug('outnode={0} (stop condition).'.format(outnode))
+                log.debug(f'outnode={outnode} (stop condition).')
 
             previous_outnode = outnode
             nodes = np.where(self.innodes == innode)
 
             # If there are no entries with this innode, we're done
             if len(nodes[0]) == 0:
-                log.debug(
-                    'innode={0} not found (stop condition).'.format(innode))
+                log.debug(f'innode={innode} not found (stop condition).')
                 break
 
             # Find the entry corresponding to the component named
@@ -188,36 +184,36 @@ class GraphTable:
                     n_match = len(index[0])
                     if n_match > 1:
                         raise exceptions.AmbiguousObsmode(
-                            '{0} matches found for {1}'.format(n_match, mode))
+                            f'{n_match} matches found for {mode}')
                     idx = index[0][0]
                     component = self.compnames[nodes[0][idx]]
                     thcomponent = self.thcompnames[nodes[0][idx]]
                     outnode = self.outnodes[nodes[0][idx]]
                     used_default = False
 
-            log.debug('innode={0} outnode={1} compname={2}'.format(
-                innode, outnode, component))
+            log.debug(f'innode={innode} outnode={outnode} '
+                      f'compname={component}')
             components.append(component)
             thcomponents.append(thcomponent)
             innode = outnode
 
             if outnode == previous_outnode:
-                log.debug('innode={0} outnode={1} used_default={2}'.format(
-                    innode, outnode, used_default))
+                log.debug(f'innode={innode} outnode={outnode} '
+                          f'used_default={used_default}')
                 count += 1
                 if count > 3:
-                    log.debug('Same outnode={0} over 3 times (stop '
-                              'condition)'.format(outnode))
+                    log.debug(f'Same outnode={outnode} over 3 times (stop '
+                              'condition)')
                     break
 
         if outnode < 0:
-            log.debug('outnode={0} (stop condition)'.format(outnode))
+            log.debug(f'outnode={outnode} (stop condition)')
             raise exceptions.IncompleteObsmode(
-                '{0}, choose from {1}'.format(modes, self.keywords[nodes]))
+                f'{modes}, choose from {self.keywords[nodes]}')
 
         if inmodes != used_modes:
             raise exceptions.UnusedKeyword(
-                '{0}'.format(str(inmodes.difference(used_modes))))
+                f'{str(inmodes.difference(used_modes))}')
 
         return components, thcomponents
 
@@ -287,7 +283,7 @@ class CompTable:
                 index = np.where(self.compnames == compname)[0]
                 if len(index) < 1:
                     raise exceptions.GraphtabError(
-                        'Cannot find {0} in {1}.'.format(compname, self.name))
+                        f'Cannot find {compname} in {self.name}.')
                 files.append(self.filenames[index[0]].lstrip())
             else:
                 files.append(conf.clear_filter)

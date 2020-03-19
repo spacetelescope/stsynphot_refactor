@@ -87,8 +87,8 @@ def _iraf_decode(irafdir):
 
         mask = _irafconvdata['IRAFNAME'] == irafdir
         if not np.any(mask):
-            raise KeyError('IRAF shortcut {0} not found in '
-                           '{1}.'.format(irafdir, conf.irafshortcutfile))
+            raise KeyError(f'IRAF shortcut {irafdir} not found in '
+                           f'{conf.irafshortcutfile}.')
         relpath = os.path.normpath(_irafconvdata['RELPATH'][mask][0])
         path = os.path.join(conf.rootdir, relpath)
 
@@ -142,7 +142,7 @@ def irafconvert(iraf_filename, sep='$'):
 
     """
     if not isinstance(iraf_filename, str):
-        raise TypeError('{0} is not a string.'.format(iraf_filename))
+        raise TypeError(f'{iraf_filename} is not a string.')
 
     # Nothing needs to be done
     if sep not in iraf_filename:
@@ -209,7 +209,7 @@ def get_latest_file(template, raise_error=False, err_msg=''):
         with request.urlopen(path) as fin:  # nosec
             soup = BeautifulSoup(fin, 'html.parser')
 
-        allfiles = [x.text for x in soup.find_all("a")]
+        allfiles = [x.text for x in soup.find_all('a')]
         sep = '/'
 
     # Remote FTP directory
@@ -238,7 +238,7 @@ def get_latest_file(template, raise_error=False, err_msg=''):
     # No files found
     else:
         if not err_msg:
-            err_msg = 'No files found for {0}'.format(template)
+            err_msg = f'No files found for {template}'
 
         if raise_error:
             raise IOError(err_msg)
@@ -277,15 +277,15 @@ def _read_table(filename, ext, dtypes):
 
     """
     # FITS
-    if filename.endswith('.fits') or filename.endswith('.fit'):
+    if filename.endswith(('.fits', '.fit')):
         with fits.open(filename) as f:
             data = f[ext].data.copy()
 
         err_str = ''
         for key, val in dtypes.items():
             if not np.issubdtype(data[key].dtype, val):
-                err_str += 'Expect {0} to be {1} but get {2}.\n'.format(
-                    key, val, data[key].dtype)
+                err_str += (f'Expect {key} to be {val} but get '
+                            f'{data[key].dtype}.\n')
         if err_str:
             raise synexceptions.SynphotError(err_str)
 
@@ -353,7 +353,7 @@ def read_graphtable(filename, tab_ext=1):
     data = _read_table(filename, tab_ext, graph_dtypes)
 
     # Get primary area
-    if filename.endswith('.fits') or filename.endswith('.fit'):
+    if filename.endswith(('.fits', '.fit')):
         with fits.open(filename) as f:
             primary_area = f[str('PRIMARY')].header.get('PRIMAREA', None)
     else:  # pragma: no cover

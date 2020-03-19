@@ -279,7 +279,7 @@ class TestRenormPartialOverlap:
 
     def test_partial(self):
         """Warning only."""
-        input_str = 'rn({0}, band(johnson, u), 15, abmag)'.format(self.fname)
+        input_str = f'rn({self.fname}, band(johnson, u), 15, abmag)'
         with pytest.warns(AstropyUserWarning,
                           match=r'Spectrum is not defined everywhere'):
             sp = spparser.parse_spec(input_str)
@@ -292,7 +292,7 @@ class TestRenormPartialOverlap:
 
     def test_disjoint(self):
         """Raise error."""
-        input_str = 'rn({0}, band(johnson, v), 15, abmag)'.format(self.fname)
+        input_str = f'rn({self.fname}, band(johnson, v), 15, abmag)'
         with pytest.raises(synexceptions.DisjointError):
             spparser.parse_spec(input_str)
 

@@ -104,8 +104,8 @@ class WaveCatalog:
             if n_match == 1:
                 ans = self.lookup[self.setlookup[candidates[0]]]
             elif n_match == 0:
-                raise KeyError('{0} not found in {1}; candidates: {2}'.format(
-                    setkey, self.file, str(candidates)))
+                raise KeyError(f'{setkey} not found in {self.file}; '
+                               f'candidates: {str(candidates)}')
             elif n_match > 1:
                 setlens = np.array([len(k) for k in candidates])
                 srtlen = setlens.argsort()
@@ -113,7 +113,7 @@ class WaveCatalog:
                 # It's really ambiguous
                 if setlens[k] == setlens[j]:
                     raise exceptions.AmbiguousObsmode(
-                        '{0}; candidates: {1}'.format(setkey, str(candidates)))
+                        f'{setkey}; candidates: {str(candidates)}')
                 # We have a winner
                 else:
                     k = candidates[srtlen[-1]]
@@ -197,5 +197,4 @@ try:
     load_wavecat()
 except Exception as e:
     warnings.warn(
-        'Failed to load {0}: {1}'.format(conf.wavecatfile, str(e)),
-        AstropyUserWarning)
+        f'Failed to load {conf.wavecatfile}: {repr(e)}', AstropyUserWarning)

@@ -31,8 +31,8 @@ Calculate the count rates for both and display the results::
 
     >>> c03 = obs03.countrate(stsyn.conf.area)  # doctest: +SKIP
     >>> c10 = obs10.countrate(stsyn.conf.area)  # doctest: +SKIP
-    >>> print('Count rate for 0.3" is {:.3f}\n'
-    ...       'Count rate for 1.0" is {:.3f}'.format(c03, c10))  # doctest: +SKIP
+    >>> print(f'Count rate for 0.3" is {c03:.3f}\n'
+    ...       f'Count rate for 1.0" is {c10:.3f}')  # doctest: +SKIP
     Count rate for 0.3" is 174.801 ct / s
     Count rate for 1.0" is 186.521 ct / s
 
@@ -55,7 +55,7 @@ the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
     >>> import stsynphot as stsyn
     >>> from astropy.time import Time
     >>> obsdate = Time('2017-05-30').mjd
-    >>> obsmode = 'acs,wfc1,f555w,mjd#{}'.format(obsdate)
+    >>> obsmode = f'acs,wfc1,f555w,mjd#{obsdate}'
     >>> bp = stsyn.band(obsmode)  # doctest: +SKIP
     >>> photflam = bp.unit_response(stsyn.conf.area)  # doctest: +SKIP
     >>> photflam  # doctest: +SKIP
@@ -69,7 +69,7 @@ the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
 ::
 
     >>> st_zpt = -2.5 * np.log10(photflam.value) - 21.1
-    >>> print('STmag zeropoint for {} is {:.5f}'.format(obsmode, st_zpt))
+    >>> print(f'STmag zeropoint for {obsmode} is {st_zpt:.5f}')
     STmag zeropoint for acs,wfc1,f555w,mjd#57903.0 is 25.66671
 
 
@@ -88,7 +88,7 @@ the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
     >>> import stsynphot as stsyn
     >>> from astropy.time import Time
     >>> obsdate = Time('2017-05-30').mjd
-    >>> obsmode = 'acs,wfc1,f555w,mjd#{}'.format(obsdate)
+    >>> obsmode = f'acs,wfc1,f555w,mjd#{obsdate}'
     >>> bp = stsyn.band(obsmode)  # doctest: +SKIP
     >>> photflam = bp.unit_response(stsyn.conf.area)  # doctest: +SKIP
     >>> photplam = bp.pivot()  # doctest: +SKIP
@@ -106,7 +106,7 @@ the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
 
     >>> ab_zpt = (-2.5 * np.log10(photflam.value) - 21.1 -
     ...           5 * np.log10(photplam.value) + 18.6921)
-    >>> print('ABmag zeropoint for {} is {:.5f}'.format(obsmode, ab_zpt))
+    >>> print(f'ABmag zeropoint for {obsmode} is {ab_zpt:.5f}')
     ABmag zeropoint for acs,wfc1,f555w,mjd#57903.0 is 25.71261
 
 
@@ -130,10 +130,10 @@ the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
     >>> from astropy.time import Time
     >>> from synphot import Observation
     >>> obsdate = Time('2017-05-30').mjd
-    >>> bp = stsyn.band('acs,wfc1,f555w,mjd#{}'.format(obsdate))  # doctest: +SKIP
+    >>> bp = stsyn.band(f'acs,wfc1,f555w,mjd#{obsdate}')  # doctest: +SKIP
     >>> obs = Observation(stsyn.Vega, bp, binset=bp.binset)  # doctest: +SKIP
     >>> vega_zpt = -obs.effstim(flux_unit='obmag', area=stsyn.conf.area)  # doctest: +SKIP
-    >>> print('VEGAMAG zeropoint for {} is {:.5f}'.format(bp.obsmode, vega_zpt))  # doctest: +SKIP
+    >>> print(f'VEGAMAG zeropoint for {bp.obsmode} is {vega_zpt:.5f}')  # doctest: +SKIP
     VEGAMAG zeropoint for acs,wfc1,f555w,mjd#57903.0 is 25.71235 OBMAG
 
 
@@ -158,7 +158,7 @@ needs to be normalized to literature value
     ...     bp = stsyn.band(obsmode)  # doctest: +SKIP
     ...     obs = Observation(sun, bp, binset=bp.binset)  # doctest: +SKIP
     ...     m = obs.effstim('vegamag', vegaspec=stsyn.Vega)  # doctest: +SKIP
-    ...     print("Sun's abs mag in {} is {:.4f}".format(bp.obsmode, m))  # doctest: +SKIP
+    ...     print(f"Sun's abs mag in {bp.obsmode} is {m:.4f}")  # doctest: +SKIP
     Sun's abs mag in acs,wfc1,f555w is 4.8395 VEGAMAG
     Sun's abs mag in wfc3,uvis2,f336w is 5.4864 VEGAMAG
     Sun's abs mag in wfc3,ir,f160w is 3.4127 VEGAMAG

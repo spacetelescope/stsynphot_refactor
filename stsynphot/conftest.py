@@ -1,15 +1,17 @@
 import os
 
 try:
-    from pytest_astropy_header.display import PYTEST_HEADER_MODULES, TESTED_VERSIONS
+    from pytest_astropy_header.display import (PYTEST_HEADER_MODULES,
+                                               TESTED_VERSIONS)
 except ImportError:
     PYTEST_HEADER_MODULES = {}
+    TESTED_VERSIONS = {}
 
 try:
     from .version import version
 except ImportError:
     version = 'unknown'
-    
+
 # Uncomment the following line to treat all DeprecationWarnings as
 # exceptions
 from astropy.tests.helper import enable_deprecations_as_exceptions  # noqa

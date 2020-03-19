@@ -38,12 +38,11 @@ def _namelist(instance):
 def _dump(tokens, states):  # pragma: no cover
     out_str = '\n'
     for i in range(len(states)):
-        out_str += 'state {0}\n'.format(i)
+        out_str += f'state {i}\n'
         for (lhs, rhs), pos, parent in states[i]:
-            out_str += '\t{0}::={1}.{2},{3}'.format(
-                lhs, ' '.join(rhs[:pos]), ' '.join(rhs[pos:]), parent)
+            out_str += f"\t{lhs}::={' '.join(rhs[:pos])}.{' '.join(rhs[pos:])},{parent}"
         if i < len(tokens):
-            out_str += '\ntoken {0}\n'.format(tokens[i])
+            out_str += f'\ntoken {tokens[i]}\n'
     log.info(out_str)
 
 
@@ -58,7 +57,7 @@ class GenericScanner:
 
     def makeRE(self, name):
         doc = getattr(self, name).__doc__
-        rv = '(?P<{0:s}>{1:s})'.format(name[2:], doc)
+        rv = f'(?P<{name[2:]:s}>{doc:s})'
         return rv
 
     def reflect(self):
@@ -71,7 +70,7 @@ class GenericScanner:
         return '|'.join(rv)
 
     def error(self, s, pos):
-        raise ParserError('Lexical error at position {0}'.format(pos))
+        raise ParserError(f'Lexical error at position {pos}')
 
     def tokenize(self, s):
         pos = 0
@@ -191,7 +190,7 @@ class GenericParser:
         return None
 
     def error(self, token):
-        raise ParserError('Syntax error at or near "{0}" token'.format(token))
+        raise ParserError(f'Syntax error at or near "{token}" token')
 
     def parse(self, tokens):
         tree = {}
