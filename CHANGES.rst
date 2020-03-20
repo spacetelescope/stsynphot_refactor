@@ -1,6 +1,8 @@
 0.3.0 (unreleased)
 ==================
 
+- New ``catalog.plot_phoenix`` function to visualize the Phoenix catalog
+  parameters. [#111]
 - Fix compatibility with Windows in regards to path handling. [#107]
 - Fix a bug in ``stio.get_latest_file`` to recognize file in current directory.
   [#108]
