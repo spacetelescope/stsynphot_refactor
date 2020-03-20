@@ -3,13 +3,13 @@
 
 # STDLIB
 import numbers
-import os
 
 # THIRD-PARTY
 import numpy as np
 
 # ASTROPY
 from astropy import units as u
+from astropy.io import fits
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
@@ -20,7 +20,8 @@ from synphot.utils import validate_totalflux
 # LOCAL
 from . import exceptions, stio
 
-__all__ = ['reset_cache', 'grid_to_spec']
+__all__ = ['reset_cache', 'get_catalog_index', 'grid_to_spec',
+           'find_valid_g_phoenix', 'plot_phoenix']
 
 _PARAM_NAMES = ['T_eff', 'metallicity', 'log_g']
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.
@@ -76,7 +77,7 @@ def _get_spectrum(parlist, catdir):
     filename = name.split('[')[0]
     column = name.split('[')[1][:-1]
 
-    filename = os.path.join(catdir, filename)
+    filename = stio.resolve_filename(catdir, *filename.split('/'))
     sp = SourceSpectrum.from_file(filename, flux_col=column)
 
     totflux = sp.integrate()
@@ -113,13 +114,54 @@ def _interpolate_spectrum(sp1, sp2, par):
     return result
 
 
+def get_catalog_index(gridname):
+    """Extract catalog index (grid parameters).
+
+    It is read once and then cached until the cache is cleared explicitly using
+    :func:`reset_cache`.
+
+    Parameters
+    ----------
+    gridname : str
+        See :func:`grid_to_spec`.
+
+    Returns
+    -------
+    cat_index : list
+        List of ``[t_eff, metallicity, log_g, filename]``.
+
+    catdir : str
+        Directory containing the requested catalog.
+
+    """
+    if gridname == 'ck04models':
+        catdir = 'crgridck04$'
+    elif gridname == 'k93models':
+        catdir = 'crgridk93$'
+    elif gridname == 'phoenix':
+        catdir = 'crgridphoenix$'
+    else:
+        raise synexceptions.SynphotError(
+            f'{gridname} is not a supported catalog grid.')
+
+    catdir = stio.irafconvert(catdir)
+    filename = stio.resolve_filename(catdir, 'catalog.fits')
+
+    # If not cached, read from grid catalog and cache it
+    if filename not in _CACHE:
+        data = stio.read_catalog(filename)  # EXT 1
+        _CACHE[filename] = [list(map(float, index.split(','))) +
+                            [data['FILENAME'][i]]
+                            for i, index in enumerate(data['INDEX'])]
+
+    return _CACHE[filename], catdir
+
+
 def grid_to_spec(gridname, t_eff, metallicity, log_g):
     """Extract spectrum from given catalog grid parameters.
     Interpolate if necessary.
 
-    Grid parameters are only read once and then cached.
-    Until the cache is cleared explicitly using
-    :func:`reset_cache`, cached values are used.
+    Grid parameters are read with :func:`get_catalog_index`.
 
     Parameters
     ----------
@@ -156,15 +198,7 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
         Invalid inputs.
 
     """
-    if gridname == 'ck04models':
-        catdir = 'crgridck04$'
-    elif gridname == 'k93models':
-        catdir = 'crgridk93$'
-    elif gridname == 'phoenix':
-        catdir = 'crgridphoenix$'
-    else:
-        raise synexceptions.SynphotError(
-            f'{gridname} is not a supported catalog grid.')
+    indices, catdir = get_catalog_index(gridname)
 
     metallicity = _par_from_parser(metallicity)
     if isinstance(metallicity, u.Quantity):
@@ -177,17 +211,6 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
             'Quantity is not supported for log surface gravity.')
 
     t_eff = units.validate_quantity(_par_from_parser(t_eff), u.K).value
-    catdir = stio.irafconvert(catdir)
-    filename = os.path.join(catdir, 'catalog.fits')
-
-    # If not cached, read from grid catalog and cache it
-    if filename not in _CACHE:
-        data = stio.read_catalog(filename)  # Ext 1
-        _CACHE[filename] = [list(map(float, index.split(','))) +
-                            [data['FILENAME'][i]]
-                            for i, index in enumerate(data['INDEX'])]
-
-    indices = _CACHE[filename]
 
     list0, list1 = _break_list(indices, 0, t_eff)
 
@@ -223,3 +246,106 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
                        f'metallicity={metallicity:g},log_g={log_g:g})')
 
     return sp
+
+
+# NOTE: The following functions need refactoring if you want to generalize
+# them to work on all the supported catalogs. This is because the catalogs
+# do not share the same header structure. Generalization requires reading all
+# the spectra tables, not just header, which will have a significant
+# performance impact.
+# Also see https://github.com/spacetelescope/stsynphot_refactor/issues/45
+
+def find_valid_g_phoenix():  # pragma: no cover
+    """Find valid ``log_g`` values in the Phoenix catalog.
+
+    .. note::
+
+        Takes time to run because it has to find the gaps by
+        parsing the headers of individual data files in the catalog.
+
+    Returns
+    -------
+    valid_g : dict
+        Dictionary mapping ``(t_eff, metallicity)`` to a list of valid
+        ``log_g`` values.
+
+    uniq_metallicity : list
+        Unique metallicity values in the catalog.
+
+    """
+    indices, catdir = get_catalog_index('phoenix')
+    specfiles = {}
+    valid_g = {}
+    possible_g = set()
+    uniq_metallicity = set()
+
+    for a in indices:
+        key = tuple(a[:2])
+        uniq_metallicity.add(a[1])
+        possible_g.add(a[2])
+
+        if key not in specfiles:
+            specfiles[key] = a[3].split('[')[0]
+
+    for key, spfile in specfiles.items():
+        hdr = fits.getheader(stio.resolve_filename(
+            catdir, *spfile.split('/')))['LOGG*']
+        valid_g[key] = []
+        for val in hdr.values():
+            gval = float(val)
+            if gval in possible_g:
+                valid_g[key].append(gval)
+
+    return valid_g, sorted(uniq_metallicity)
+
+
+def plot_phoenix(filename=''):  # pragma: no cover
+    """Visualize the Phoenix catalog index (grid parameters).
+
+    .. note:: Uses ``matplotlib``.
+
+    .. note::
+
+        Takes time to run because it has to find the gaps by
+        parsing the headers of individual data files in the catalog.
+
+    Parameters
+    ----------
+    filename : str
+        If provided, plot is saved to given filename.
+
+    """
+    import matplotlib.pyplot as plt
+
+    valid_g, uniq_metallicity = find_valid_g_phoenix()
+    n_plots = len(uniq_metallicity)
+    ax_map = {}
+
+    fig, axes = plt.subplots(nrows=3, ncols=4)
+    axes = axes.flatten()
+    n_axes = axes.size
+
+    if n_plots > n_axes:
+        raise ValueError(f'Need {n_plots} but only {n_axes} subplots created')
+
+    for i, metallicity in enumerate(uniq_metallicity):
+        ax_map[metallicity] = axes[i]
+
+    for i in range(n_plots, n_axes):
+        axes[i].remove()
+
+    for key, log_g in valid_g.items():
+        metallicity = key[1]
+        t_eff = [key[0]] * len(log_g)
+        ax = ax_map[metallicity]
+        ax.plot(t_eff, log_g, 'b,')
+        ax.set_xlabel(r'$T_{\mathrm{eff}}$')
+        ax.set_ylabel(r'$\log g$')
+        ax.set_title(f'[M/H] = {metallicity:.2f}')
+        ax.axvline(0, ls='--', lw=0.5, c='k')
+
+    plt.tight_layout()
+    plt.draw()
+
+    if filename:
+        fig.savefig(filename)
