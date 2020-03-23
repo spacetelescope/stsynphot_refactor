@@ -1,4 +1,4 @@
-0.3.0 (unreleased)
+0.3.0 (2020-03-23)
 ==================
 
 - New ``catalog.plot_phoenix`` function to visualize the Phoenix catalog
