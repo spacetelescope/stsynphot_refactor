@@ -56,7 +56,7 @@ def _compare_spectra(sp1, sp2):
     assert_quantity_allclose(sp1(w), sp2(w))
     assert_quantity_allclose(sp1.integrate(wavelengths=w),
                              sp2.integrate(wavelengths=w))
-    assert type(sp1.model.__class__) == type(sp2.model.__class__)
+    assert type(sp1.model.__class__) == type(sp2.model.__class__)  # noqa
     if hasattr(sp1, 'z'):
         assert sp1.z == sp2.z
 

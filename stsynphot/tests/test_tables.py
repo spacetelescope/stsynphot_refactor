@@ -15,9 +15,6 @@ import pytest
 # ASTROPY
 from astropy.utils.data import get_pkg_data_filename
 
-# SYNPHOT
-from synphot import exceptions as synexceptions
-
 # LOCAL
 from .. import exceptions
 from ..tables import GraphTable, CompTable
