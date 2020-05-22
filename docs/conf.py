@@ -131,6 +131,8 @@ intersphinx_mapping.update({
 # -- Options for linkcheck output ---------------------------------------------
 linkcheck_retry = 5
 linkcheck_ignore = ['https://hsthelp.stsci.edu',
+                    'http://ssb.stsci.edu',
+                    'http://www.stsci.edu',
                     'https://www.as.arizona.edu/observing']
 linkcheck_timeout = 180
 linkcheck_anchors = False
