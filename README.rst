@@ -8,7 +8,7 @@ stsynphot
     :target: http://stsynphot.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://github.com/spacetelescope/stsynphot_refactor/workflows/.github/workflows/ci_workflows.yml/badge.svg
+.. image:: https://github.com/spacetelescope/stsynphot_refactor/workflows/CI/badge.svg
     :alt: Github Actions CI Status
 
 .. image:: https://codecov.io/gh/spacetelescope/stsynphot_refactor/branch/master/graph/badge.svg
