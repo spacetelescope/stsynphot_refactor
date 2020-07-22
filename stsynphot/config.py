@@ -1,7 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """``stsynphot`` configurable items.
 
-The default configuration heavily depends on STScI CDBS structure
+The default configuration heavily depends on STScI TRDS structure
 but it can be easily re-configured as the user wishes via
 `astropy.config`.
 
@@ -35,8 +35,8 @@ class Conf(ConfigNamespace):
 
     # Root directory
     rootdir = ConfigItem(
-        os.environ.get('PYSYN_CDBS', '/grp/hst/cdbs/'),
-        'CDBS data root directory')
+        os.environ.get('PYSYN_CDBS', '/grp/redcat/trds'),
+        'TRDS data root directory')
 
     # Graph, optical component, and thermal component tables
     graphtable = ConfigItem('mtab$*_tmg.fits', 'Graph table')

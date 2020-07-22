@@ -47,17 +47,17 @@ For backward compatibilty, :func:`~stsynphot.config.showref` and
 
     >>> import stsynphot as stsyn
     >>> stsyn.showref()  # doctest: +SKIP
-    graphtable: /my/local/dir/cdbs/mtab/0bf2050hm_tmg.fits
-    comptable : /my/local/dir/cdbs/mtab/0ac1951am_tmc.fits
-    thermtable: /my/local/dir/cdbs/mtab/tae17277m_tmt.fits
+    graphtable: /my/local/dir/trds/mtab/0bf2050hm_tmg.fits
+    comptable : /my/local/dir/trds/mtab/0ac1951am_tmc.fits
+    thermtable: /my/local/dir/trds/mtab/tae17277m_tmt.fits
     area      : 45238.93416
     waveset   : Min: 500, Max: 26000, Num: 10000, Delta: None, Log: True
      [stsynphot.config]
     >>> stsyn.getref()  # doctest: +SKIP
     {'area': 45238.93416,
-     'comptable': '/my/local/dir/cdbs/mtab/0ac1951am_tmc.fits',
-     'graphtable': '/my/local/dir/cdbs/mtab/0bf2050hm_tmg.fits',
-     'thermtable': '/my/local/dir/cdbs/mtab/tae17277m_tmt.fits',
+     'comptable': '/my/local/dir/trds/mtab/0ac1951am_tmc.fits',
+     'graphtable': '/my/local/dir/trds/mtab/0bf2050hm_tmg.fits',
+     'thermtable': '/my/local/dir/trds/mtab/tae17277m_tmt.fits',
      'waveset': 'Min: 500, Max: 26000, Num: 10000, Delta: None, Log: True'}
 
 To change a configurable item's value, use the machinery of
@@ -93,19 +93,19 @@ For example::
 
     >>> bp_hst = stsyn.band('wfc3,ir,f105w')  # doctest: +SKIP
     >>> bp_hst.showfiles()  # doctest: +SKIP
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_primary_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_secondary_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_pom_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_csm_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_fold_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_mir1_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_mir2_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_mask_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_rcp_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_f105w_004_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_win_001_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_qe_003_syn.fits
-    /my/local/dir/cdbs/comp/wfc3/wfc3_ir_cor_004_syn.fits  [...]
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_primary_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_secondary_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_pom_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_csm_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_fold_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_mir1_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_mir2_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_mask_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_rcp_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_f105w_004_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_win_001_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_qe_003_syn.fits
+    /my/local/dir/trds/comp/wfc3/wfc3_ir_cor_004_syn.fits  [...]
 
     >>> from synphot import SpectralElement
     >>> bp_nonhst = SpectralElement.from_filter('johnson_v')  # doctest: +REMOTE_DATA

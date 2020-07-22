@@ -101,7 +101,7 @@ def irafconvert(iraf_filename, sep='$'):
     Acceptable IRAF formats:
 
     * ``$path/file`` - ``path`` assumed to be environment variable.
-    * ``path$file`` - ``path`` is special IRAF shortcut for CDBS
+    * ``path$file`` - ``path`` is special IRAF shortcut for TRDS
       data directory (case-insensitive).
 
     Notes on special IRAF shortcut:
@@ -201,8 +201,8 @@ def get_latest_file(template, raise_error=False, err_msg=''):
     if not path:
         path = os.curdir
 
-    # Remote HTTP directory
-    if path_lc.startswith('http:'):
+    # Remote HTTP/HTTPS directory
+    if path_lc.startswith('http'):
         from urllib import request
         from bs4 import BeautifulSoup
 
