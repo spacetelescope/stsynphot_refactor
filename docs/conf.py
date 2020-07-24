@@ -133,6 +133,7 @@ linkcheck_retry = 5
 linkcheck_ignore = ['https://hsthelp.stsci.edu',
                     'http://ssb.stsci.edu',
                     'http://www.stsci.edu',
-                    'https://www.as.arizona.edu/observing']
+                    'https://www.as.arizona.edu/observing',
+                    'https://phoenix.ens-lyon.fr/simulator/index.faces']
 linkcheck_timeout = 180
 linkcheck_anchors = False
