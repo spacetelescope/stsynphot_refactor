@@ -5,7 +5,7 @@ HST data files
 
 These data files are needed for calculations involving HST bandpasses.
 To install them locally, first download
-https://ssb.stsci.edu/cdbs/tarfiles/synphot1.tar.gz .
+https://ssb.stsci.edu/trds/tarfiles/synphot1.tar.gz .
 Move it to the appropriate location and then extract it::
 
     $ tar -xzf synphot1.tar.gz
