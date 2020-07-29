@@ -61,7 +61,7 @@ You can install **stsynphot** using one of the following ways:
 
     conda install stsynphot -c conda-forge
 
-* From standalone release::
+* From standalone release on PyPI::
 
     pip install stsynphot
 
@@ -77,15 +77,15 @@ separately by
 They are expected to follow a certain directory structure under the root
 directory, identified by the ``PYSYN_CDBS`` environment variable that *must* be
 set prior to using this package. In the examples below, the root directory is
-arbitrarily named ``/my/local/dir/cdbs/``.
+arbitrarily named ``/my/local/dir/trds``.
 
 In bash shell::
 
-    export PYSYN_CDBS=/my/local/dir/cdbs/
+    export PYSYN_CDBS=/my/local/dir/trds
 
 In csh shell::
 
-    setenv PYSYN_CDBS /my/local/dir/cdbs/
+    setenv PYSYN_CDBS /my/local/dir/trds
 
 Below are the instructions to install:
 
@@ -100,19 +100,19 @@ Below are the instructions to install:
 
     >>> # This is not marked remote data because it is essential for VEGAMAG
     >>> from stsynphot.spectrum import load_vega
-    >>> load_vega(vegafile='http://ssb.stsci.edu/cdbs/calspec/alpha_lyr_stis_009.fits', encoding='binary')  # doctest: +IGNORE_OUTPUT
+    >>> load_vega(vegafile='https://ssb.stsci.edu/trds/calspec/alpha_lyr_stis_010.fits', encoding='binary')  # doctest: +IGNORE_OUTPUT
 
 To ensure consistency for all data files used, **stsynphot silently overwrites
 synphot data file locations within the Python session**. For example::
 
     >>> from synphot.config import conf as syn_conf
     >>> print(syn_conf.johnson_v_file)  # doctest: +IGNORE_OUTPUT
-    http://ssb.stsci.edu/cdbs/comp/nonhst/johnson_v_004_syn.fits
+    https://ssb.stsci.edu/trds/comp/nonhst/johnson_v_004_syn.fits
     >>> from stsynphot.config import conf
     >>> print(conf.rootdir)  # doctest: +IGNORE_OUTPUT
-    /my/local/dir/cdbs/
+    /my/local/dir/trds
     >>> print(syn_conf.johnson_v_file)  # doctest: +IGNORE_OUTPUT
-    /my/local/dir/cdbs//comp/nonhst/johnson_v_004_syn.fits
+    /my/local/dir/trds/comp/nonhst/johnson_v_004_syn.fits
 
 You can also take advantage of
 :ref:`Astropy configuration system <astropy:astropy_config>` to manage
@@ -121,14 +121,14 @@ You can also take advantage of
 to your ``$HOME/.astropy/config/`` directory and modify it to your needs::
 
     # This replaces the need to set PYSYN_CDBS environment variable
-    rootdir = /my/local/dir/cdbs/
+    rootdir = /my/local/dir/trds
 
 ::
 
     # This pins lookup tables to a specific files
-    graphtable = /my/local/dir/cdbs/mtab/07r1502mm_tmg.fits
-    comptable = /my/local/dir/cdbs/mtab/07r1502nm_tmc.fits
-    thermtable = /my/local/dir/cdbs/mtab/tae17277m_tmt.fits
+    graphtable = /my/local/dir/trds/mtab/07r1502mm_tmg.fits
+    comptable = /my/local/dir/trds/mtab/07r1502nm_tmc.fits
+    thermtable = /my/local/dir/trds/mtab/tae17277m_tmt.fits
 
 ::
 
@@ -160,9 +160,9 @@ Display the current settings for graph and component tables, telescope area
 
     >>> import stsynphot as stsyn
     >>> stsyn.showref()  # doctest: +SKIP
-    graphtable: /my/local/dir/cdbs/mtab/07r1502mm_tmg.fits
-    comptable : /my/local/dir/cdbs/mtab/07r1502nm_tmc.fits
-    thermtable: /my/local/dir/cdbs/mtab/tae17277m_tmt.fits
+    graphtable: /my/local/dir/trds/mtab/07r1502mm_tmg.fits
+    comptable : /my/local/dir/trds/mtab/07r1502nm_tmc.fits
+    thermtable: /my/local/dir/trds/mtab/tae17277m_tmt.fits
     area      : 45238.93416
     waveset   : Min: 500, Max: 26000, Num: 10000, Delta: None, Log: True
      [stsynphot.config]
@@ -173,7 +173,7 @@ slash in path name does not affect software operation)::
 
     >>> import synphot
     >>> synphot.conf.vega_file  # doctest: +IGNORE_OUTPUT
-    '/my/local/dir/cdbs//calspec/alpha_lyr_stis_009.fits'
+    '/my/local/dir/trds/calspec/alpha_lyr_stis_009.fits'
 
 Plot the built-in Vega spectrum, which is used to compute VEGAMAG. This is
 pre-loaded at start-up for convenience::
@@ -193,11 +193,11 @@ Then, show all the individual throughput files used in its construction::
     >>> bp = stsyn.band('acs,wfc1,f555w')  # doctest: +SKIP
     >>> bp.showfiles()  # doctest: +SKIP
     INFO: #Throughput table names:
-    /my/local/dir/cdbs/comp/ota/hst_ota_007_syn.fits
-    /my/local/dir/cdbs/comp/acs/acs_wfc_im123_004_syn.fits
-    /my/local/dir/cdbs/comp/acs/acs_f555w_wfc_006_syn.fits
-    /my/local/dir/cdbs/comp/acs/acs_wfc_ebe_win12f_005_syn.fits
-    /my/local/dir/cdbs/comp/acs/acs_wfc_ccd1_mjd_021_syn.fits [...]
+    /my/local/dir/trds/comp/ota/hst_ota_007_syn.fits
+    /my/local/dir/trds/comp/acs/acs_wfc_im123_004_syn.fits
+    /my/local/dir/trds/comp/acs/acs_f555w_wfc_006_syn.fits
+    /my/local/dir/trds/comp/acs/acs_wfc_ebe_win12f_005_syn.fits
+    /my/local/dir/trds/comp/acs/acs_wfc_ccd1_mjd_021_syn.fits [...]
 
 Construct a source spectrum from Kurucz 1993 Atlas of Model Atmospheres for a
 star with blackbody temperature of 5770 Kelvin, at solar metallicity, and log
@@ -383,7 +383,7 @@ Koornneef, J., Bohlin, R., Buser, R., Horne, K., & Turnshek, D. 1986, Highlights
 
 .. _stsynphot-ref-laidler2009:
 
-Laidler, V. 2009, TSR 2009-01: Pysynphot Commissioning Report (Baltimore, MD: STScI), http://ssb.stsci.edu/tsr/2009_01/
+Laidler, V. 2009, TSR 2009-01: Pysynphot Commissioning Report (Baltimore, MD: STScI), https://ssb.stsci.edu/tsr/2009_01/
 
 .. _stsynphot-ref-laidler2005:
 

@@ -82,7 +82,7 @@ class TestGetLatestFile:
     @pytest.mark.remote_data
     def test_http(self):
         """Remote HTTP path."""
-        path = 'http://ssb.stsci.edu/cdbs_open/cdbs/mtab/OLD_FILES/'
+        path = 'https://ssb.stsci.edu/trds/mtab/OLD_FILES/'
         with warnings.catch_warnings():
             # Warning issued from html5lib 1.0.1
             warnings.filterwarnings(

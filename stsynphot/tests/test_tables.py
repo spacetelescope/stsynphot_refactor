@@ -4,7 +4,7 @@
 .. note::
 
     Uses local graph and component tables so that the tests
-    are not affected by CDBS changes.
+    are not affected by TRDS changes.
 
 """
 

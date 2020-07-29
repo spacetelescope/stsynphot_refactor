@@ -41,11 +41,11 @@ filter::
 To see which throughput tables are being used, as set by CRDS::
 
     >>> bp_acs.showfiles()  # doctest: +SKIP
-    /my/local/dir/cdbs/comp/ota/hst_ota_007_syn.fits
-    /my/local/dir/cdbs/comp/acs/acs_wfc_im123_004_syn.fits
-    /my/local/dir/cdbs/comp/acs/acs_f555w_wfc_005_syn.fits
-    /my/local/dir/cdbs/comp/acs/acs_wfc_ebe_win12f_005_syn.fits
-    /my/local/dir/cdbs/comp/acs/acs_wfc_ccd1_mjd_021_syn.fits [...]
+    /my/local/dir/trds/comp/ota/hst_ota_007_syn.fits
+    /my/local/dir/trds/comp/acs/acs_wfc_im123_004_syn.fits
+    /my/local/dir/trds/comp/acs/acs_f555w_wfc_005_syn.fits
+    /my/local/dir/trds/comp/acs/acs_wfc_ebe_win12f_005_syn.fits
+    /my/local/dir/trds/comp/acs/acs_wfc_ccd1_mjd_021_syn.fits [...]
 
 Create a bandpass for Johnson *V*::
 
@@ -70,9 +70,9 @@ Then plot the actual bandpass and overlay those components::
 
     >>> from synphot import SpectralElement
     >>> ota = SpectralElement.from_file(
-    ...     '/my/local/dir/cdbs/comp/ota/hst_ota_007_syn.fits')  # doctest: +SKIP
+    ...     '/my/local/dir/trds/comp/ota/hst_ota_007_syn.fits')  # doctest: +SKIP
     >>> ccd = SpectralElement.from_file(
-    ...     '/my/local/dir/cdbs/comp/acs/acs_wfc_ccd1_mjd_021_syn.fits')  # doctest: +SKIP
+    ...     '/my/local/dir/trds/comp/acs/acs_wfc_ccd1_mjd_021_syn.fits')  # doctest: +SKIP
     >>> bp_partial = ota * ccd  # doctest: +SKIP
     >>> w = bp_acs.binset  # waveset that is optimal for binning # doctest: +SKIP
     >>> plt.plot(w, ota(w), 'b--', w, ccd(w), 'r--', w, bp_partial(w), 'g', w, bp_acs(w), 'k')  # doctest: +SKIP
