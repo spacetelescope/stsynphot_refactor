@@ -1,6 +1,8 @@
-1.0.0 (unreleased)
+1.0.0 (2020-07-31)
 ==================
 
+- CDBS is TRDS now. [#121]
+- This release works with ``synphot`` 1.0.
 
 0.3.0 (2020-03-23)
 ==================
