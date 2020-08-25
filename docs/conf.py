@@ -134,6 +134,7 @@ linkcheck_ignore = ['https://hsthelp.stsci.edu',
                     'http://ssb.stsci.edu',
                     'http://www.stsci.edu',
                     'https://www.as.arizona.edu/observing',
-                    'https://phoenix.ens-lyon.fr/simulator/index.faces']
+                    'https://phoenix.ens-lyon.fr/simulator/index.faces',
+                    'https://wfirst.gsfc.nasa.gov/science/WFIRST_Reference_Information.html']
 linkcheck_timeout = 180
 linkcheck_anchors = False
