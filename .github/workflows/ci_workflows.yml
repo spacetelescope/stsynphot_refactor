@@ -130,6 +130,7 @@ jobs:
     - name: Test with old deps
       run: pytest --open-files
 
+  # TODO: Change back to 3.x when Numpy and Scipy have wheels for 3.9
   windows:
     runs-on: windows-latest
     needs: [pep_and_audit, initial_tests]
@@ -141,7 +142,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: '3.8'
     - name: Install and build
       run: |
         python -m pip install --upgrade pip setuptools scipy
