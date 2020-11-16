@@ -1,7 +1,7 @@
 stsynphot
 =========
 
-.. imahe:: https://img.shields.io/badge/ascl-2010.003-blue.svg?colorB=262255
+.. image:: https://img.shields.io/badge/ascl-2010.003-blue.svg?colorB=262255
    :target: http://ascl.net/2010.003
    :alt: ASCL 2010.003
 
