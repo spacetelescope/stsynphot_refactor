@@ -2,7 +2,7 @@ stsynphot
 =========
 
 .. image:: https://img.shields.io/badge/ascl-2010.003-blue.svg?colorB=262255
-   :target: http://ascl.net/2010.003
+   :target: https://ascl.net/2010.003
    :alt: ASCL 2010.003
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3247831.svg
@@ -10,7 +10,7 @@ stsynphot
    :alt: Zenodo 3247831
 
 .. image:: https://readthedocs.org/projects/stsynphot/badge/?version=latest
-    :target: http://stsynphot.readthedocs.io/en/latest/?badge=latest
+    :target: https://stsynphot.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 .. image:: https://github.com/spacetelescope/stsynphot_refactor/workflows/CI/badge.svg
