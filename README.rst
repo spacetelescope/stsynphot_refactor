@@ -22,4 +22,4 @@ stsynphot
     :alt: Coverage results
 
 This is a replacement for IRAF STSDAS SYNPHOT and ASTROLIB PYSYNPHOT, utilizing Astropy
-covering instrument specific portions of the old packages for HST and JWST.
+covering instrument specific portions of the old packages for HST.

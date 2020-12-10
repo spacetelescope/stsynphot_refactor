@@ -10,7 +10,7 @@ In this section, we describe the keywords available for
 
 .. note::
 
-    OBSMODE is currently not yet available for JWST.
+    OBSMODE is not available for JWST.
 
 For HST, the following are supported:
 

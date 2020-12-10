@@ -98,7 +98,7 @@ Miscellaneous
 Observing Mode
 --------------
 
-The throughput calibrations of the HST and the JWST observatories are
+The throughput calibrations of the HST observatory is
 represented in a framework consisting of:
 
 * Component throughput files for every optical component (e.g., mirror, filter,
@@ -120,14 +120,14 @@ component throughput tables are all in FITS format.
 structure and functioning of the configuration graph and component throughput
 tables.)
 
-To retrieve a particular HST (and soon JWST) bandpass, you furnish the bandpass
+To retrieve a particular HST bandpass, you furnish the bandpass
 generator with a couple of keywords (e.g., ``"wfc3,uvis2,f555w"``).
 The bandpass generator uses the keywords to trace a path through the graph
 file, multiplies together the bandpass components it encounters along the way,
 and returns the evaluated bandpass on a particular wavelength grid. You can
 also generate bandpass in functional form (see :ref:`synphot:bandpass-main`).
 The bandpass can then be convolved with spectral data
-(see :ref:`synphot:source-spectrum-main`) to simulate HST (and soon JWST)
+(see :ref:`synphot:source-spectrum-main`) to simulate HST
 observations of particular targets. See :ref:`stsynphot-obsmode` for more
 details.
 

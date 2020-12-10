@@ -3,7 +3,7 @@
 Appendix C: TMG, TMC, and TMT Files
 ===================================
 
-.. note:: This is currently not yet available for JWST.
+.. note:: This is not available for JWST.
 
 **stsynphot** computes the combined throughput for an
 :ref:`observing mode <stsynphot-obsmode>` (``obsmode``) with the

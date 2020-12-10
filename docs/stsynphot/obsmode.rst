@@ -5,7 +5,7 @@ Observation Modes
 
 In addition to :ref:`bandpass in synphot <synphot:bandpass-main>`,
 **stsynphot** adds the capability to construct a bandpass by specifying a valid
-string of HST (and soon JWST) instrument mode keywords (``obsmode``).
+string of HST instrument mode keywords (``obsmode``).
 This bandpass is the wavelength-dependent sensitivity curve of the associated
 photometer or spectrophotometer. Its overview is given at
 :ref:`observing mode overview <stsynphot-obsmode-overview>`.
