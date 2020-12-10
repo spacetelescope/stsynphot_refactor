@@ -1,15 +1,15 @@
 .. _stsynphot_index:
 
-*********************************************
-Synthetic Photometry for HST/JWST (stsynphot)
-*********************************************
+****************************************
+Synthetic Photometry for HST (stsynphot)
+****************************************
 
 Introduction
 ============
 
 **stsynphot** is an extension to :ref:`synphot <synphot:astropy_synphot>`
 (:ref:`Lim et al. 2016 <stsynphot-ref-lim2016>`) that implements
-synthetic photometry package for HST (and soon JWST) support. The documentation
+synthetic photometry package for HST support. The documentation
 in this package is meant to *complement* that of **synphot**, which already
 documents the non-observatory specific functionalities. It is recommended that
 you read both for full understanding of its capabilities.
@@ -18,12 +18,12 @@ This package, in particular, allows you to:
 
 * Construct spectra from various grids of model atmosphere spectra,
   parameterized spectrum models, and atlases of stellar spectrophotometry.
-* Simulate observations specific to HST (and soon JWST).
+* Simulate observations specific to HST.
 * Compute photometric calibration parameters for any supported instrument mode.
 * Plot instrument-specific sensitivity curves and calibration target spectra.
 
 Like ASTROLIB PYSYNPHOT (:ref:`Lim et al. 2015 <stsynphot-ref-lim2015>`),
-**stsynphot** can help HST (and soon JWST) observers to perform
+**stsynphot** can help HST observers to perform
 cross-instrument simulations and examine the transmission curve of the
 Optical Telescope Assembly (OTA) and spectra of calibration targets.
 
