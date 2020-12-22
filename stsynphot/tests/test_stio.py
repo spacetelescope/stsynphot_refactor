@@ -17,7 +17,7 @@ import numpy as np
 import pytest
 
 # ASTROPY
-from astropy.utils.data import _find_pkg_data_path, get_pkg_data_filename
+from astropy.utils.data import get_pkg_data_filename
 from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
@@ -26,6 +26,11 @@ from synphot import exceptions as synexceptions
 # LOCAL
 from .. import stio
 from ..config import conf
+
+if stio.ASTROPY_LT_4_3:
+    from astropy.utils.data import _find_pkg_data_path as get_pkg_data_path
+else:
+    from astropy.utils.data import get_pkg_data_path
 
 
 class TestIRAFConvert:
@@ -77,7 +82,7 @@ class TestIRAFConvert:
 class TestGetLatestFile:
     """Test getting latest file."""
     def setup_class(self):
-        self.datadir = _find_pkg_data_path('data')
+        self.datadir = get_pkg_data_path('data')
 
     @pytest.mark.remote_data
     def test_http(self):
