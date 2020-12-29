@@ -1,0 +1,52 @@
+docs:
+  - .github/**/*.md
+  - .readthedocs.yml
+  - docs/*
+  - docs/_static/*
+  - docs/_templates/*
+  - legacy_materials/*
+  - LICENSE
+  - licenses/*
+  - '*.md'
+  - any: ['*.rst', '!CHANGES.rst']
+
+testing:
+  - .bandit.yaml
+  - .github/**/*.yml
+  - conftest.py
+  - stsynphot/tests/**/*
+  - stsynphot/commissioning/**/*
+
+installation:
+  - MANIFEST.in
+  - pyproject.toml
+  - setup.*
+
+catalog:
+  - stsynphot/catalog.py
+
+config:
+  - stsynphot/config.py
+  - stsynphot/stsynphot.cfg
+
+observationmode:
+  - stsynphot/observationmode.py
+
+spectrum:
+  - stsynphot/spectrum.py
+
+spparser:
+  - stsynphot/spark.py
+  - stsynphot/spparser.py
+
+stio:
+  - stsynphot/data/irafshortcuts.txt
+  - stsynphot/stio.py
+
+tables:
+  - stsynphot/tables.py
+
+wavetable:
+  - stsynphot/data/detectors.dat
+  - stsynphot/data/wavecats/*
+  - stsynphot/wavetable.py
