@@ -69,7 +69,7 @@ The ``$PYSYN_CDBS/grid/ck04models`` directory contains ATLAS9 stellar
 atmosphere models by Castelli & Kurucz 2004. There are about 4300 models for a
 wide range of metallicities, effective temperatures and gravities. The ones
 available in CRDS are from "the Grids of ATLAS9-ODFNEW Models and Fluxes" from
-`Dr. F. Castelli's webpage <http://wwwuser.oats.inaf.it/castelli/grids.html>`_
+`Dr. F. Castelli's webpage <http://www.oact.inaf.it/castelli/castelli/grids.html>`_
 (created on January 2007) and also available from
 `Dr. R. Kurucz's webpage <http://kurucz.harvard.edu>`_. See
 `Castelli-Kurucz 2004 atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/castelli-and-kurucz-atlas.html>`_
@@ -186,7 +186,7 @@ Phoenix Models
 The ``$PYSYN_CDBS/grid/phoenix`` directory contains models provided by
 `F. Allard et al. <http://perso.ens-lyon.fr/france.allard/>`_
 and can be found in the
-`Star, Brown Dwarf, and Planet Simulator <https://phoenix.ens-lyon.fr/simulator/index.faces>`_. They use static, spherical symmetric, 1D simulations to
+`Star, Brown Dwarf, and Planet Simulator <http://phoenix.ens-lyon.fr/simulator/index.faces>`_. They use static, spherical symmetric, 1D simulations to
 completely describe the atmospheric emission spectrum. The models account for
 the formation of molecular bands, such as those of water vapor, methane, or
 titanium dioxide, solving for the transfer equation over more than 20,000
