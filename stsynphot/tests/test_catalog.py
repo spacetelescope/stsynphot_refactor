@@ -100,12 +100,15 @@ def test_phoenix_gap():
         catalog.grid_to_spec('phoenix', 2700, -0.501, 5.1)
 
 
-def test_grid_to_spec_exceptions():
+def test_grid_to_spec_exceptions_1():
     """Test other exceptions."""
     # Invalid catalog
     with pytest.raises(synexceptions.SynphotError):
         catalog.grid_to_spec('foo', 6440, 0, 4.3)
 
+
+@pytest.mark.remote_data
+def test_grid_to_spec_exceptions_2():
     # Quantity is not acceptable for log values
     with pytest.raises(synexceptions.SynphotError):
         catalog.grid_to_spec(
