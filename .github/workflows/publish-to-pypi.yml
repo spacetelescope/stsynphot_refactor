@@ -1,26 +1,49 @@
-name: Publish to PyPI
+name: Release
 
 on:
   release:
     types: [released]
 
 jobs:
-  build:
-      name: Publish release to PyPI
-      env:
-        PYPI_USERNAME_STSCI_MAINTAINER: ${{ secrets.PYPI_USERNAME_STSCI_MAINTAINER }}
-        PYPI_PASSWORD_STSCI_MAINTAINER: ${{ secrets.PYPI_PASSWORD_STSCI_MAINTAINER }}
-        PYPI_USERNAME_OVERRIDE: ${{ secrets.PYPI_USERNAME_OVERRIDE }}
-        PYPI_PASSWORD_OVERRIDE: ${{ secrets.PYPI_PASSWORD_OVERRIDE }}
-        PYPI_TEST: ${{ secrets.PYPI_TEST }}
-        INDEX_URL_OVERRIDE: ${{ secrets.INDEX_URL_OVERRIDE }}
-      runs-on: ubuntu-latest
-      steps:
+  build-n-publish:
+    name: Build and publish Python 🐍 distributions 📦 to PyPI
+    runs-on: ubuntu-latest
+    if: github.repository == 'spacetelescope/stsynphot_refactor'
 
-          # Check out the commit containing this workflow file.
-          - name: checkout repo
-            uses: actions/checkout@v2
-         
-          - name: custom action
-            uses: spacetelescope/action-publish_to_pypi@master
-            id: custom_action_0
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install python-build and twine
+      run: python -m pip install build "twine>=3.3"
+
+    - name: Build package
+      run: python -m build --sdist --wheel .
+
+    - name: List result
+      run: ls -l dist
+
+    - name: Check dist
+      run: python -m twine check --strict dist/*
+
+    - name: Test package
+      run: |
+        cd ..
+        python -m venv testenv
+        testenv/bin/pip install pytest-astropy ci-watson stsynphot_refactor/dist/*.whl
+        testenv/bin/python -c "import stsynphot; stsynphot.test()"
+
+    # FOR DEBUGGING ONLY: repository_url (TestPyPI) and verbose;
+    # Use appropriate token if debugging with TestPyPI
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_TOKEN }}
+        #repository_url: https://test.pypi.org/legacy/
+        #verbose: true
