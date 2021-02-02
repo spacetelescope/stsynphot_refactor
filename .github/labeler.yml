@@ -1,7 +1,7 @@
 docs:
   - .github/**/*.md
   - .readthedocs.yml
-  - docs/*
+  - docs/**/*
   - docs/_static/*
   - docs/_templates/*
   - legacy_materials/*
