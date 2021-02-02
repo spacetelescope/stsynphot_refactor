@@ -69,7 +69,7 @@ The ``$PYSYN_CDBS/grid/ck04models`` directory contains ATLAS9 stellar
 atmosphere models by Castelli & Kurucz 2004. There are about 4300 models for a
 wide range of metallicities, effective temperatures and gravities. The ones
 available in CRDS are from "the Grids of ATLAS9-ODFNEW Models and Fluxes" from
-`Dr. F. Castelli's webpage <http://www.oact.inaf.it/castelli/castelli/grids.html>`_
+`Dr. F. Castelli's webpage <https://wwwuser.oats.inaf.it/castelli/>`_
 (created on January 2007) and also available from
 `Dr. R. Kurucz's webpage <http://kurucz.harvard.edu>`_. See
 `Castelli-Kurucz 2004 atlas README file <http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/castelli-and-kurucz-atlas.html>`_
