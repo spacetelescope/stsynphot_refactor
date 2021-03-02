@@ -116,12 +116,12 @@ systems are small:
 -----
 
 The 2MASS *JHK*:math:`_s` throughputs are taken from :ref:`Cohen et al. (2003) <stsynphot-ref-cohen2003>`.
-These are normalized relative spectral response curves and include the throughputs of all of the 
+These are normalized relative spectral response curves and include the throughputs of all of the
 appropriate optics from the 2MASS optical system, as well as the atmosphere above the two 2MASS
-telescopes. 
+telescopes.
 
-Zero point reference fluxes for 2MASS reproduced from the 
-`IPAC 2MASS website <https://old.ipac.caltech.edu/2mass/releases/allsky/doc/sec6_4a.html>`_ 
+Zero point reference fluxes for 2MASS reproduced from the
+`IPAC 2MASS website <https://irsa.ipac.caltech.edu/data/2MASS/docs/releases/allsky/doc/sec6_4a.html>`_
 are included here for reference (pay special attention to the units):
 
 +-----+--------------------+-----------------+---------------+-----------------------+
@@ -143,7 +143,7 @@ To use the 2MASS throughputs:
 >>> bp = stsyn.band('2mass,ks')  # doctest: +SKIP
 
 (Note: 2MASS throughput curves were added to the TMG file in January 2020. Users must use
-a TMG/TMC file and associated throughput tables delivered after this date to use the 
+a TMG/TMC file and associated throughput tables delivered after this date to use the
 2MASS OBSMODEs.)
 
 
@@ -310,7 +310,7 @@ At this time, the estimated throughputs do not differentiate between the differe
 SCA-dependent throughputs will be delivered at a later time.
 
 (Note: WFIRST throughput curves were added to the TMG file in January 2020. Users must use
-a TMG/TMC file and associated throughput tables delivered after this date to use the 
+a TMG/TMC file and associated throughput tables delivered after this date to use the
 WFIRST OBSMODEs.)
 
 
