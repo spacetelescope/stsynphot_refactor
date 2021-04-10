@@ -258,6 +258,7 @@ Using **stsynphot**
    :maxdepth: 1
 
    stsynphot/overview
+   stsynphot/config
    stsynphot/from_pysyn_iraf
    stsynphot/obsmode
    stsynphot/spectrum
