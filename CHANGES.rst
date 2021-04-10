@@ -1,6 +1,8 @@
 1.1.0 (unreleased)
 ==================
 
+- ``~/.astropy/config/stsynphot.cfg`` is no longer updated on import. [#145]
+
 1.0.0 (2020-07-31)
 ==================
 

@@ -13,9 +13,9 @@ Reference data has its history in IRAF SYNPHOT::
 
 In **stsynphot**, this is managed via its configuration system
 (``stsynphot.config.conf``). Its overview and setup are explained in
-:ref:`stsynphot-installation-setup`. As you can see in its
-`stsynphot.cfg <https://github.com/spacetelescope/stsynphot_refactor/blob/master/stsynphot/stsynphot.cfg>`_
-file, the reference data management has been expanded to include the following:
+:ref:`stsynphot-installation-setup`. As you can see in
+:ref:`stsynphot_config_file`, the reference data management has been expanded
+to include the following:
 
 * ``rootdir``, which is used in the absence of ``PYSYN_CDBS`` environment
   variable
@@ -63,11 +63,10 @@ For backward compatibilty, :func:`~stsynphot.config.showref` and
 To change a configurable item's value, use the machinery of
 :ref:`Astropy configuration system <astropy:astropy_config>`.
 Examples shown are only for ``graphtable`` but they are similar for others
-(in fact, usually all the graph and component tables are changed together)::
+(in fact, usually all the graph and component tables are changed together):
 
     >>> stsyn.conf.graphtable = '/path/to/my_new_tmg.fits'  # Entire session
     >>> stsyn.conf.reload('graphtable')  # Reload from stsynphot.cfg
-    'mtab$*_tmg.fits'
     >>> stsyn.conf.reload()  # Reload everything
     >>> stsyn.conf.reset('graphtable')  # Reset to software default
     >>> stsyn.conf.reset()  # Reset everything
