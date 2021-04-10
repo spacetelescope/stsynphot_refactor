@@ -28,7 +28,7 @@ catalog:
 
 config:
   - stsynphot/config.py
-  - stsynphot/stsynphot.cfg
+  - docs/stsynphot/config.rst
 
 observationmode:
   - stsynphot/observationmode.py
