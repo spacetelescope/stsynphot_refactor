@@ -5,9 +5,9 @@ stsynphot
    :target: https://ascl.net/2010.003
    :alt: ASCL 2010.003
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3247831.svg
-   :target: https://doi.org/10.5281/zenodo.3247831
-   :alt: Zenodo 3247831
+.. image:: https://zenodo.org/badge/12412342.svg
+   :target: https://zenodo.org/badge/latestdoi/12412342
+   :alt: DOI: 10.5281/zenodo.5020768
 
 .. image:: https://readthedocs.org/projects/stsynphot/badge/?version=latest
     :target: https://stsynphot.readthedocs.io/en/latest/?badge=latest
