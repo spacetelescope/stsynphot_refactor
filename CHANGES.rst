@@ -1,6 +1,9 @@
-1.1.0 (unreleased)
+1.1.0 (2021-06-23)
 ==================
 
+This version is compatible with ``synphot`` 1.1.0.
+
+- Compatibility with ``astropy`` 4.3. [#128]
 - ``~/.astropy/config/stsynphot.cfg`` is no longer updated on import. [#145]
 
 1.0.0 (2020-07-31)
