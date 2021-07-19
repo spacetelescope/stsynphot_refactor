@@ -288,7 +288,7 @@ The Stromgren *uvby* throughputs are taken from
 .. _stsynphot-nonhst-roman:
 
 Roman
-------
+-----
 
 Phase C estimates of the Roman integrated system throughputs have been taken from
 the `Roman Reference Information <https://roman.gsfc.nasa.gov/science/Roman_Reference_Information.html>`_ page at GSFC. For example:
