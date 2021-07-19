@@ -285,33 +285,31 @@ The Stromgren *uvby* throughputs are taken from
     >>> bp = stsyn.band('stromgren,y')  # doctest: +SKIP
 
 
-.. _stsynphot-nonhst-wfirst:
+.. _stsynphot-nonhst-roman:
 
-WFIRST
+Roman
 ------
 
-Phase B estimates of the WFIRST integrated system throughputs have been taken from
-the `WFIRST Reference Information <https://wfirst.gsfc.nasa.gov/science/WFIRST_Reference_Information.html>`_ page at GSFC. For example:
+Phase C estimates of the Roman integrated system throughputs have been taken from
+the `Roman Reference Information <https://roman.gsfc.nasa.gov/science/Roman_Reference_Information.html>`_ page at GSFC. For example:
 
 >>> import stsynphot as stsyn
->>> bp = stsyn.band('wfirst,wfi,f062')  # doctest: +SKIP
+>>> bp = stsyn.band('roman,wfi,f062')  # doctest: +SKIP
 
 Only the Wide Field Instrument (WFI) is currently supported with the following modes:
 
-+------------+-----------------------------------------+
-|Description |Keywords                                 |
-+============+=========================================+
-|Filter      |f062, f087, f106, f129, f146, f158, f184 |
-+------------+-----------------------------------------+
-|Grating     |grism, prism                             |
-+------------+-----------------------------------------+
++------------+-----------------------------------------------+
+|Description |Keywords                                       |
++============+===============================================+
+|Filter      |f062, f087, f106, f129, w146, f158, f184, f213 |
++------------+-----------------------------------------------+
+|Grating     |grism, grism0, prism                           |
++------------+-----------------------------------------------+
+
+The grism component gives the throughput for the first order grism spectrum. This is the mode that most users should select. The zeroth order grism throughput (grism0) is provided only as a reference.
 
 At this time, the estimated throughputs do not differentiate between the different sensor chip assemblies (SCAs).
 SCA-dependent throughputs will be delivered at a later time.
-
-(Note: WFIRST throughput curves were added to the TMG file in January 2020. Users must use
-a TMG/TMC file and associated throughput tables delivered after this date to use the
-WFIRST OBSMODEs.)
 
 
 
