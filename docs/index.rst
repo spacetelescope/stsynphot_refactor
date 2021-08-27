@@ -144,12 +144,19 @@ Then, you can modify it to your needs::
 
 .. note::
 
+    In ``stsynphot`` 1.2 and later, instead of setting ``area`` in your
+    configuration file, you can also grab pre-defined values for HST and JWST
+    from `stsynphot.constant` module; e.g., ``stsynphot.constant.jwst_area``.
+    You can pass this constant directly into a method that uses area directly,
+    such as :meth:`synphot.observation.Observation.countrate`.
+
+.. note::
+
     In theory, you can use any ``astropy.config`` functionality
     (e.g. ``set_temp()``) to manage **stsynphot** configuration items.
     However, due to the complicated relationships between instrument-specific
     data files, it is not recommended unless you know what you are doing.
     Also see :ref:`stsynphot-refdata`.
-
 
 .. _stsynphot_getting_started:
 
@@ -228,7 +235,7 @@ for HST collecting area::
 
     >>> from synphot import Observation
     >>> obs = Observation(sp_ext, bp, binset=bp.binset)  # doctest: +SKIP
-    >>> obs.countrate(area=stsyn.config.conf.area)  # doctest: +SKIP
+    >>> obs.countrate(area=stsyn.constant.hst_area)  # doctest: +SKIP
     <Quantity 23.839134880103543 ct / s>
 
 To find out exactly how ``bp.binset`` was computed, you can use the following
@@ -279,6 +286,10 @@ API
 
 .. automodapi:: stsynphot.config
    :no-inheritance-diagram:
+
+.. automodapi:: stsynphot.constant
+   :no-inheritance-diagram:
+   :include-all-objects:
 
 .. automodapi:: stsynphot.exceptions
 

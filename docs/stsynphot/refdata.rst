@@ -132,6 +132,10 @@ primary header. This behavior is retained from ASTROLIB PYSYNPHOT to be
 backward compatible. When in doubt, always provide the desired telescope area
 explicitly by passing it into the ``area`` keyword, where applicable.
 
+For convenience, in ``stsynphot`` 1.2 and later, you can directly access
+HST and JWST telescope areas via constants defined in `stsynphot.constant`
+module. You can pass the desired constant value directly into the ``area``
+keyword, as mentioned above.
 
 .. _refdata-wavecatfile:
 

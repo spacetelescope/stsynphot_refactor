@@ -7,14 +7,20 @@ import os
 # THIRD-PARTY
 import numpy as np
 import pytest
+from numpy.testing import assert_allclose
 
 # SYNPHOT
 from synphot.config import conf as synconf
 from synphot.utils import generate_wavelengths
 
 # LOCAL
-from .. import config
-from ..stio import get_latest_file, irafconvert
+from stsynphot import config, constant
+from stsynphot.stio import get_latest_file, irafconvert
+
+
+def test_area():
+    """Make sure default area is still HST."""
+    assert_allclose(config.conf.area, constant.hst_area.value)
 
 
 class TestOverwriteSynphot:

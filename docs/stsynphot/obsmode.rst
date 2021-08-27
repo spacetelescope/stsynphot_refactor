@@ -179,6 +179,7 @@ The example below (adapted from an example in the documentation of IRAF SYNPHOT
 2500 K blackbody in Cousins *I* and HST/WFC3 UVIS1 F814W bandpasses::
 
     >>> import stsynphot as stsyn
+    >>> from stsynphot.constant import hst_area
     >>> from synphot import SourceSpectrum, Observation
     >>> from synphot.models import BlackBodyNorm1D
     >>> # Create the blackbody
@@ -188,8 +189,7 @@ The example below (adapted from an example in the documentation of IRAF SYNPHOT
     >>> # Create Cousins I observation using WFC3 binning for consistency
     >>> obs_i = Observation(bb, stsyn.band('i'), binset=obs_wfc3.binset)  # doctest: +SKIP
     >>> # Color index in instrumental magnitude
-    >>> area = stsyn.conf.area
-    >>> obs_i.effstim('obmag', area=area) - obs_wfc3.effstim('obmag', area=area)  # doctest: +SKIP
+    >>> obs_i.effstim('obmag', area=hst_area) - obs_wfc3.effstim('obmag', area=hst_area)  # doctest: +SKIP
     <Quantity -1.2186293262909498 OBMAG>
     >>> # Color index in FLA
     >>> obs_i.effstim('flam') / obs_wfc3.effstim('flam')  # doctest: +SKIP

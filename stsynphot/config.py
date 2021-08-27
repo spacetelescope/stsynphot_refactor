@@ -22,6 +22,9 @@ from astropy.config import ConfigNamespace, ConfigItem
 from synphot.config import Conf as synconf
 from synphot.utils import generate_wavelengths
 
+# LOCAL
+from stsynphot.constant import hst_area
+
 __all__ = ['conf', 'getref', 'showref', 'overwrite_synphot_config']
 
 
@@ -50,7 +53,7 @@ class Conf(ConfigNamespace):
     waveset = ConfigItem(_wave_str, 'Default wavelength set description')
 
     # Telescope primary mirror collecting area in cm^2
-    area = ConfigItem(45238.93416, 'Telescope collecting area in cm^2')
+    area = ConfigItem(hst_area.value, 'Telescope collecting area in cm^2')
 
     # Common filter name
     clear_filter = ConfigItem('clear', 'Name for a clear filter')

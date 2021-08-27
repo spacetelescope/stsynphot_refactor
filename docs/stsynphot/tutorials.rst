@@ -22,6 +22,7 @@ ACS/WFC1 F555W bandpass, with 0.3 and 1.0 arcsec EE radii, respectively::
 
     >>> import stsynphot as stsyn
     >>> from astropy import units as u
+    >>> from stsynphot.constant import hst_area
     >>> from synphot import Observation
     >>> sp = stsyn.Vega.normalize(20 * u.STmag, stsyn.band('johnson,v'))  # doctest: +SKIP
     >>> obs03 = Observation(sp, stsyn.band('acs,wfc1,f555w,aper#0.3'))  # doctest: +SKIP
@@ -29,8 +30,8 @@ ACS/WFC1 F555W bandpass, with 0.3 and 1.0 arcsec EE radii, respectively::
 
 Calculate the count rates for both and display the results::
 
-    >>> c03 = obs03.countrate(stsyn.conf.area)  # doctest: +SKIP
-    >>> c10 = obs10.countrate(stsyn.conf.area)  # doctest: +SKIP
+    >>> c03 = obs03.countrate(hst_area)  # doctest: +SKIP
+    >>> c10 = obs10.countrate(hst_area)  # doctest: +SKIP
     >>> print(f'Count rate for 0.3" is {c03:.3f}\n'
     ...       f'Count rate for 1.0" is {c10:.3f}')  # doctest: +SKIP
     Count rate for 0.3" is 174.801 ct / s
@@ -54,10 +55,11 @@ the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
     >>> import numpy as np
     >>> import stsynphot as stsyn
     >>> from astropy.time import Time
+    >>> from stsynphot.constant import hst_area
     >>> obsdate = Time('2017-05-30').mjd
     >>> obsmode = f'acs,wfc1,f555w,mjd#{obsdate}'
     >>> bp = stsyn.band(obsmode)  # doctest: +SKIP
-    >>> photflam = bp.unit_response(stsyn.conf.area)  # doctest: +SKIP
+    >>> photflam = bp.unit_response(hst_area)  # doctest: +SKIP
     >>> photflam  # doctest: +SKIP
     <Quantity 1.9647813651514673e-19 FLAM>
 
@@ -87,10 +89,11 @@ the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
     >>> import numpy as np
     >>> import stsynphot as stsyn
     >>> from astropy.time import Time
+    >>> from stsynphot.constant import hst_area
     >>> obsdate = Time('2017-05-30').mjd
     >>> obsmode = f'acs,wfc1,f555w,mjd#{obsdate}'
     >>> bp = stsyn.band(obsmode)  # doctest: +SKIP
-    >>> photflam = bp.unit_response(stsyn.conf.area)  # doctest: +SKIP
+    >>> photflam = bp.unit_response(hst_area)  # doctest: +SKIP
     >>> photplam = bp.pivot()  # doctest: +SKIP
     >>> photplam  # doctest: +SKIP
     <Quantity 5360.938362432486 Angstrom>
@@ -128,11 +131,12 @@ the ACS/WFC1 F555W bandpass, which happens to be time-dependent::
     >>> import numpy as np
     >>> import stsynphot as stsyn
     >>> from astropy.time import Time
+    >>> from stsynphot.constant import hst_area
     >>> from synphot import Observation
     >>> obsdate = Time('2017-05-30').mjd
     >>> bp = stsyn.band(f'acs,wfc1,f555w,mjd#{obsdate}')  # doctest: +SKIP
     >>> obs = Observation(stsyn.Vega, bp, binset=bp.binset)  # doctest: +SKIP
-    >>> vega_zpt = -obs.effstim(flux_unit='obmag', area=stsyn.conf.area)  # doctest: +SKIP
+    >>> vega_zpt = -obs.effstim(flux_unit='obmag', area=hst_area)  # doctest: +SKIP
     >>> print(f'VEGAMAG zeropoint for {bp.obsmode} is {vega_zpt:.5f}')  # doctest: +SKIP
     VEGAMAG zeropoint for acs,wfc1,f555w,mjd#57903.0 is 25.71235 OBMAG
 
