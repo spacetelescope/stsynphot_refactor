@@ -386,7 +386,7 @@ Bessell
 The Bessell *JHK* filter curves are taken from
 :ref:`Bessell & Brett (1988) <stsynphot-ref-bessell1988>`, Table IV.
 These curves include the mean atmospheric transmission equivalent to 1.2
-air masses of a standard `KPNO <https://www.noao.edu/kpno/>`_  atmosphere.
+air masses of a standard `KPNO <https://noirlab.edu/public/programs/kitt-peak-national-observatory/>`_  atmosphere.
 For example::
 
     >>> import stsynphot as stsyn
@@ -410,7 +410,7 @@ For example::
 KPNO
 ^^^^
 
-The `Kitt Peak National Observatory (KPNO) <https://www.noao.edu/kpno/>`_ *JHK*
+The `Kitt Peak National Observatory (KPNO) <https://noirlab.edu/public/programs/kitt-peak-national-observatory/>`_ *JHK*
 filter curves are taken from the tracings of the Simultaneous Quad Infrared
 Image Device (SQIID) filter set, which were provided by Richard Joyce from the
 observatory. For example::
