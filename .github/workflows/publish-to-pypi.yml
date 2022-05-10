@@ -1,8 +1,13 @@
 name: Release
 
 on:
+  pull_request:
   release:
     types: [released]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-n-publish:
@@ -11,11 +16,11 @@ jobs:
     if: github.repository == 'spacetelescope/stsynphot_refactor'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: 3.8
 
@@ -41,7 +46,8 @@ jobs:
     # FOR DEBUGGING ONLY: repository_url (TestPyPI) and verbose;
     # Use appropriate token if debugging with TestPyPI
     - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@master
+      if: github.event_name == 'release'
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_TOKEN }}
