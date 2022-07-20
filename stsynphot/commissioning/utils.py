@@ -3,7 +3,7 @@
 # STDLIB
 import os
 import sys
-from collections import Iterable
+from collections.abc import Sized
 
 # THIRD-PARTY
 import numpy as np
@@ -148,7 +148,7 @@ class CommCase:
                          atol=sys.float_info.min):
         """``assert_allclose`` only report percentage but we
         also want to know some extra info conveniently."""
-        if isinstance(actual, Iterable):
+        if isinstance(actual, Sized):
             ntot = len(actual)
         else:
             ntot = 1
