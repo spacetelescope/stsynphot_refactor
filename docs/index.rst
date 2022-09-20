@@ -53,11 +53,7 @@ packages:
 
 You can install **stsynphot** using one of the following ways:
 
-* From `AstroConda <https://astroconda.readthedocs.io/en/latest/>`_::
-
-    conda install stsynphot -c http://ssb.stsci.edu/astroconda
-
-* From ``conda-forge`` channel::
+* From the ``conda-forge`` channel::
 
     conda install stsynphot -c conda-forge
 
