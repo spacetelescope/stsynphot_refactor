@@ -1,5 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""Custom exceptions for `stsynphot` to raise."""
+"""Custom exceptions for ``stsynphot`` to raise."""
 
 # SYNPHOT
 from synphot.exceptions import SynphotError

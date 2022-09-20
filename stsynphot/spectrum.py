@@ -585,11 +585,11 @@ def ebmvx(redlaw_name, ebv):
 
 def load_vega(vegafile=None, **kwargs):
     """Convenience function to load Vega spectrum that is
-    used throughout `stsynphot`.
+    used throughout ``stsynphot``.
 
     Parameters
     ----------
-    vegafile : str or `None`, optional
+    vegafile : str, None
         Vega spectrum filename.
         If `None`, use ``synphot.config.conf.vega_file``.
 
@@ -598,7 +598,7 @@ def load_vega(vegafile=None, **kwargs):
 
     Returns
     -------
-    sp : `synphot.spectrum.SourceSpectrum` or `None`
+    sp : synphot.spectrum.SourceSpectrum, None
         Vega spectrum. `None` if failed.
 
     """
