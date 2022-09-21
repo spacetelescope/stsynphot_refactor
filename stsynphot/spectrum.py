@@ -589,7 +589,7 @@ def load_vega(vegafile=None, **kwargs):
 
     Parameters
     ----------
-    vegafile : str, None
+    vegafile : str, `None`
         Vega spectrum filename.
         If `None`, use ``synphot.config.conf.vega_file``.
 
@@ -598,7 +598,7 @@ def load_vega(vegafile=None, **kwargs):
 
     Returns
     -------
-    sp : synphot.spectrum.SourceSpectrum, None
+    sp : `synphot.spectrum.SourceSpectrum`, `None`
         Vega spectrum. `None` if failed.
 
     """
