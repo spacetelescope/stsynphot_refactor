@@ -591,7 +591,7 @@ def load_vega(vegafile=None, **kwargs):
     ----------
     vegafile : str, `None`
         Vega spectrum filename.
-        Defaults to `synphot.config.Conf.vega_file`
+        Defaults to ``synphot.config.conf.vega_file``
 
     kwargs : dict
         Keywords acceptable by :func:`synphot.specio.read_remote_spec`.
