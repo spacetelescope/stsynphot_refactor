@@ -589,16 +589,16 @@ def load_vega(vegafile=None, **kwargs):
 
     Parameters
     ----------
-    vegafile : str, `None`
+    vegafile : str or `None`, optional
         Vega spectrum filename.
-        Defaults to ``synphot.config.conf.vega_file``
+        If `None`, use ``synphot.config.conf.vega_file``.
 
     kwargs : dict
         Keywords acceptable by :func:`synphot.specio.read_remote_spec`.
 
     Returns
     -------
-    sp : `synphot.spectrum.SourceSpectrum`, `None`
+    sp : `synphot.spectrum.SourceSpectrum` or `None`
         Vega spectrum. `None` if failed.
 
     """
