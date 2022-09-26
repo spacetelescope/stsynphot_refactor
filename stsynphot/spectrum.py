@@ -585,7 +585,7 @@ def ebmvx(redlaw_name, ebv):
 
 def load_vega(vegafile=None, **kwargs):
     """Convenience function to load Vega spectrum that is
-    used throughout `stsynphot`.
+    used throughout ``stsynphot``.
 
     Parameters
     ----------
