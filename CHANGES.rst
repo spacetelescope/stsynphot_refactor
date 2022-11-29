@@ -3,6 +3,9 @@
 
 - Dropped support for Python 3.6 and 3.7. Minimum supported Python
   version is now 3.8. [#161]
+- Bumped minimum supported versions for ``numpy`` to 1.18,
+  ``astropy`` to 4.3, and ``scipy`` to 1.3. [#167]
+- Bumped minimum supported version for ``synphot`` to 1. [#167]
 
 1.1.0 (2021-06-23)
 ==================
