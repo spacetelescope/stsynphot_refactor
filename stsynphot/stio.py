@@ -17,11 +17,10 @@ from pathlib import Path
 import numpy as np
 
 # ASTROPY
-import astropy
 from astropy import units as u
 from astropy.io import ascii, fits
 from astropy.utils.exceptions import AstropyUserWarning
-from astropy.utils.introspection import minversion
+from astropy.utils.data import get_pkg_data_path
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
@@ -33,13 +32,6 @@ __all__ = ['resolve_filename', 'irafconvert', 'get_latest_file',
 
 _irafconvpat = re.compile(r'\$(\w*)')
 _irafconvdata = None
-
-ASTROPY_LT_4_3 = not minversion(astropy, '4.3')
-
-if ASTROPY_LT_4_3:
-    from astropy.utils.data import _find_pkg_data_path as get_pkg_data_path
-else:
-    from astropy.utils.data import get_pkg_data_path
 
 
 def resolve_filename(path, *args):
