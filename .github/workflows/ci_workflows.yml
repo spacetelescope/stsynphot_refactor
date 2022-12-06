@@ -40,7 +40,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: initial_check
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
 
@@ -63,7 +63,6 @@ jobs:
             os: ubuntu-latest
             python: 3.x
             toxenv: linkcheck
-            continue-on-error: true
 
           - name: Test without optional deps
             os: ubuntu-latest
