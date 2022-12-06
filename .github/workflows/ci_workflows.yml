@@ -63,6 +63,7 @@ jobs:
             os: ubuntu-latest
             python: 3.x
             toxenv: linkcheck
+            continue-on-error: true
 
           - name: Test without optional deps
             os: ubuntu-latest
