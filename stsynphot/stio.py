@@ -71,7 +71,7 @@ def resolve_filename(path, *args):
 
 def _iraf_decode(irafdir):
     """Decode IRAF dir shortcut."""
-    from .config import conf  # Put here to avoid circular import error
+    from stsynphot.config import conf  # Put here to avoid circular import error  # noqa
     global _irafconvdata
 
     irafdir = irafdir.lower()

@@ -9,8 +9,8 @@ import pytest
 from astropy import units as u
 
 # LOCAL
-from .. import exceptions
-from ..wavetable import WAVECAT
+from stsynphot import exceptions
+from stsynphot.wavetable import WAVECAT
 
 
 @pytest.mark.parametrize(

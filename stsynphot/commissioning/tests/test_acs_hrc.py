@@ -12,7 +12,7 @@ import shutil
 from astropy.utils.data import get_pkg_data_filename
 
 # LOCAL
-from ..utils import CommCase
+from stsynphot.commissioning.utils import CommCase
 
 # Local test data
 datafiles = ['earthshine.fits', 'el1215a.fits', 'el1302a.fits', 'el1356a.fits',

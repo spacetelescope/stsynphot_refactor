@@ -21,9 +21,9 @@ else:
 
 # LOCAL
 from synphot import Observation
-from ..config import conf
-from ..spectrum import band
-from ..spparser import parse_spec
+from stsynphot.config import conf
+from stsynphot.spectrum import band
+from stsynphot.spparser import parse_spec
 
 use_pysynphot = pytest.mark.skipif('not HAS_PYSYNPHOT')
 

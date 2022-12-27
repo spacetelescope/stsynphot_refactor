@@ -15,7 +15,7 @@ import re
 from astropy import log
 
 # LOCAL
-from .exceptions import ParserError, GenericASTTraversalPruningException
+from stsynphot.exceptions import ParserError, GenericASTTraversalPruningException
 
 __all__ = ['GenericScanner', 'GenericParser', 'GenericASTBuilder',
            'GenericASTTraversal', 'GenericASTMatcher']

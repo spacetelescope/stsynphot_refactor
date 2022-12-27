@@ -8,9 +8,9 @@ import numpy as np
 from astropy import log
 
 # LOCAL
-from . import exceptions, stio
-from .config import conf
-from .stio import get_latest_file, irafconvert
+from stsynphot import exceptions, stio
+from stsynphot.config import conf
+from stsynphot.stio import get_latest_file, irafconvert
 
 __all__ = ['GraphTable', 'CompTable']
 

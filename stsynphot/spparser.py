@@ -28,11 +28,11 @@ from synphot.models import (BlackBodyNorm1D, Box1D, ConstFlux1D,
 from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
-from . import exceptions, spectrum
-from .catalog import grid_to_spec
-from .config import conf
-from .spark import GenericScanner, GenericASTBuilder, GenericASTMatcher
-from .stio import irafconvert
+from stsynphot import exceptions, spectrum
+from stsynphot.catalog import grid_to_spec
+from stsynphot.config import conf
+from stsynphot.spark import GenericScanner, GenericASTBuilder, GenericASTMatcher
+from stsynphot.stio import irafconvert
 
 __all__ = ['Token', 'AST', 'BaseScanner', 'Scanner', 'BaseParser',
            'Interpreter', 'tokens_info', 'scan', 'parse', 'interpret',

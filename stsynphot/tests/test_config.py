@@ -13,8 +13,8 @@ from synphot.config import conf as synconf
 from synphot.utils import generate_wavelengths
 
 # LOCAL
-from .. import config
-from ..stio import get_latest_file, irafconvert
+from stsynphot import config
+from stsynphot.stio import get_latest_file, irafconvert
 
 
 class TestOverwriteSynphot:

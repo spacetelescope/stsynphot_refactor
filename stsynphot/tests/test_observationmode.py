@@ -16,9 +16,9 @@ from astropy.utils.data import get_pkg_data_filename
 from synphot import units
 
 # LOCAL
-from .. import observationmode
-from ..config import conf
-from ..stio import irafconvert
+from stsynphot import observationmode
+from stsynphot.config import conf
+from stsynphot.stio import irafconvert
 
 GT_FILE = get_pkg_data_filename('data/tables_tmg.fits')
 CP_FILE = get_pkg_data_filename('data/tables_tmc.fits')

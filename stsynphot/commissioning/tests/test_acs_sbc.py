@@ -10,7 +10,7 @@ Adapted from ``astrolib/pysynphot/from_commissioning/acs/test3.py``
 """
 
 # LOCAL
-from ..utils import CommCase
+from stsynphot.commissioning.utils import CommCase
 
 
 class Test619(CommCase):

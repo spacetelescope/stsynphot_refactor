@@ -123,7 +123,7 @@ overwrite_synphot_config(conf.rootdir)
 
 def _get_ref_cfgitems():
     """Iterator for configuration items to be displayed."""
-    from .stio import get_latest_file, irafconvert
+    from stsynphot.stio import get_latest_file, irafconvert
 
     for cfgitem, do_conv in (
             (Conf.graphtable, True),

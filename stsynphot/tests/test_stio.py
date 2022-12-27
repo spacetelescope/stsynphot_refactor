@@ -24,8 +24,8 @@ from astropy.utils.exceptions import AstropyUserWarning
 from synphot import exceptions as synexceptions
 
 # LOCAL
-from .. import stio
-from ..config import conf
+from stsynphot import stio
+from stsynphot.config import conf
 
 
 class TestIRAFConvert:
