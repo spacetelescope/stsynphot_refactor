@@ -27,9 +27,9 @@ from synphot.reddening import ExtinctionCurve
 from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
-from .. import catalog, exceptions, observationmode, spectrum, spparser
-from ..config import conf
-from ..stio import resolve_filename
+from stsynphot import catalog, exceptions, observationmode, spectrum, spparser
+from stsynphot.config import conf
+from stsynphot.stio import resolve_filename
 
 
 def _single_functioncall(sp, ans_cls, ans_model, ans_name, ans_z=0):

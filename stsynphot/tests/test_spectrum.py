@@ -25,10 +25,10 @@ from synphot.models import ConstFlux1D
 from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
-from .. import spectrum
-from ..config import conf
-from ..exceptions import PixscaleNotFoundError
-from ..stio import irafconvert
+from stsynphot import spectrum
+from stsynphot.config import conf
+from stsynphot.exceptions import PixscaleNotFoundError
+from stsynphot.stio import irafconvert
 
 GT_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmg.fits'))
 CP_FILE = get_pkg_data_filename(os.path.join('data', 'tables_tmc.fits'))

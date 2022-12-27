@@ -22,8 +22,8 @@ from synphot.models import Empirical1D
 from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
-from . import stio
-from .exceptions import PixscaleNotFoundError
+from stsynphot import stio
+from stsynphot.exceptions import PixscaleNotFoundError
 
 __all__ = ['reset_cache', 'interpolate_spectral_element',
            'ObservationSpectralElement', 'band', 'ebmvx', 'load_vega', 'Vega']
@@ -522,7 +522,7 @@ class ObservationSpectralElement(SpectralElement):
             Observation mode yields no throughput.
 
         """
-        from .observationmode import ObservationMode  # Avoid circular import
+        from stsynphot.observationmode import ObservationMode  # Avoid circular import  # noqa
 
         ob = ObservationMode(
             obsmode, graphtable=graphtable, comptable=comptable,

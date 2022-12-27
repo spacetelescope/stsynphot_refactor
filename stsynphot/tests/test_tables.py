@@ -16,8 +16,8 @@ import pytest
 from astropy.utils.data import get_pkg_data_filename
 
 # LOCAL
-from .. import exceptions
-from ..tables import GraphTable, CompTable
+from stsynphot import exceptions
+from stsynphot.tables import GraphTable, CompTable
 
 
 def test_custom_primarea():

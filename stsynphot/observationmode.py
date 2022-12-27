@@ -23,11 +23,11 @@ from synphot.thermal import ThermalSpectralElement
 from synphot.utils import merge_wavelengths
 
 # LOCAL
-from . import exceptions, stio
-from .config import conf
-from .spectrum import Vega, interpolate_spectral_element
-from .tables import GraphTable, CompTable
-from .wavetable import WAVECAT
+from stsynphot import exceptions, stio
+from stsynphot.config import conf
+from stsynphot.spectrum import Vega, interpolate_spectral_element
+from stsynphot.tables import GraphTable, CompTable
+from stsynphot.wavetable import WAVECAT
 
 __all__ = ['reset_cache', 'Component', 'ThermalComponent',
            'BaseObservationMode', 'ObservationMode', 'ThermalObservationMode']

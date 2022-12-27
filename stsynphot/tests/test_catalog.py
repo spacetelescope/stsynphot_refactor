@@ -13,7 +13,7 @@ from synphot import exceptions as synexceptions
 from synphot import units
 
 # LOCAL
-from .. import catalog, exceptions
+from stsynphot import catalog, exceptions
 
 
 @pytest.mark.remote_data

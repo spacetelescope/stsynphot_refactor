@@ -19,8 +19,8 @@ from astropy.utils.exceptions import AstropyUserWarning
 from synphot import units
 
 # LOCAL
-from . import exceptions, stio
-from .config import conf
+from stsynphot import exceptions, stio
+from stsynphot.config import conf
 
 __all__ = ['WAVECAT', 'WaveCatalog', 'load_wavecat']
 

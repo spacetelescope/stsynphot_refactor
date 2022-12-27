@@ -18,7 +18,7 @@ from synphot.spectrum import SourceSpectrum
 from synphot.utils import validate_totalflux
 
 # LOCAL
-from . import exceptions, stio
+from stsynphot import exceptions, stio
 
 __all__ = ['reset_cache', 'get_catalog_index', 'grid_to_spec',
            'find_valid_g_phoenix', 'plot_phoenix']
