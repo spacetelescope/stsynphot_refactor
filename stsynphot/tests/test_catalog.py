@@ -93,11 +93,11 @@ def test_phoenix_gap():
     """
     https://github.com/spacetelescope/stsynphot_refactor/issues/44
     """
-    catalog.grid_to_spec('phoenix', 2700, -1, 5.1)  # OK
+    catalog.grid_to_spec('phoenix', 2200, -1, 5.1)  # OK
     with pytest.raises(exceptions.ParameterOutOfBounds):
-        catalog.grid_to_spec('phoenix', 2700, -0.5, 5.1)
+        catalog.grid_to_spec('phoenix', 2200, -0.5, 5.1)
     with pytest.raises(exceptions.ParameterOutOfBounds):
-        catalog.grid_to_spec('phoenix', 2700, -0.501, 5.1)
+        catalog.grid_to_spec('phoenix', 2200, -0.501, 5.1)
 
 
 def test_grid_to_spec_exceptions_1():
