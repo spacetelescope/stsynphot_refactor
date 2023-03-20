@@ -1,4 +1,4 @@
-1.2.0 (unreleased)
+1.2.0 (2023-03-20)
 ==================
 
 - Dropped support for Python 3.6 and 3.7. Minimum supported Python
