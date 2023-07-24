@@ -216,7 +216,7 @@ The `Sloan Digital Sky Survey (SDSS) <https://www.sdss.org/>`_ *ugriz* filter
 throughputs were provided by Sebastian Jester on behalf of the SDSS team,
 as described in :ref:`Gunn et al. (2001) <stsynphot-ref-gunn2001>`.
 The filter curves are shown in the
-`SDSS filter response plot <http://classic.sdss.org/dr1/instruments/imager/index.html#filters>`_. For example::
+`SDSS filter response plot <https://classic.sdss.org/dr1/instruments/imager/#filters>`_. For example::
 
     >>> import stsynphot as stsyn
     >>> bp = stsyn.band('sdss,g')  # doctest: +SKIP
@@ -245,7 +245,7 @@ large extended sources (larger than about 80 pixels in size)
 because the extended IR scattering wings in these bands,
 which do not affect the photometry of point sources, begin to be
 included. The modified curves are shown in an
-`updated SDSS system response plot <http://classic.sdss.org/dr3/instruments/imager/#filters>`_.
+`updated SDSS system response plot <https://classic.sdss.org/dr3/instruments/imager/#filters>`_.
 
 The SDSS photometry is intended to be on the AB system
 (:ref:`Oke & Gunn 1983 <stsynphot-ref-oke1983>`), by which a 0-magnitude object
