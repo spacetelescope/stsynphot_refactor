@@ -41,7 +41,7 @@ reported) or contact `STScI Help Desk <https://hsthelp.stsci.edu>`_.
 Installation and Setup
 ======================
 
-**stsynphot** works for Python 3.8 or later only. It requires the following
+**stsynphot** works for Python 3.9 or later only. It requires the following
 packages:
 
 * numpy
@@ -112,11 +112,9 @@ synphot data file locations within the Python session**. For example::
 
 You can also take advantage of
 :ref:`Astropy configuration system <astropy:astropy_config>` to manage
-**stsynphot** configuration and data files. For example, with ``astropy`` 4.1
-or later, you can generate a ``$HOME/.astropy/config/stsynphot.cfg`` file like
+**stsynphot** configuration and data files. For example, with ``astropy``,
+you can generate a ``$HOME/.astropy/config/stsynphot.cfg`` file like
 this (otherwise, you can manually create one):
-
-.. doctest-requires:: astropy>=4.1
 
     >>> from astropy.config import generate_config
     >>> generate_config(pkgname='stsynphot')

@@ -10,6 +10,7 @@ import warnings
 # THIRD-PARTY
 import numpy as np
 import pytest
+from scipy.integrate import trapezoid
 
 # ASTROPY
 from astropy import units as u
@@ -185,7 +186,7 @@ class TestObservationSpectralElement:
 
         # Unit response
         a = obs.unit_response(obs.area)
-        b = units.HC * 0.01 / abs(np.trapz(x * y, x=x))
+        b = units.HC * 0.01 / abs(trapezoid(x * y, x=x))
         np.testing.assert_allclose(a.value, b.value)
 
     @pytest.mark.parametrize(
