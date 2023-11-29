@@ -1,7 +1,7 @@
 name: Release
 
 on:
-  pull_request:
+  workflow_dispatch:
   release:
     types: [released]
 
@@ -14,6 +14,11 @@ jobs:
     name: Build and publish Python 🐍 distributions 📦 to PyPI
     runs-on: ubuntu-latest
     if: github.repository == 'spacetelescope/stsynphot_refactor'
+    environment:
+      name: release
+      url: https://pypi.org/p/stsynphot
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
 
     steps:
     - uses: actions/checkout@v4
@@ -22,7 +27,7 @@ jobs:
 
     - uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.x'
 
     - name: Install python-build and twine
       run: python -m pip install build "twine>=3.3"
@@ -43,13 +48,6 @@ jobs:
         testenv/bin/pip install pytest-astropy ci-watson stsynphot_refactor/dist/*.whl
         testenv/bin/python -c "import stsynphot; stsynphot.test()"
 
-    # FOR DEBUGGING ONLY: repository_url (TestPyPI) and verbose;
-    # Use appropriate token if debugging with TestPyPI
     - name: Publish distribution 📦 to PyPI
       if: github.event_name == 'release'
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_TOKEN }}
-        #repository_url: https://test.pypi.org/legacy/
-        #verbose: true
