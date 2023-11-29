@@ -6,8 +6,8 @@ stsynphot
    :alt: ASCL 2010.003
 
 .. image:: https://zenodo.org/badge/12412342.svg
-   :target: https://zenodo.org/badge/latestdoi/12412342
-   :alt: DOI: 10.5281/zenodo.5020768
+   :target: https://zenodo.org/doi/10.5281/zenodo.5020767
+   :alt: DOI: 10.5281/zenodo.5020767
 
 .. image:: https://readthedocs.org/projects/stsynphot/badge/?version=latest
     :target: https://stsynphot.readthedocs.io/en/latest/?badge=latest

@@ -2,7 +2,7 @@ To reference stsynphot in publications, please cite [![ascl:2010.003](https://im
 
 #### Other forms of citation
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3247832.svg)](https://doi.org/10.5281/zenodo.3247832)
+[![DOI](https://zenodo.org/badge/12412342.svg)](https://zenodo.org/doi/10.5281/zenodo.5020767)
 
 Lim, P. L., et al. 2016, stsynphot User's Guide (Baltimore, MD: STScI),
 https://stsynphot.readthedocs.io/en/latest/
