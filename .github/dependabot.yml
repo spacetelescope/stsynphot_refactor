@@ -7,7 +7,7 @@ updates:
     target-branch: "master"
     schedule:
       interval: "monthly"
-      time: "10:10"
+      time: "10:20"
     open-pull-requests-limit: 10
 
   # Maintain dependencies for pip
@@ -16,4 +16,5 @@ updates:
     target-branch: "master"
     schedule:
       interval: "monthly"
-
+      time: "10:10"
+    open-pull-requests-limit: 10
