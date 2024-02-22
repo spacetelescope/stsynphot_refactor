@@ -1,53 +1,77 @@
 docs:
-  - .github/**/*.md
-  - .readthedocs.yaml
-  - docs/**/*
-  - docs/_static/*
-  - docs/_templates/*
-  - legacy_materials/*
-  - LICENSE
-  - licenses/*
-  - '*.md'
-  - any: ['*.rst', '!CHANGES.rst']
+- changed-files:
+  - any-glob-to-any-file:
+    - .github/**/*.md
+    - .readthedocs.yaml
+    - docs/**/*
+    - docs/_static/*
+    - docs/_templates/*
+    - legacy_materials/*
+    - LICENSE
+    - licenses/*
+    - '*.md'
+  - all-globs-to-any-file:
+    - '*.rst'
+    - '!CHANGES.rst'
 
 testing:
-  - .bandit.yaml
-  - .github/**/*.yml
-  - conftest.py
-  - tox.ini
-  - stsynphot/tests/**/*
-  - stsynphot/commissioning/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - .bandit.yaml
+    - .github/**/*.yml
+    - conftest.py
+    - tox.ini
+    - stsynphot/tests/**/*
+    - stsynphot/commissioning/**/*
 
 installation:
-  - MANIFEST.in
-  - pyproject.toml
-  - setup.*
+- changed-files:
+  - any-glob-to-any-file:
+    - MANIFEST.in
+    - pyproject.toml
+    - setup.*
 
 catalog:
-  - stsynphot/catalog.py
+- changed-files:
+  - any-glob-to-any-file:
+    - stsynphot/catalog.py
 
 config:
-  - stsynphot/config.py
-  - docs/stsynphot/config.rst
+- changed-files:
+  - any-glob-to-any-file:
+    - stsynphot/config.py
+    - docs/stsynphot/config.rst
 
 observationmode:
-  - stsynphot/observationmode.py
+- changed-files:
+  - any-glob-to-any-file:
+    - stsynphot/observationmode.py
 
 spectrum:
-  - stsynphot/spectrum.py
+- changed-files:
+  - any-glob-to-any-file:
+    - stsynphot/spectrum.py
 
 spparser:
-  - stsynphot/spark.py
-  - stsynphot/spparser.py
+- changed-files:
+  - any-glob-to-any-file:
+    - stsynphot/spark.py
+    - stsynphot/spparser.py
 
 stio:
-  - stsynphot/data/irafshortcuts.txt
-  - stsynphot/stio.py
+- changed-files:
+  - any-glob-to-any-file:
+    - stsynphot/data/irafshortcuts.txt
+    - stsynphot/stio.py
 
 tables:
-  - stsynphot/tables.py
+- changed-files:
+  - any-glob-to-any-file:
+    - stsynphot/tables.py
 
 wavetable:
-  - stsynphot/data/detectors.dat
-  - stsynphot/data/wavecats/*
-  - stsynphot/wavetable.py
+- changed-files:
+  - any-glob-to-any-file:
+    - stsynphot/data/detectors.dat
+    - stsynphot/data/wavecats/*
+    - stsynphot/wavetable.py
