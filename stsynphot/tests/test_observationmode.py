@@ -160,8 +160,8 @@ class TestObservationMode:
             [500, 3797, 4797, 5797, 6797, 7797, 8797, 9797, 10796])
         np.testing.assert_allclose(
             t(w).value,
-            [0, 6.87477055e-06, 2.14807644e-01, 2.85725420e-01, 7.34488102e-07,
-             2.96078061e-08, 3.57507695e-08, 9.99538418e-07, 0], rtol=1e-3)
+            [0, 6.757692e-06, 2.133779e-01, 2.845666e-01, 7.306088e-07,
+             2.941201e-08, 3.548093e-08, 9.848318e-07,0], rtol=1e-3)
 
     def test_sensitivity(self):
         sens = self.obsmode.sensitivity
@@ -171,8 +171,8 @@ class TestObservationMode:
             [500, 3797, 4797, 5797, 6797, 7797, 8797, 9797, 10796])
         np.testing.assert_allclose(
             sens(w).value,
-            [0, 5.94476276e+10, 2.34668703e+15, 3.77214087e+15, 1.13694055e+10,
-             5.25738140e+08, 7.16235278e+08, 2.23012046e+10, 0], rtol=1e-3)
+            [0, 5.843521e+10, 2.331067e+15, 3.756842e+15, 1.130935e+10,
+             5.222613e+08, 7.108290e+08, 2.197307e+10, 0], rtol=1e-3)
 
     def test_interp_two_params(self):
         obsmode = observationmode.ObservationMode(
@@ -195,10 +195,9 @@ class TestObservationMode:
         w = [6898, 7192, 7486, 7780, 8630, 11190, 13790, 15670, 17954.90234375]
         np.testing.assert_allclose(
             thsp(w).value,
-            [2.911303e-30, 9.52169734e-29, 2.32066138e-27, 4.38458258e-26,
-             1.86992105e-21, 2.90270169e-15, 3.42776351e-11, 2.15179718e-08,
-             7.24300701e-09], rtol=5e-3)
-
+            [2.911318e-30, 9.554516e-29, 2.328319e-27, 4.398529e-26,
+             1.863447e-21, 2.897122e-15, 3.428160e-11, 2.136660e-08,
+             7.252959e-09], rtol=5e-3)
 
 @pytest.mark.remote_data
 class TestThermalObservationMode:
