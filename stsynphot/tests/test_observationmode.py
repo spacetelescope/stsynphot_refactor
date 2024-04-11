@@ -161,7 +161,7 @@ class TestObservationMode:
         np.testing.assert_allclose(
             t(w).value,
             [0, 6.757692e-06, 2.133779e-01, 2.845666e-01, 7.306088e-07,
-             2.941201e-08, 3.548093e-08, 9.848318e-07,0], rtol=1e-3)
+             2.941201e-08, 3.548093e-08, 9.848318e-07, 0], rtol=1e-3)
 
     def test_sensitivity(self):
         sens = self.obsmode.sensitivity
