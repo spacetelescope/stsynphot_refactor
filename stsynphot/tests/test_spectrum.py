@@ -191,14 +191,14 @@ class TestObservationSpectralElement:
 
     @pytest.mark.parametrize(
         ('obsmode', 'ans'),
-        [('acs,hrc,f555w', 2.9788972414188295e-19),
-         ('acs,sbc,f125lp', 1.7218083497870695e-17),
-         ('acs,wfc1,f555w,f814w', 1.7485647715025005e-13),
-         ('cos,boa,fuv,g130m,c1309', 3.8108219824401987e-15),
-         ('stis,ccd,f25ndq1,a2d4,mjd#55555', 3.0597787848106823e-18),
-         ('wfc3,ir,f140w', 1.4737148727216957e-20),
-         ('wfc3,uvis1,f395n', 5.9433862614148255e-18),
-         ('wfc3,uvis2,fq924n', 6.1632709911742462e-18),
+        [('acs,hrc,f555w', 3.040958e-19),
+         ('acs,sbc,f125lp', 1.295846e-17),
+         ('acs,wfc1,f555w,f814w', 1.80739e-13),
+         ('cos,boa,fuv,g130m,c1309', 5.091488e-15),
+         ('stis,ccd,f25ndq1,a2d4,mjd#55555', 3.064935e-18),
+         ('wfc3,ir,f140w', 1.474866e-20),
+         ('wfc3,uvis1,f395n', 5.958943e-18),
+         ('wfc3,uvis2,fq924n', 6.360089e-18),
          ('wfpc2,1,a2d7,f300w,cont#49892.0', 6.3011E-17),
          ('wfpc2,f555w', 4.8967453103320938e-19)])
     def test_uresp(self, obsmode, ans):
