@@ -199,6 +199,7 @@ class TestObservationMode:
              1.863447e-21, 2.897122e-15, 3.428160e-11, 2.136660e-08,
              7.252959e-09], rtol=5e-3)
 
+
 @pytest.mark.remote_data
 class TestThermalObservationMode:
     """Test thermal observation mode.
