@@ -614,7 +614,7 @@ def load_vega(vegafile=None, **kwargs):
             Vega = None
             warnings.warn(
                 f'Failed to load Vega spectrum from {vegafile}; Functionality '
-                f'involving Vega will be cripped: {repr(e)}',
+                f'involving Vega will be severely limited: {repr(e)}',
                 AstropyUserWarning)
 
 
