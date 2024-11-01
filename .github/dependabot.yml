@@ -8,7 +8,10 @@ updates:
     schedule:
       interval: "monthly"
       time: "10:20"
-    open-pull-requests-limit: 10
+    groups:
+      actions:
+        patterns:
+          - "*"
 
   # Maintain dependencies for pip
   - package-ecosystem: "pip"
@@ -17,4 +20,7 @@ updates:
     schedule:
       interval: "monthly"
       time: "10:10"
-    open-pull-requests-limit: 10
+    groups:
+      actions:
+        patterns:
+          - "*"
