@@ -1,5 +1,8 @@
-1.3.1 (unreleased)
+1.4.0 (2024-11-19)
 ==================
+
+- Bumped minimum supported versions for Python to 3.10,
+  ``numpy`` to 1.23, ``astropy`` to 6.0, and ``scipy`` to 1.9. [#201]
 
 1.3.0 (2023-11-28)
 ==================
