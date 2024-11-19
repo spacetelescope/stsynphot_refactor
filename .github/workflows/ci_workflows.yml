@@ -87,7 +87,7 @@ jobs:
           - name: Test with old dependencies
             os: ubuntu-latest
             python: '3.10'
-            toxenv: py39-test-oldestdeps
+            toxenv: py310-test-oldestdeps
 
           - name: Test in OSX
             os: macos-latest
