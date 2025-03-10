@@ -46,7 +46,7 @@ jobs:
         cd ..
         python -m venv testenv
         testenv/bin/pip install pytest-astropy ci-watson stsynphot_refactor/dist/*.whl
-        testenv/bin/python -c "import stsynphot; stsynphot.test()"
+        testenv/bin/pytest --pyargs stsynphot
 
     - name: Publish distribution 📦 to PyPI
       if: github.event_name == 'release'
