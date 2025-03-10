@@ -1,6 +1,9 @@
 1.5.0 (unreleased)
 ==================
 
+- Removed ``stsynphot.test()`` test runner.
+  Use ``pytest --pyargs stsynphot`` instead. [#206]
+
 1.4.0 (2024-11-19)
 ==================
 
