@@ -89,8 +89,9 @@ For :ref:`stsynphot-appendixb-acs` and :ref:`stsynphot-appendixb-wfc3`,
 the ``aper`` keyword is used to specify a circular aperture, given by its
 radius in arcseconds, to calculate the source counts within.
 If no aperture is given, calculations are done for an infinite aperture, where 
-the EE curves are normalized.  For ACS detectors, infinite aperture is defined 
-at a radius of 5.5 arcsec where the EE value is 1.0. For WFC3 detectors, 
+the EE curves are normalized. For ACS WFC and HRC detectors, infinite aperture 
+is defined at a radius of 5.5 arcsec where the EE value is 1.0. For ACS SBC, 
+infinite aperture is defined at 4.0 arcsec. For WFC3 UVIS and IR detectors, 
 infinite aperture is defined at a radius of 6.0 arcsec, where the EE is 1.0.
 
 This enables **stsynphot** to be more flexible and accurate, particularly for
