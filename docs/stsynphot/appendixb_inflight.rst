@@ -355,7 +355,7 @@ as tabulated below. For example::
 |               |               |aper#1.47 aper#1.50 aper#1.54 aper#1.58       |
 |               |               |aper#1.62 aper#1.66 aper#1.70 aper#1.74       |
 |               |               |aper#1.78 aper#1.82 aper#1.86 aper#1.90       |
-|               |               |aper#1.94 aper#6.00                           |
+|               |               |aper#1.94 aper#1.98 aper#6.00                 |
 |               +---------------+----------------------------------------------+
 |               |IR             |aper#0.10 aper#0.15 aper#0.20 aper#0.25       |
 |               |               |aper#0.30 aper#0.40 aper#0.50 aper#0.60       |
