@@ -1,8 +1,10 @@
-1.5.0 (unreleased)
+1.5.0 (2025-10-06)
 ==================
 
 - Removed ``stsynphot.test()`` test runner.
   Use ``pytest --pyargs stsynphot`` instead. [#206]
+- Fixed incorrect aperture information for WFC3 and ACS in
+  Appendix B. [#212]
 
 1.4.0 (2024-11-19)
 ==================
