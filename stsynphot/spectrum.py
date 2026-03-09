@@ -12,9 +12,11 @@ import numpy as np
 # ASTROPY
 from astropy import log
 from astropy import units as u
+from astropy.utils import minversion
 from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
+import synphot
 from synphot import binning, reddening, units
 from synphot import exceptions as synexceptions
 from synphot.config import conf as synconf
@@ -31,6 +33,7 @@ __all__ = ['reset_cache', 'interpolate_spectral_element',
 _interpfilepatt = re.compile(r'\[(?P<col>.*?)\]')
 _REDLAWS = {}  # Cache previously loaded reddening laws
 Vega = None  # Cache Vega spectrum
+SYNPHOT_LT_1_7 = not minversion(synphot, "1.7.0")
 
 
 def reset_cache():
@@ -587,6 +590,9 @@ def load_vega(vegafile=None, **kwargs):
     """Convenience function to load Vega spectrum that is
     used throughout ``stsynphot``.
 
+    ``stsynphot.Vega`` would be loaded as a
+    `~synphot.spectrum.SourceSpectrum` if successful; otherwise `None`.
+
     Parameters
     ----------
     vegafile : str or `None`, optional
@@ -596,12 +602,26 @@ def load_vega(vegafile=None, **kwargs):
     kwargs : dict
         Keywords acceptable by :func:`synphot.specio.read_remote_spec`.
 
-    Returns
-    -------
-    sp : `synphot.spectrum.SourceSpectrum` or `None`
-        Vega spectrum. `None` if failed.
-
     """
+    if SYNPHOT_LT_1_7:
+        _old_load_vega(vegafile=vegafile, **kwargs)
+    else:
+        from synphot import spectrum as syn_spec
+
+        global Vega
+
+        syn_spec.Vega = None  # Force reload
+        errmsg = syn_spec.lazy_load_vega(vegafile=vegafile, **kwargs)
+        if errmsg:
+            warnings.warn(
+                f'Failed to load Vega spectrum from {vegafile}; Functionality '
+                f'involving Vega will be severely limited: {errmsg}',
+                AstropyUserWarning)
+        Vega = syn_spec.Vega
+
+
+def _old_load_vega(vegafile=None, **kwargs):
+    """This is used by :func:`load_vega` for ``synphot<1.7``."""
     global Vega
 
     if vegafile is None:

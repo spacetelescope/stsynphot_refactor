@@ -81,8 +81,8 @@ jobs:
 
           - name: Test with dev dependencies
             os: ubuntu-latest
-            python: '3.13'
-            toxenv: py313-test-devdeps
+            python: '3.14'
+            toxenv: py314-test-devdeps
 
           - name: Test with old dependencies
             os: ubuntu-latest
@@ -91,14 +91,14 @@ jobs:
 
           - name: Test in OSX
             os: macos-latest
-            python: '3.12'
-            toxenv: py312-test
+            python: '3.13'
+            toxenv: py313-test
 
           # NOTE: If TRDS cannot take the hit, disable --remote-data
           - name: Test in Windows with remote data
             os: windows-latest
-            python: '3.11'
-            toxenv: py311-test
+            python: '3.14'
+            toxenv: py314-test
             toxposargs: --remote-data
 
     steps:
