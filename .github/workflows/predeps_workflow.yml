@@ -24,19 +24,19 @@ jobs:
 
           - name: RC testing in Linux with remote data
             os: ubuntu-latest
-            python: '3.11'
-            toxenv: py311-test-predeps
+            python: '3.12'
+            toxenv: py312-test-predeps
             toxposargs: --remote-data
 
           - name: RC testing in OSX
             os: macos-latest
-            python: '3.13'
-            toxenv: py313-test-predeps
+            python: '3.14'
+            toxenv: py314-test-predeps
 
           - name: RC testing in Windows
             os: windows-latest
-            python: '3.12'
-            toxenv: py312-test-predeps
+            python: '3.13'
+            toxenv: py313-test-predeps
 
     steps:
     - name: Checkout code
