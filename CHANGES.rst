@@ -1,3 +1,8 @@
+1.5.1 (2026-03-09)
+==================
+
+- Maintenance release, including caching compatibility with ``synphot`` 1.7.0. [#223]
+
 1.5.0 (2025-10-06)
 ==================
 
