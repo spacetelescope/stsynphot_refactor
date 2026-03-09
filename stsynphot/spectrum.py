@@ -587,6 +587,9 @@ def load_vega(vegafile=None, **kwargs):
     """Convenience function to load Vega spectrum that is
     used throughout ``stsynphot``.
 
+    ``stsynphot.Vega`` would be loaded as a
+    `~synphot.spectrum.SourceSpectrum` if successful; otherwise `None`.
+
     Parameters
     ----------
     vegafile : str or `None`, optional
@@ -595,11 +598,6 @@ def load_vega(vegafile=None, **kwargs):
 
     kwargs : dict
         Keywords acceptable by :func:`synphot.specio.read_remote_spec`.
-
-    Returns
-    -------
-    sp : `synphot.spectrum.SourceSpectrum` or `None`
-        Vega spectrum. `None` if failed.
 
     """
     global Vega
