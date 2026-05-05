@@ -7,13 +7,14 @@ import pytest
 
 # ASTROPY
 from astropy import units as u
+from astropy.table import Table
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
 from synphot import units
 
 # LOCAL
-from stsynphot import catalog, exceptions
+from stsynphot import conf as stsyn_conf, catalog, exceptions
 
 
 @pytest.mark.remote_data
@@ -104,3 +105,34 @@ def test_grid_to_spec_exceptions_2():
     with pytest.raises(synexceptions.SynphotError):
         catalog.grid_to_spec(
             'k93models', 6440, 0, 4.3 * u.dimensionless_unscaled)
+
+
+def test_get_catalog_index_custom(tmp_path):
+    """Test custom catalogs."""
+
+    crgrid = tmp_path / "grid"  # As defined in irafshortcuts.txt
+    crgrid.mkdir()
+
+    # Mock a custom catalog.
+    custom_name = 'BTSettl_2015_test'
+    custom_dir = crgrid / custom_name
+    custom_dir.mkdir()
+    data = [('10000,-0.5,0.0', 'BTSettl_2015_test_00000.fits'),
+            ('10000,-0.5,0.5', 'BTSettl_2015_test_00001.fits'),
+            ('10000,-0.5,1.0', 'BTSettl_2015_test_00002.fits')]
+    cat_tab = Table(rows=data,
+                    names=['INDEX', 'FILENAME'],
+                    dtype=['S14', 'S46'])
+    cat_tab.write(custom_dir / 'catalog.fits',
+                  format='fits', overwrite=True)
+
+    with stsyn_conf.set_temp("rootdir", str(tmp_path)):
+        # Test whether we can get a valid catalog path for a custom catalog
+        catfiles, catdir = catalog.get_catalog_index(custom_name)
+        assert catdir.endswith(custom_name)
+        assert len(catfiles) == 3
+
+        # Test whether we get an exception with an invalid catalog name.
+        with pytest.raises(synexceptions.SynphotError,
+                           match='junk catalog was not found'):
+            catfiles, catdir = catalog.get_catalog_index('junk')

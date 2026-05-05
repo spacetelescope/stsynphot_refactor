@@ -1,5 +1,8 @@
-1.5.2 (unreleased)
+1.6.0 (unreleased)
 ==================
+
+- ``get_catalog_index()`` now supports custom grid as long as they are
+  formatted and stored properly under ``crgrid$`` directory. [#224]
 
 1.5.1 (2026-03-09)
 ==================
