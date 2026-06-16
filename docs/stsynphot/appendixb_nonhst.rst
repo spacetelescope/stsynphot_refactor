@@ -167,7 +167,7 @@ GALEX
 -----
 
 The GALEX FUV and NUV throughputs were provided by Tom Barlow on
-behalf of the `GALEX <http://www.galex.caltech.edu/>`_ project, as described in
+behalf of the `GALEX <https://www.galex.caltech.edu/>`_ project, as described in
 :ref:`Morrissey et al. (2007) <stsynphot-ref-morrissey2007>`.
 They were measured on the ground in units of effective area,
 and were divided by the full area of the GALEX primary mirror
