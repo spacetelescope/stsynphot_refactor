@@ -3,6 +3,7 @@
 
 - ``get_catalog_index()`` now supports custom grid as long as they are
   formatted and stored properly under ``crgrid$`` directory. [#224]
+- Bumped minimum supported versions of Python to 3.11 and astropy to 7.0. [#231]
 
 1.5.1 (2026-03-09)
 ==================
