@@ -91,14 +91,14 @@ jobs:
 
           - name: Test in OSX
             os: macos-latest
-            python: '3.13'
-            toxenv: py313-test
+            python: '3.14'
+            toxenv: py314-test
 
           # NOTE: If TRDS cannot take the hit, disable --remote-data
           - name: Test in Windows with remote data
             os: windows-latest
-            python: '3.14'
-            toxenv: py314-test
+            python: '3.13'
+            toxenv: py313-test
             toxposargs: --remote-data
 
     steps:
