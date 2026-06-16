@@ -75,8 +75,8 @@ jobs:
 
           - name: Coverage test with remote data
             os: ubuntu-latest
-            python: '3.11'
-            toxenv: py311-test-alldeps-cov
+            python: '3.13'
+            toxenv: py313-test-alldeps-cov
             toxposargs: --remote-data
 
           - name: Test with dev dependencies
@@ -86,8 +86,8 @@ jobs:
 
           - name: Test with old dependencies
             os: ubuntu-latest
-            python: '3.10'
-            toxenv: py310-test-oldestdeps
+            python: '3.11'
+            toxenv: py311-test-oldestdeps
 
           - name: Test in OSX
             os: macos-latest
