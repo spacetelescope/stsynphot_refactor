@@ -141,6 +141,7 @@ linkcheck_ignore = ['https://hsthelp.stsci.edu',
                     'https://www.as.arizona.edu/observing',
                     'http://phoenix.ens-lyon.fr/simulator/index.faces',
                     'https://roman.gsfc.nasa.gov/science/Roman_Reference_Information.html',
+                    'https://www.galex.caltech.edu',
                     'https://www.sdss.org']
 linkcheck_timeout = 180
 linkcheck_anchors = False
