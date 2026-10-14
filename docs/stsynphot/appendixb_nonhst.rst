@@ -52,7 +52,9 @@ non-HST system.
 
 Firstly, one should be careful whether the throughput data have been
 defined for a photon-counting or an energy-integrating detector.
-**stsynphot** always assumes that a throughput are of the former.
+**stsynphot** always assumes that a throughput is of the photon-counting type;
+i.e., the throughput is not scaled by wavelength but it will be during
+integration in, say, :ref:`synphot:synphot-formula-effstim`.
 In particular, some authors in the past have defined throughput curves
 for photomultipliers as if these detectors were energy integrators,
 which they are not. Such curves have to be converted into photon-counting
@@ -115,6 +117,16 @@ systems are small:
 2MASS
 -----
 
+.. warning::
+    2MASS throughput curves are photon-counting relative spectral response curves (RSRs)
+    and cannot be used in :ref:`synphot:synphot_formulae` where wavelengths would be
+    multiplied back, hence double-counted. Please see :ref:`appb_nonhst_observed` for more details.
+
+.. note::
+    2MASS throughput curves were added to the TMG file in January 2020. Users must use
+    a TMG/TMC file and associated throughput tables delivered after this date to use the
+    2MASS OBSMODEs.
+
 The 2MASS *JHK*:math:`_s` throughputs are taken from :ref:`Cohen et al. (2003) <stsynphot-ref-cohen2003>`.
 These are normalized relative spectral response curves and include the throughputs of all of the
 appropriate optics from the 2MASS optical system, as well as the atmosphere above the two 2MASS
@@ -141,11 +153,6 @@ To use the 2MASS throughputs:
 >>> bp = stsyn.band('2mass,j')  # doctest: +SKIP
 >>> bp = stsyn.band('2mass,h')  # doctest: +SKIP
 >>> bp = stsyn.band('2mass,ks')  # doctest: +SKIP
-
-(Note: 2MASS throughput curves were added to the TMG file in January 2020. Users must use
-a TMG/TMC file and associated throughput tables delivered after this date to use the
-2MASS OBSMODEs.)
-
 
 
 .. _stsynphot-nonhst-cousins:
