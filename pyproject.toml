@@ -1,4 +1,112 @@
+[project]
+name = "stsynphot"
+description = "Synthetic photometry for HST"
+readme = {file = "README.rst", content-type = "text/x-rst"}
+requires-python = ">=3.11"
+authors = [{name = "STScI"}]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics"]
+keywords = ["astronomy", "astrophysics", "synthetic", "photometry", "HST"]
+dependencies = [
+    "numpy>=2",
+    "astropy>=7",
+    "scipy>=1.14",
+    "synphot>=1.5",
+    "beautifulsoup4"]
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+dynamic = [
+    "version",
+]
+
+[project.urls]
+"Bug Reports" = "https://github.com/spacetelescope/stsynphot_refactor/issues"
+Source = "https://github.com/spacetelescope/stsynphot_refactor"
+Help = "https://hsthelp.stsci.edu"
+Documentation = "https://stsynphot.readthedocs.io"
+
+[project.optional-dependencies]
+all = ["matplotlib"]
+test = [
+    "ci-watson",
+    "pytest-astropy-header",
+    "pytest-cov",
+    "pytest-doctestplus",
+    "pytest-remotedata"]
+docs = ["sphinx-astropy"]
+
 [build-system]
 requires = ["setuptools>=82.0.1",
             "setuptools_scm"]
-build-backend = "setuptools.build_meta"
+build-backend = "setuptools.build_meta"]
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["stsynphot*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+"stsynphot" = ["data/*.*", "data/wavecats/*"]
+"stsynphot.tests" = ["data/*"]
+"stsynphot.commissioning.tests" = ["data/*"]
+
+[tool.setuptools_scm]
+version_file = "stsynphot/version.py"
+
+[tool.pytest]
+minversion = "9"
+testpaths = ["stsynphot", "docs"]
+norecursedirs = ["build", "docs/_build", "stsynphot/data", "stsynphot/commissioning"]
+astropy_header = true
+addopts = ["--doctest-rst"]
+doctest_plus = "enabled"
+text_file_format = "rst"
+xfail_strict = true
+filterwarnings = [
+    "error",
+    "ignore:numpy\\.ufunc size changed:RuntimeWarning",
+    "ignore:numpy\\.ndarray size changed:RuntimeWarning",
+    "ignore:unclosed <ssl\\.SSLSocket:ResourceWarning",
+    "ignore:Implicitly cleaning up:ResourceWarning",
+    "ignore:can't resolve package from __spec__:ImportWarning",
+    "ignore:distutils Version classes are deprecated:DeprecationWarning",
+    "ignore:.*Column disp option",
+    "ignore:BlackBody provides the same capabilities",
+    "ignore:The MexicanHat1D class is deprecated"]
+
+[tool.coverage]
+
+    [tool.coverage.run]
+    omit = [
+        "stsynphot/tests/*",
+        "stsynphot/*/tests/*",
+        "stsynphot/*/*/tests/*",
+        "stsynphot/version*",
+        "*/stsynphot/tests/*",
+        "*/stsynphot/*/tests/*",
+        "*/stsynphot/*/*/tests/*",
+        "*/stsynphot/version*"]
+
+    [tool.coverage.report]
+    exclude_also = [
+        # Have to re-enable the standard pragma
+        "pragma: no cover",
+        # Don't complain about packages we have installed
+        "except ImportError",
+        # Don't complain if tests don't hit assertions
+        "raise AssertionError",
+        "raise NotImplementedError",
+        # Don't complain about script hooks
+        "def main\(.*\):",
+        # Ignore branches that don't pertain to this version of Python
+        "pragma: py{ignore_python_version}",
+        # Don't complain about IPython completion helper
+        "def _ipython_key_completions_"]
