@@ -13,9 +13,8 @@ from astropy.table import Table
 from synphot import exceptions as synexceptions
 from synphot import units
 
-from stsynphot import catalog, exceptions
-
 # LOCAL
+from stsynphot import catalog, exceptions
 from stsynphot import conf as stsyn_conf
 
 

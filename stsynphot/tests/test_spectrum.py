@@ -10,8 +10,6 @@ import warnings
 # THIRD-PARTY
 import numpy as np
 import pytest
-
-# ASTROPY
 from astropy import units as u
 from astropy.io import fits
 from astropy.modeling.models import Const1D
@@ -19,8 +17,6 @@ from astropy.utils.data import get_pkg_data_filename
 from astropy.utils.exceptions import AstropyUserWarning
 from scipy.integrate import trapezoid
 from synphot import exceptions as synexceptions
-
-# SYNPHOT
 from synphot import units
 from synphot.models import ConstFlux1D
 from synphot.spectrum import SourceSpectrum, SpectralElement
