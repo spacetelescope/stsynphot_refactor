@@ -20,9 +20,7 @@ dependencies = [
     "beautifulsoup4"]
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
-dynamic = [
-    "version",
-]
+dynamic = ["version"]
 
 [project.urls]
 "Bug Reports" = "https://github.com/spacetelescope/stsynphot_refactor/issues"
@@ -43,7 +41,7 @@ docs = ["sphinx-astropy"]
 [build-system]
 requires = ["setuptools>=82.0.1",
             "setuptools_scm"]
-build-backend = "setuptools.build_meta"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 zip-safe = false
