@@ -12,7 +12,7 @@ from stsynphot import exceptions, stio
 from stsynphot.config import conf
 from stsynphot.stio import get_latest_file, irafconvert
 
-__all__ = ['GraphTable', 'CompTable']
+__all__ = ["CompTable", "GraphTable"]
 
 
 class GraphTable:
@@ -45,22 +45,23 @@ class GraphTable:
         Value of PRIMAREA keyword in primary header.
 
     """
+
     def __init__(self, graphfile, ext=1):
         self.primary_area, data = stio.read_graphtable(
             get_latest_file(
-                irafconvert(graphfile),
-                err_msg=('No graph tables found; functionality will be '
-                         'SEVERELY crippled.')),
-            tab_ext=ext)
+                irafconvert(graphfile), err_msg=("No graph tables found; functionality will be SEVERELY crippled.")
+            ),
+            tab_ext=ext,
+        )
 
         # Convert all strings to lowercase
-        self.keywords = np.array([s.lower() for s in data['KEYWORD']])
-        self.compnames = np.array([s.lower() for s in data['COMPNAME']])
-        self.thcompnames = np.array([s.lower() for s in data['THCOMPNAME']])
+        self.keywords = np.array([s.lower() for s in data["KEYWORD"]])
+        self.compnames = np.array([s.lower() for s in data["COMPNAME"]])
+        self.thcompnames = np.array([s.lower() for s in data["THCOMPNAME"]])
 
         # Already int
-        self.innodes = data['INNODE']
-        self.outnodes = data['OUTNODE']
+        self.innodes = data["INNODE"]
+        self.outnodes = data["OUTNODE"]
 
     def get_next_node(self, modes, innode):
         """Return the output node that matches an element from
@@ -96,7 +97,7 @@ class GraphTable:
             return -1
 
         # Output node for default mode
-        defaultindex = np.where(self.keywords[nodes] == 'default')[0]
+        defaultindex = np.where(self.keywords[nodes] == "default")[0]
 
         if len(defaultindex) != 0:
             outnode = self.outnodes[nodes[defaultindex]]
@@ -151,21 +152,21 @@ class GraphTable:
 
         while outnode >= 0:
             if outnode < 0:  # pragma: no cover
-                log.debug(f'outnode={outnode} (stop condition).')
+                log.debug(f"outnode={outnode} (stop condition).")
 
             previous_outnode = outnode
             nodes = np.where(self.innodes == innode)
 
             # If there are no entries with this innode, we're done
             if len(nodes[0]) == 0:
-                log.debug(f'innode={innode} not found (stop condition).')
+                log.debug(f"innode={innode} not found (stop condition).")
                 break
 
             # Find the entry corresponding to the component named
             # 'default', because thats the one we'll use if we don't
             # match anything in the modes list
-            if 'default' in self.keywords[nodes]:
-                dfi = np.where(self.keywords[nodes] == 'default')[0][0]
+            if "default" in self.keywords[nodes]:
+                dfi = np.where(self.keywords[nodes] == "default")[0][0]
                 outnode = self.outnodes[nodes[0][dfi]]
                 component = self.compnames[nodes[0][dfi]]
                 thcomponent = self.thcompnames[nodes[0][dfi]]
@@ -183,37 +184,31 @@ class GraphTable:
                     index = np.where(self.keywords[nodes] == mode)
                     n_match = len(index[0])
                     if n_match > 1:
-                        raise exceptions.AmbiguousObsmode(
-                            f'{n_match} matches found for {mode}')
+                        raise exceptions.AmbiguousObsmode(f"{n_match} matches found for {mode}")
                     idx = index[0][0]
                     component = self.compnames[nodes[0][idx]]
                     thcomponent = self.thcompnames[nodes[0][idx]]
                     outnode = self.outnodes[nodes[0][idx]]
                     used_default = False
 
-            log.debug(f'innode={innode} outnode={outnode} '
-                      f'compname={component}')
+            log.debug(f"innode={innode} outnode={outnode} compname={component}")
             components.append(component)
             thcomponents.append(thcomponent)
             innode = outnode
 
             if outnode == previous_outnode:
-                log.debug(f'innode={innode} outnode={outnode} '
-                          f'used_default={used_default}')
+                log.debug(f"innode={innode} outnode={outnode} used_default={used_default}")
                 count += 1
                 if count > 3:
-                    log.debug(f'Same outnode={outnode} over 3 times (stop '
-                              'condition)')
+                    log.debug(f"Same outnode={outnode} over 3 times (stop condition)")
                     break
 
         if outnode < 0:
-            log.debug(f'outnode={outnode} (stop condition)')
-            raise exceptions.IncompleteObsmode(
-                f'{modes}, choose from {self.keywords[nodes]}')
+            log.debug(f"outnode={outnode} (stop condition)")
+            raise exceptions.IncompleteObsmode(f"{modes}, choose from {self.keywords[nodes]}")
 
         if inmodes != used_modes:
-            raise exceptions.UnusedKeyword(
-                f'{str(inmodes.difference(used_modes))}')
+            raise exceptions.UnusedKeyword(f"{inmodes.difference(used_modes)!s}")
 
         return components, thcomponents
 
@@ -243,17 +238,17 @@ class CompTable:
         Component names and corresponding filenames.
 
     """
+
     def __init__(self, compfile, ext=1):
         data = stio.read_comptable(
             get_latest_file(
-                irafconvert(compfile),
-                err_msg=('No component tables found; functionality will be '
-                         'SEVERELY crippled.')),
-            tab_ext=ext)
+                irafconvert(compfile), err_msg=("No component tables found; functionality will be SEVERELY crippled.")
+            ),
+            tab_ext=ext,
+        )
         self.name = compfile
-        self.compnames = np.array([s.lower() for s in data['COMPNAME']])
-        self.filenames = np.array(
-            list(map(stio.irafconvert, data['FILENAME'])))
+        self.compnames = np.array([s.lower() for s in data["COMPNAME"]])
+        self.filenames = np.array(list(map(stio.irafconvert, data["FILENAME"])))
 
     def get_filenames(self, compnames):
         """Get filenames of given component names.
@@ -279,11 +274,10 @@ class CompTable:
         files = []
 
         for compname in compnames:
-            if compname not in (None, '', conf.clear_filter):
+            if compname not in (None, "", conf.clear_filter):
                 index = np.where(self.compnames == compname)[0]
                 if len(index) < 1:
-                    raise exceptions.GraphtabError(
-                        f'Cannot find {compname} in {self.name}.')
+                    raise exceptions.GraphtabError(f"Cannot find {compname} in {self.name}.")
                 files.append(self.filenames[index[0]].lstrip())
             else:
                 files.append(conf.clear_filter)

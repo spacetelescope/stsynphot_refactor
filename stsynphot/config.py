@@ -10,19 +10,20 @@ directories to be configured properly. It also overwrites
 ``synphot`` configurable items.
 
 """
+
 # STDLIB
 import os
 
 # THIRD-PARTY
 import numpy as np
 from astropy import log
-from astropy.config import ConfigNamespace, ConfigItem
+from astropy.config import ConfigItem, ConfigNamespace
 
 # SYNPHOT
 from synphot.config import Conf as synconf
 from synphot.utils import generate_wavelengths
 
-__all__ = ['conf', 'getref', 'showref', 'overwrite_synphot_config']
+__all__ = ["conf", "getref", "overwrite_synphot_config", "showref"]
 
 
 class Conf(ConfigNamespace):
@@ -30,43 +31,35 @@ class Conf(ConfigNamespace):
 
     # Set up default wavelength
     _wave, _wave_str = generate_wavelengths(
-        minwave=500, maxwave=26000, num=10000, delta=None, log=True,
-        wave_unit='angstrom')
+        minwave=500, maxwave=26000, num=10000, delta=None, log=True, wave_unit="angstrom"
+    )
 
     # Root directory
-    rootdir = ConfigItem(
-        os.environ.get('PYSYN_CDBS', '/grp/redcat/trds'),
-        'TRDS data root directory')
+    rootdir = ConfigItem(os.environ.get("PYSYN_CDBS", "/grp/redcat/trds"), "TRDS data root directory")
 
     # Graph, optical component, and thermal component tables
-    graphtable = ConfigItem('mtab$*_tmg.fits', 'Graph table')
-    comptable = ConfigItem('mtab$*_tmc.fits', 'Component table')
-    thermtable = ConfigItem('mtab$*_tmt.fits', 'Thermal table')
+    graphtable = ConfigItem("mtab$*_tmg.fits", "Graph table")
+    comptable = ConfigItem("mtab$*_tmc.fits", "Component table")
+    thermtable = ConfigItem("mtab$*_tmt.fits", "Thermal table")
 
     # Default wavelength in Angstrom and its description
-    waveset_array = ConfigItem(
-        _wave.value.tolist(),
-        'Default wavelength set in Angstrom', 'float_list')
-    waveset = ConfigItem(_wave_str, 'Default wavelength set description')
+    waveset_array = ConfigItem(_wave.value.tolist(), "Default wavelength set in Angstrom", "float_list")
+    waveset = ConfigItem(_wave_str, "Default wavelength set description")
 
     # Telescope primary mirror collecting area in cm^2
-    area = ConfigItem(45238.93416, 'Telescope collecting area in cm^2')
+    area = ConfigItem(45238.93416, "Telescope collecting area in cm^2")
 
     # Common filter name
-    clear_filter = ConfigItem('clear', 'Name for a clear filter')
+    clear_filter = ConfigItem("clear", "Name for a clear filter")
 
     # Wavelength catalog file
-    wavecatfile = ConfigItem(
-        'synphot$wavecats/wavecat.dat', 'Wavelength catalog file')
+    wavecatfile = ConfigItem("synphot$wavecats/wavecat.dat", "Wavelength catalog file")
 
     # Detector parameters file
-    detectorfile = ConfigItem(
-        'synphot$detectors.dat', 'Detector parameters file')
+    detectorfile = ConfigItem("synphot$detectors.dat", "Detector parameters file")
 
     # IRAF shortcuts file for stsynphot.stio.irafconvert()
-    irafshortcutfile = ConfigItem(
-        'synphot$irafshortcuts.txt',
-        'col1=shortcut_name col2=relpath_to_rootdir, has header.')
+    irafshortcutfile = ConfigItem("synphot$irafshortcuts.txt", "col1=shortcut_name col2=relpath_to_rootdir, has header.")
 
     # Clean up
     del _wave
@@ -90,11 +83,11 @@ def overwrite_synphot_config(root):
         Root directory name.
 
     """
-    subdir_keys = ['calspec', 'extinction', 'nonhst']
+    subdir_keys = ["calspec", "extinction", "nonhst"]
 
     # Need this for Windows support
-    if root.startswith(('http', 'ftp')):
-        sep = '/'
+    if root.startswith(("http", "ftp")):
+        sep = "/"
     else:
         sep = os.sep  # Can be / or \
 
@@ -107,8 +100,8 @@ def overwrite_synphot_config(root):
 
         subdir = subdir_keys[i[0]]
 
-        if subdir == 'nonhst':
-            cfgval = sep.join([root, 'comp', subdir, fname])
+        if subdir == "nonhst":
+            cfgval = sep.join([root, "comp", subdir, fname])
         else:
             cfgval = sep.join([root, subdir, fname])
 
@@ -126,11 +119,12 @@ def _get_ref_cfgitems():
     from stsynphot.stio import get_latest_file, irafconvert
 
     for cfgitem, do_conv in (
-            (Conf.graphtable, True),
-            (Conf.comptable, True),
-            (Conf.thermtable, True),
-            (Conf.area, False),
-            (Conf.waveset, False)):
+        (Conf.graphtable, True),
+        (Conf.comptable, True),
+        (Conf.thermtable, True),
+        (Conf.area, False),
+        (Conf.waveset, False),
+    ):
         val = cfgitem()
         if do_conv:
             val = get_latest_file(irafconvert(val))
@@ -150,7 +144,7 @@ def getref():
 
 def showref():  # pragma: no cover
     """Show the values of select configurable items."""
-    info_str = '\n'
+    info_str = "\n"
     for x in _get_ref_cfgitems():
-        info_str += f'{x[0]:10s}: {x[1]}\n'
+        info_str += f"{x[0]:10s}: {x[1]}\n"
     log.info(info_str)

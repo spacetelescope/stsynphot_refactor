@@ -21,16 +21,21 @@ from synphot.utils import validate_totalflux
 # LOCAL
 from stsynphot import exceptions, stio
 
-__all__ = ['reset_cache', 'get_catalog_index', 'grid_to_spec',
-           'find_valid_g_phoenix', 'plot_phoenix']
+__all__ = [
+    "find_valid_g_phoenix",
+    "get_catalog_index",
+    "grid_to_spec",
+    "plot_phoenix",
+    "reset_cache",
+]
 
-_PARAM_NAMES = ['T_eff', 'metallicity', 'log_g']
+_PARAM_NAMES = ["T_eff", "metallicity", "log_g"]
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.
 
 
 def reset_cache():
     """Empty the catalog grid cache."""
-    global _CACHE
+    global _CACHE  # noqa: PLW0602
     _CACHE.clear()
 
 
@@ -43,19 +48,18 @@ def _par_from_parser(x):
 
 def _break_list(in_list, index, parameter):
     """Break input list into upper and lower lists."""
-    array = np.array([parameters[index] for parameters in in_list],
-                     dtype=np.float64)
+    array = np.array([parameters[index] for parameters in in_list], dtype=np.float64)
     upper_array = array[array >= parameter]
     lower_array = array[array <= parameter]
 
     if upper_array.size == 0:
         raise exceptions.ParameterOutOfBounds(
-            f"Parameter '{_PARAM_NAMES[index]}' exceeds data. "
-            f"Max allowed={array.max()}, entered={parameter}.")
+            f"Parameter '{_PARAM_NAMES[index]}' exceeds data. Max allowed={array.max()}, entered={parameter}."
+        )
     if lower_array.size == 0:
         raise exceptions.ParameterOutOfBounds(
-            f"Parameter '{_PARAM_NAMES[index]}' exceeds data. "
-            f"Min allowed={array.min()}, entered={parameter}.")
+            f"Parameter '{_PARAM_NAMES[index]}' exceeds data. Min allowed={array.min()}, entered={parameter}."
+        )
 
     upper = upper_array.min()
     lower = lower_array.max()
@@ -75,18 +79,17 @@ def _get_spectrum(parlist, catdir):
     """Get list of spectra for given parameter list and base name."""
     name = parlist[3]
 
-    filename = name.split('[')[0]
-    column = name.split('[')[1][:-1]
+    filename = name.split("[")[0]
+    column = name.split("[")[1][:-1]
 
-    filename = stio.resolve_filename(catdir, *filename.split('/'))
+    filename = stio.resolve_filename(catdir, *filename.split("/"))
     sp = SourceSpectrum.from_file(filename, flux_col=column)
 
     totflux = sp.integrate()
     try:
         validate_totalflux(totflux)
     except synexceptions.SynphotError:
-        raise exceptions.ParameterOutOfBounds(
-            f"Parameter '{parlist}' has no valid data.")
+        raise exceptions.ParameterOutOfBounds(f"Parameter '{parlist}' has no valid data.")
 
     result = [member for member in parlist]
     result.pop()
@@ -137,28 +140,27 @@ def get_catalog_index(gridname):
         Directory containing the requested catalog.
 
     """
-    if gridname == 'ck04models':
-        catdir = 'crgridck04$'
-    elif gridname == 'k93models':
-        catdir = 'crgridk93$'
-    elif gridname == 'phoenix':
-        catdir = 'crgridphoenix$'
+    if gridname == "ck04models":
+        catdir = "crgridck04$"
+    elif gridname == "k93models":
+        catdir = "crgridk93$"
+    elif gridname == "phoenix":
+        catdir = "crgridphoenix$"
     else:
-        catdir = 'crgrid${}'.format(gridname)
+        catdir = f"crgrid${gridname}"
 
     catdir = stio.irafconvert(catdir)
-    filename = stio.resolve_filename(catdir, 'catalog.fits')
+    filename = stio.resolve_filename(catdir, "catalog.fits")
 
     # If not cached, read from grid catalog and cache it
     if filename not in _CACHE:
         try:
             data = stio.read_catalog(filename)  # EXT 1
-            _CACHE[filename] = [list(map(float, index.split(','))) +
-                                [data['FILENAME'][i]]
-                                for i, index in enumerate(data['INDEX'])]
+            _CACHE[filename] = [
+                list(map(float, index.split(","))) + [data["FILENAME"][i]] for i, index in enumerate(data["INDEX"])
+            ]
         except (FileNotFoundError, HTTPError) as e:
-            raise synexceptions.SynphotError(
-                f'{gridname} catalog was not found: {e}') from e
+            raise synexceptions.SynphotError(f"{gridname} catalog was not found: {e}") from e
 
     return _CACHE[filename], catdir
 
@@ -208,13 +210,11 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
 
     metallicity = _par_from_parser(metallicity)
     if isinstance(metallicity, u.Quantity):
-        raise synexceptions.SynphotError(
-            'Quantity is not supported for metallicity.')
+        raise synexceptions.SynphotError("Quantity is not supported for metallicity.")
 
     log_g = _par_from_parser(log_g)
     if isinstance(log_g, u.Quantity):
-        raise synexceptions.SynphotError(
-            'Quantity is not supported for log surface gravity.')
+        raise synexceptions.SynphotError("Quantity is not supported for log surface gravity.")
 
     t_eff = units.validate_quantity(_par_from_parser(t_eff), u.K).value
 
@@ -248,8 +248,7 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     spa7 = _interpolate_spectrum(spa5, spa6, t_eff)
 
     sp = spa7[0]
-    sp.meta['expr'] = (f'{gridname}(T_eff={t_eff:g},'
-                       f'metallicity={metallicity:g},log_g={log_g:g})')
+    sp.meta["expr"] = f"{gridname}(T_eff={t_eff:g},metallicity={metallicity:g},log_g={log_g:g})"
 
     return sp
 
@@ -260,6 +259,7 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
 # the spectra tables, not just header, which will have a significant
 # performance impact.
 # Also see https://github.com/spacetelescope/stsynphot_refactor/issues/45
+
 
 def find_valid_g_phoenix():  # pragma: no cover
     """Find valid ``log_g`` values in the Phoenix catalog.
@@ -279,7 +279,7 @@ def find_valid_g_phoenix():  # pragma: no cover
         Unique metallicity values in the catalog.
 
     """
-    indices, catdir = get_catalog_index('phoenix')
+    indices, catdir = get_catalog_index("phoenix")
     specfiles = {}
     valid_g = {}
     possible_g = set()
@@ -291,11 +291,10 @@ def find_valid_g_phoenix():  # pragma: no cover
         possible_g.add(a[2])
 
         if key not in specfiles:
-            specfiles[key] = a[3].split('[')[0]
+            specfiles[key] = a[3].split("[")[0]
 
     for key, spfile in specfiles.items():
-        hdr = fits.getheader(stio.resolve_filename(
-            catdir, *spfile.split('/')))['LOGG*']
+        hdr = fits.getheader(stio.resolve_filename(catdir, *spfile.split("/")))["LOGG*"]
         valid_g[key] = []
         for val in hdr.values():
             gval = float(val)
@@ -305,7 +304,7 @@ def find_valid_g_phoenix():  # pragma: no cover
     return valid_g, sorted(uniq_metallicity)
 
 
-def plot_phoenix(filename=''):  # pragma: no cover
+def plot_phoenix(filename=""):  # pragma: no cover
     """Visualize the Phoenix catalog index (grid parameters).
 
     .. note:: Uses ``matplotlib``.
@@ -332,7 +331,7 @@ def plot_phoenix(filename=''):  # pragma: no cover
     n_axes = axes.size
 
     if n_plots > n_axes:
-        raise ValueError(f'Need {n_plots} but only {n_axes} subplots created')
+        raise ValueError(f"Need {n_plots} but only {n_axes} subplots created")
 
     for i, metallicity in enumerate(uniq_metallicity):
         ax_map[metallicity] = axes[i]
@@ -344,11 +343,11 @@ def plot_phoenix(filename=''):  # pragma: no cover
         metallicity = key[1]
         t_eff = [key[0]] * len(log_g)
         ax = ax_map[metallicity]
-        ax.plot(t_eff, log_g, 'b,')
-        ax.set_xlabel(r'$T_{\mathrm{eff}}$')
-        ax.set_ylabel(r'$\log g$')
-        ax.set_title(f'[M/H] = {metallicity:.2f}')
-        ax.axvline(0, ls='--', lw=0.5, c='k')
+        ax.plot(t_eff, log_g, "b,")
+        ax.set_xlabel(r"$T_{\mathrm{eff}}$")
+        ax.set_ylabel(r"$\log g$")
+        ax.set_title(f"[M/H] = {metallicity:.2f}")
+        ax.axvline(0, ls="--", lw=0.5, c="k")
 
     plt.tight_layout()
     plt.draw()

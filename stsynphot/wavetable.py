@@ -22,7 +22,7 @@ from synphot import units
 from stsynphot import exceptions, stio
 from stsynphot.config import conf
 
-__all__ = ['WAVECAT', 'WaveCatalog', 'load_wavecat']
+__all__ = ["WAVECAT", "WaveCatalog", "load_wavecat"]
 
 # This is NSPEC-1 in IRAF SYNPHOT COUNTRATE calcstep.x.
 # NSPEC was hardcoded to 2000 as the number of bins into
@@ -70,6 +70,7 @@ class WaveCatalog:
         string. Used for partial matching.
 
     """
+
     def __init__(self, fname, wave_unit=u.AA):
         data = stio.read_wavecat(stio.irafconvert(fname))
 
@@ -79,10 +80,10 @@ class WaveCatalog:
         self.setlookup = {}
 
         for line in data:
-            obm = line['OBSMODE']
-            coeff = line['FILENAME']
+            obm = line["OBSMODE"]
+            coeff = line["FILENAME"]
             self.lookup[obm] = coeff
-            self.setlookup[frozenset(obm.split(','))] = obm
+            self.setlookup[frozenset(obm.split(","))] = obm
 
     def __getitem__(self, key):
         """Fairly smart lookup by observation mode.
@@ -97,23 +98,21 @@ class WaveCatalog:
             ans = None
             # Try a set-wise match.
             # The correct key will be a subset of the input key.
-            setkey = set(key.split(','))
+            setkey = set(key.split(","))
             candidates = [k for k in self.setlookup if k.issubset(setkey)]
             n_match = len(candidates)
             # We may have 1, 0, or >1 candidates.
             if n_match == 1:
                 ans = self.lookup[self.setlookup[candidates[0]]]
             elif n_match == 0:
-                raise KeyError(f'{setkey} not found in {self.file}; '
-                               f'candidates: {str(candidates)}')
+                raise KeyError(f"{setkey} not found in {self.file}; candidates: {candidates!s}")
             elif n_match > 1:
                 setlens = np.array([len(k) for k in candidates])
                 srtlen = setlens.argsort()
                 k, j = srtlen[-2:]
                 # It's really ambiguous
                 if setlens[k] == setlens[j]:
-                    raise exceptions.AmbiguousObsmode(
-                        f'{setkey}; candidates: {str(candidates)}')
+                    raise exceptions.AmbiguousObsmode(f"{setkey}; candidates: {candidates!s}")
                 # We have a winner
                 else:
                     k = candidates[srtlen[-1]]
@@ -123,7 +122,7 @@ class WaveCatalog:
     @staticmethod
     def _calc_quadratic_coeff(coeff):
         """Calculate quadratic coefficients from parameter string."""
-        coefficients = coeff[1:-1].split(',')
+        coefficients = coeff[1:-1].split(",")
         n_coeff = len(coefficients)
 
         c0 = float(coefficients[0])
@@ -170,11 +169,10 @@ class WaveCatalog:
 
         """
         par = self.__getitem__(obsmode)
-        if par.startswith('('):
+        if par.startswith("("):
             waveset = self._waveset_from_parstring(par)
         else:
-            waveset = stio.read_waveset(
-                stio.irafconvert(par), wave_unit=self.wave_unit)
+            waveset = stio.read_waveset(stio.irafconvert(par), wave_unit=self.wave_unit)
         return par, waveset
 
 
@@ -196,5 +194,4 @@ def load_wavecat(wave_unit=u.AA):
 try:
     load_wavecat()
 except Exception as e:
-    warnings.warn(
-        f'Failed to load {conf.wavecatfile}: {repr(e)}', AstropyUserWarning)
+    warnings.warn(f"Failed to load {conf.wavecatfile}: {e!r}", AstropyUserWarning)
