@@ -103,7 +103,7 @@ filterwarnings = [
         "raise AssertionError",
         "raise NotImplementedError",
         # Don't complain about script hooks
-        "def main\(.*\):",
+        "'def main(.*):'",
         # Ignore branches that don't pertain to this version of Python
         "pragma: py{ignore_python_version}",
         # Don't complain about IPython completion helper
