@@ -13,9 +13,7 @@
 # See sphinx_astropy.conf for which values are set there.
 
 import datetime
-import os
 import sys
-from configparser import ConfigParser
 
 from stsynphot import __version__
 
@@ -26,11 +24,6 @@ except ImportError:
     print('ERROR: the documentation requires the sphinx-astropy package '
           'to be installed')
     sys.exit(1)
-
-# Get configuration information from setup.cfg
-conf = ConfigParser()
-conf.read([os.path.join(os.path.dirname(__file__), '..', 'setup.cfg')])
-setup_cfg = dict(conf.items('metadata'))
 
 # -- General configuration ----------------------------------------------------
 
@@ -53,8 +46,8 @@ rst_epilog += """
 # -- Project information ------------------------------------------------------
 
 # This does not *have* to match the package name, but typically does
-project = setup_cfg['name']
-author = setup_cfg['author']
+project = "stsynphot"
+author = "STScI"
 copyright = f'{datetime.datetime.now().year}, {author}'
 
 # The version info for the project you're documenting, acts as replacement for

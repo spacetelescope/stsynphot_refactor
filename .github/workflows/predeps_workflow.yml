@@ -24,8 +24,8 @@ jobs:
 
           - name: RC testing in Linux with remote data
             os: ubuntu-latest
-            python: '3.12'
-            toxenv: py312-test-predeps
+            python: '3.15'
+            toxenv: py315-test-predeps
             toxposargs: --remote-data
 
           - name: RC testing in OSX
