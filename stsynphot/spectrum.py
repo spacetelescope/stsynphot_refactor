@@ -8,15 +8,11 @@ import warnings
 
 # THIRD-PARTY
 import numpy as np
-
-# ASTROPY
+import synphot
 from astropy import log
 from astropy import units as u
 from astropy.utils import minversion
 from astropy.utils.exceptions import AstropyUserWarning
-
-# SYNPHOT
-import synphot
 from synphot import binning, reddening, units
 from synphot import exceptions as synexceptions
 from synphot.config import conf as synconf
@@ -27,10 +23,17 @@ from synphot.spectrum import SourceSpectrum, SpectralElement
 from stsynphot import stio
 from stsynphot.exceptions import PixscaleNotFoundError
 
-__all__ = ['reset_cache', 'interpolate_spectral_element',
-           'ObservationSpectralElement', 'band', 'ebmvx', 'load_vega', 'Vega']
+__all__ = [
+    "ObservationSpectralElement",
+    "Vega",
+    "band",
+    "ebmvx",
+    "interpolate_spectral_element",
+    "load_vega",
+    "reset_cache",
+]
 
-_interpfilepatt = re.compile(r'\[(?P<col>.*?)\]')
+_interpfilepatt = re.compile(r"\[(?P<col>.*?)\]")
 _REDLAWS = {}  # Cache previously loaded reddening laws
 Vega = None  # Cache Vega spectrum
 SYNPHOT_LT_1_7 = not minversion(synphot, "1.7.0")
@@ -38,12 +41,11 @@ SYNPHOT_LT_1_7 = not minversion(synphot, "1.7.0")
 
 def reset_cache():
     """Empty the reddening laws cache."""
-    global _REDLAWS
+    global _REDLAWS  # noqa: PLW0602
     _REDLAWS.clear()
 
 
-def _interp_spec(interpval, waves, lower_val, upper_val, lower_thru,
-                 upper_thru, doshift):
+def _interp_spec(interpval, waves, lower_val, upper_val, lower_thru, upper_thru, doshift):
     """Interpolate between two spectra to parameter at given value.
     Called by :func:`interpolate_spectral_element`.
 
@@ -133,26 +135,23 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
         No columns available for interpolation or extrapolation.
 
     """
-    def_colname = 'THROUGHPUT'
+    def_colname = "THROUGHPUT"
     warndict = {}
 
     # Separate real filename and column name specification
     xre = _interpfilepatt.search(parfilename)
     if xre is None:
-        raise synexceptions.SynphotError(
-            f'{parfilename} must be in the format of "path/filename.fits'
-            '[col#]"')
-    filename = parfilename[0:xre.start()]
-    col_prefix = xre.group('col').upper()
+        raise synexceptions.SynphotError(f'{parfilename} must be in the format of "path/filename.fits[col#]"')
+    filename = parfilename[0 : xre.start()]
+    col_prefix = xre.group("col").upper()
 
     # Read data table
     try:
-        data, wave_unit, doshift, extrapolate = stio.read_interp_spec(
-            filename, tab_ext=ext)
+        data, wave_unit, doshift, extrapolate = stio.read_interp_spec(filename, tab_ext=ext)
     except Exception as e:  # pragma: no cover
-        raise IOError(f'Failed to read {filename}[{ext}]: {repr(e)}')
+        raise OSError(f"Failed to read {filename}[{ext}]: {e!r}")
     wave_unit = units.validate_unit(wave_unit)
-    wave0 = data['WAVELENGTH']
+    wave0 = data["WAVELENGTH"]
 
     # Determine the columns that bracket the desired value.
     # Grab all columns that begin with the parameter name (e.g. 'MJD#')
@@ -163,11 +162,10 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
         cn = n.upper()
         if cn.startswith(col_prefix):
             col_names.append(cn)
-            col_pars.append(float(cn.split('#')[1]))
+            col_pars.append(float(cn.split("#")[1]))
 
     if len(col_names) < 1:
-        raise synexceptions.SynphotError(
-            f'{filename} contains no interpolated columns for {col_prefix}.')
+        raise synexceptions.SynphotError(f"{filename} contains no interpolated columns for {col_prefix}.")
 
     # Assumes ascending order of parameter values in table.
     min_par = col_pars[0]
@@ -183,40 +181,39 @@ def interpolate_spectral_element(parfilename, interpval, ext=1):
         lower_ind = upper_ind - 1
 
         thru = _interp_spec(
-            interpval, wave0, col_pars[lower_ind], col_pars[upper_ind],
-            data[col_names[lower_ind]], data[col_names[upper_ind]], doshift)
+            interpval,
+            wave0,
+            col_pars[lower_ind],
+            col_pars[upper_ind],
+            data[col_names[lower_ind]],
+            data[col_names[upper_ind]],
+            doshift,
+        )
 
     # Need extrapolation, if allowed.
     elif extrapolate:
         # Extrapolate below lowest columns.
         if interpval < min_par:
-            thru = _extrap_spec(interpval, min_par, col_pars[1],
-                                data[col_names[0]], data[col_names[1]])
+            thru = _extrap_spec(interpval, min_par, col_pars[1], data[col_names[0]], data[col_names[1]])
 
         # Extrapolate above highest columns.
         else:  # interpval > max_par
-            thru = _extrap_spec(interpval, col_pars[-2], max_par,
-                                data[col_names[-2]], data[col_names[-1]])
+            thru = _extrap_spec(interpval, col_pars[-2], max_par, data[col_names[-2]], data[col_names[-1]])
 
     # Extrapolation not allowed.
     else:
         # Use default, if available.
         if def_colname in data.names:
-            warnings.warn(
-                'Extrapolation not allowed, using default throughput for '
-                f'{parfilename}.', AstropyUserWarning)
-            warndict['DefaultThroughput'] = True
+            warnings.warn(f"Extrapolation not allowed, using default throughput for {parfilename}.", AstropyUserWarning)
+            warndict["DefaultThroughput"] = True
             thru = data[def_colname]
 
         # Nothing can be done.
         else:
-            raise synexceptions.ExtrapolationNotAllowed(
-                f'No default throughput for {parfilename}.')
+            raise synexceptions.ExtrapolationNotAllowed(f"No default throughput for {parfilename}.")
 
-    meta = {'expr': f'{filename}#{interpval:g}',
-            'warnings': warndict}
-    return SpectralElement(
-        Empirical1D, points=wave0 * wave_unit, lookup_table=thru, meta=meta)
+    meta = {"expr": f"{filename}#{interpval:g}", "warnings": warndict}
+    return SpectralElement(Empirical1D, points=wave0 * wave_unit, lookup_table=thru, meta=meta)
 
 
 class ObservationSpectralElement(SpectralElement):
@@ -239,21 +236,20 @@ class ObservationSpectralElement(SpectralElement):
         Observation mode for this bandpass.
 
     """
+
     def __init__(self, modelclass, obsmode=None, **kwargs):
         if obsmode is None:
-            raise synexceptions.SynphotError('Missing OBSMODE.')
+            raise synexceptions.SynphotError("Missing OBSMODE.")
 
-        super(ObservationSpectralElement, self).__init__(modelclass, **kwargs)
+        super().__init__(modelclass, **kwargs)
         self._obsmode = obsmode
-        self.meta['expr'] = str(obsmode)
+        self.meta["expr"] = str(obsmode)
 
         # Check for zero bounds, if applicable
         try:
             self.bounded_by_zero()
         except synexceptions.SynphotError:  # pragma: no cover
-            warnings.warn(
-                'Zero-bound check not done due to undefined waveset.',
-                AstropyUserWarning)
+            warnings.warn("Zero-bound check not done due to undefined waveset.", AstropyUserWarning)
 
     @property
     def obsmode(self):
@@ -277,7 +273,7 @@ class ObservationSpectralElement(SpectralElement):
 
     def taper(self, **kwargs):
         """Disabled."""
-        raise NotImplementedError('Method disabled.')
+        raise NotImplementedError("Method disabled.")
 
     def bounded_by_zero(self, wavelengths=None, verbose=True):
         """Check if sampled throughout is bounded by zeroes.
@@ -299,13 +295,11 @@ class ObservationSpectralElement(SpectralElement):
 
         """
         thru = self(wavelengths)
-        y = thru[::thru.size - 1].value
+        y = thru[:: thru.size - 1].value
         bounded = np.all(y == 0)
 
         if not bounded and verbose:
-            warnings.warn(
-                f'Unbounded throughput; {y} when expecting zeroes.',
-                AstropyUserWarning)
+            warnings.warn(f"Unbounded throughput; {y} when expecting zeroes.", AstropyUserWarning)
 
         return bounded
 
@@ -357,15 +351,14 @@ class ObservationSpectralElement(SpectralElement):
 
         """
         if self.obsmode.pixscale is None:
-            raise PixscaleNotFoundError(
-                f'Undefined pixel scale for {self.obsmode}.')
+            raise PixscaleNotFoundError(f"Undefined pixel scale for {self.obsmode}.")
 
         if area is None:
             area = self.area
         area = units.validate_quantity(area, units.AREA)
 
         sp = self.obsmode.thermal_spectrum(thermtable=thermtable)
-        bg = sp.integrate() * self.obsmode.pixscale ** 2 * area
+        bg = sp.integrate() * self.obsmode.pixscale**2 * area
 
         return bg.value * (u.count / u.s / u.pix)
 
@@ -398,18 +391,15 @@ class ObservationSpectralElement(SpectralElement):
 
         """
         if self.binset is None:
-            raise synexceptions.UndefinedBinset(
-                'No binset specified for this passband.')
+            raise synexceptions.UndefinedBinset("No binset specified for this passband.")
 
         # Calculation is done in the unit of cenwave.
         if not isinstance(cenwave, u.Quantity):
             cenwave = cenwave * self._internal_wave_unit
 
-        bin_wave = units.validate_quantity(
-            self.binset, cenwave.unit, equivalencies=u.spectral())
+        bin_wave = units.validate_quantity(self.binset, cenwave.unit, equivalencies=u.spectral())
 
-        return binning.wave_range(
-            bin_wave.value, cenwave.value, npix, **kwargs) * cenwave.unit
+        return binning.wave_range(bin_wave.value, cenwave.value, npix, **kwargs) * cenwave.unit
 
     def binned_pixelrange(self, waverange, **kwargs):
         """Calculate the number of pixels within the given wavelength
@@ -436,11 +426,9 @@ class ObservationSpectralElement(SpectralElement):
 
         """
         if self.binset is None:
-            raise synexceptions.UndefinedBinset(
-                'No binset specified for this passband.')
+            raise synexceptions.UndefinedBinset("No binset specified for this passband.")
 
-        x = units.validate_quantity(
-            waverange, self._internal_wave_unit, equivalencies=u.spectral())
+        x = units.validate_quantity(waverange, self._internal_wave_unit, equivalencies=u.spectral())
 
         return binning.pixel_range(self.binset.value, x.value, **kwargs)
 
@@ -469,32 +457,29 @@ class ObservationSpectralElement(SpectralElement):
 
         """
         bkeys = {
-            'grftable': (os.path.basename(self.obsmode.gtname),
-                         'graph table used'),
-            'cmptable': (os.path.basename(self.obsmode.ctname),
-                         'component table used')}
+            "grftable": (os.path.basename(self.obsmode.gtname), "graph table used"),
+            "cmptable": (os.path.basename(self.obsmode.ctname), "component table used"),
+        }
 
-        if 'ext_header' in kwargs:
-            kwargs['ext_header'].update(bkeys)
+        if "ext_header" in kwargs:
+            kwargs["ext_header"].update(bkeys)
         else:
-            kwargs['ext_header'] = bkeys
+            kwargs["ext_header"] = bkeys
 
-        super(ObservationSpectralElement, self).to_fits(
-            filename, wavelengths=wavelengths, **kwargs)
+        super().to_fits(filename, wavelengths=wavelengths, **kwargs)
 
     @classmethod
     def from_file(cls, filename, **kwargs):
         """Disabled."""
-        raise NotImplementedError('Class method disabled.')
+        raise NotImplementedError("Class method disabled.")
 
     @classmethod
     def from_filter(cls, filtername, **kwargs):
         """Disabled."""
-        raise NotImplementedError('Class method disabled.')
+        raise NotImplementedError("Class method disabled.")
 
     @classmethod
-    def from_obsmode(cls, obsmode, graphtable=None, comptable=None,
-                     component_dict={}):
+    def from_obsmode(cls, obsmode, graphtable=None, comptable=None, component_dict={}):
         """Create a bandpass from observation mode string.
 
         Parameters
@@ -525,14 +510,12 @@ class ObservationSpectralElement(SpectralElement):
             Observation mode yields no throughput.
 
         """
-        from stsynphot.observationmode import ObservationMode  # Avoid circular import  # noqa
+        from stsynphot.observationmode import ObservationMode  # Avoid circular import
 
-        ob = ObservationMode(
-            obsmode, graphtable=graphtable, comptable=comptable,
-            component_dict=component_dict)
+        ob = ObservationMode(obsmode, graphtable=graphtable, comptable=comptable, component_dict=component_dict)
 
         if not isinstance(ob.throughput, SpectralElement):  # pragma: no cover
-            raise synexceptions.SynphotError(f'{obsmode} has no throughput.')
+            raise synexceptions.SynphotError(f"{obsmode} has no throughput.")
 
         return cls(ob.throughput, obsmode=ob)
 
@@ -571,17 +554,16 @@ def ebmvx(redlaw_name, ebv):
         Extinction curve.
 
     """
-    global _REDLAWS
+    global _REDLAWS  # noqa: PLW0602
 
-    if redlaw_name in ('gal3', None):
-        m = 'mwavg'
-        log.info(f'{redlaw_name} uses {m} reddening law.')
+    if redlaw_name in ("gal3", None):
+        m = "mwavg"
+        log.info(f"{redlaw_name} uses {m} reddening law.")
     else:
         m = redlaw_name
 
     if m not in _REDLAWS:
-        _REDLAWS[m] = reddening.ReddeningLaw.from_extinction_model(
-            m, encoding='binary')
+        _REDLAWS[m] = reddening.ReddeningLaw.from_extinction_model(m, encoding="binary")
 
     return _REDLAWS[m].extinction_curve(ebv)
 
@@ -614,9 +596,10 @@ def load_vega(vegafile=None, **kwargs):
         errmsg = syn_spec.lazy_load_vega(vegafile=vegafile, **kwargs)
         if errmsg:
             warnings.warn(
-                f'Failed to load Vega spectrum from {vegafile}; Functionality '
-                f'involving Vega will be severely limited: {errmsg}',
-                AstropyUserWarning)
+                f"Failed to load Vega spectrum from {vegafile}; Functionality "
+                f"involving Vega will be severely limited: {errmsg}",
+                AstropyUserWarning,
+            )
         Vega = syn_spec.Vega
 
 
@@ -627,16 +610,17 @@ def _old_load_vega(vegafile=None, **kwargs):
     if vegafile is None:
         vegafile = synconf.vega_file
 
-    with synconf.set_temp('vega_file', vegafile):
+    with synconf.set_temp("vega_file", vegafile):
         try:
             Vega = SourceSpectrum.from_vega(**kwargs)
         except Exception as e:
             Vega = None
             warnings.warn(
-                f'Failed to load Vega spectrum from {vegafile}; Functionality '
-                f'involving Vega will be severely limited: {repr(e)}',
-                AstropyUserWarning)
+                f"Failed to load Vega spectrum from {vegafile}; Functionality "
+                f"involving Vega will be severely limited: {e!r}",
+                AstropyUserWarning,
+            )
 
 
 # Load default Vega
-load_vega(encoding='binary')
+load_vega(encoding="binary")

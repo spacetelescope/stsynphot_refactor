@@ -26,13 +26,19 @@ from synphot.utils import merge_wavelengths
 from stsynphot import exceptions, stio
 from stsynphot.config import conf
 from stsynphot.spectrum import Vega, interpolate_spectral_element
-from stsynphot.tables import GraphTable, CompTable
+from stsynphot.tables import CompTable, GraphTable
 from stsynphot.wavetable import WAVECAT
 
-__all__ = ['reset_cache', 'Component', 'ThermalComponent',
-           'BaseObservationMode', 'ObservationMode', 'ThermalObservationMode']
+__all__ = [
+    "BaseObservationMode",
+    "Component",
+    "ObservationMode",
+    "ThermalComponent",
+    "ThermalObservationMode",
+    "reset_cache",
+]
 
-_band_patt = re.compile(r'band\((.*?)\)', re.IGNORECASE)
+_band_patt = re.compile(r"band\((.*?)\)", re.IGNORECASE)
 
 # Cache previously loaded graph, component, thermal, and detector tables
 _GRAPHDICT = {}
@@ -43,7 +49,7 @@ _DETECTORDICT = {}
 
 def reset_cache():
     """Empty the table dictionaries cache."""
-    global _GRAPHDICT, _COMPDICT, _THERMDICT, _DETECTORDICT
+    global _GRAPHDICT, _COMPDICT, _THERMDICT, _DETECTORDICT  # noqa: PLW0602
     _GRAPHDICT.clear()
     _COMPDICT.clear()
     _THERMDICT.clear()
@@ -71,6 +77,7 @@ class Component:
         Component spectrum object.
 
     """
+
     def __init__(self, throughput_name, interpval=None):
         self.throughput_name = throughput_name
 
@@ -79,8 +86,7 @@ class Component:
             if interpval is None:
                 self.throughput = SpectralElement.from_file(throughput_name)
             else:
-                self.throughput = interpolate_spectral_element(
-                    throughput_name, interpval)
+                self.throughput = interpolate_spectral_element(throughput_name, interpval)
         else:
             self.throughput = None
 
@@ -118,9 +124,9 @@ class ThermalComponent(Component):
         Thermal component spectrum object.
 
     """
+
     def __init__(self, throughput_name, thermal_name, interpval=None):
-        super(ThermalComponent, self).__init__(
-            throughput_name, interpval=interpval)
+        super().__init__(throughput_name, interpval=interpval)
         self.thermal_name = thermal_name
 
         # Extract thermal spectrum unless component is a CLEAR filter.
@@ -140,7 +146,7 @@ class ThermalComponent(Component):
 
 def _process_graphtable(graphtable):
     """Load and cache graphtable. Get primary area."""
-    global _GRAPHDICT
+    global _GRAPHDICT  # noqa: PLW0602
 
     # Use default graph table if not given
     if graphtable is None:
@@ -226,8 +232,9 @@ class BaseObservationMode:
         Wavelength set defined by ``binset``.
 
     """
+
     def __init__(self, obsmode, graphtable=None, comptable=None):
-        global _GRAPHDICT, _COMPDICT
+        global _GRAPHDICT, _COMPDICT  # noqa: PLW0602
 
         # Strip "band()" syntax if present, and force lowercase
         tmatch = _band_patt.search(obsmode)
@@ -237,15 +244,15 @@ class BaseObservationMode:
             self._obsmode = obsmode.lower()
 
         # Split obsmode and separate parameterized modes
-        modes = self._obsmode.replace(' ', '').split(',')
+        modes = self._obsmode.replace(" ", "").split(",")
         self.pardict = {}
-        if '#' in self._obsmode:
+        if "#" in self._obsmode:
             self.modes = []
             for m in modes:
-                if '#' in m:
-                    key, val = m.split('#')
+                if "#" in m:
+                    key, val = m.split("#")
                     self.pardict[key] = float(val)
-                    self.modes.append(f'{key:s}#')
+                    self.modes.append(f"{key:s}#")
                 else:
                     self.modes.append(m)
         else:
@@ -286,7 +293,7 @@ class BaseObservationMode:
         try:
             self.binset, self.bandwave = WAVECAT.load_waveset(self._obsmode)
         except (KeyError, exceptions.AmbiguousObsmode):
-            self.binset = ''
+            self.binset = ""
             self.bandwave = None
 
     def _set_pixscale(self):
@@ -294,7 +301,7 @@ class BaseObservationMode:
         If multiple matches found, only first match is used.
 
         """
-        global _DETECTORDICT
+        global _DETECTORDICT  # noqa: PLW0602
 
         det_file = stio.irafconvert(conf.detectorfile)
 
@@ -304,8 +311,8 @@ class BaseObservationMode:
             data = stio.read_detector_pars(det_file)
             _DETECTORDICT[det_file] = data
 
-        obsmode = ','.join(self._obsmode.split(',')[:2])
-        pixscales = data[data['OBSMODE'] == obsmode]['SCALE'].data
+        obsmode = ",".join(self._obsmode.split(",")[:2])
+        pixscales = data[data["OBSMODE"] == obsmode]["SCALE"].data
 
         if pixscales.size < 1:
             self.pixscale = None
@@ -313,7 +320,7 @@ class BaseObservationMode:
             self.pixscale = pixscales[0] * u.arcsec
 
     def _get_components(self):
-        raise NotImplementedError('To be implemented by subclasses.')
+        raise NotImplementedError("To be implemented by subclasses.")
 
     def __str__(self):
         return self._obsmode
@@ -327,8 +334,8 @@ class BaseObservationMode:
         ``name[parkey#]``.
 
         """
-        if filename.endswith('#]'):
-            x = filename.split('[')
+        if filename.endswith("#]"):
+            x = filename.split("[")
             parkey = x[1][:-2]
         else:
             parkey = None
@@ -340,10 +347,10 @@ class BaseObservationMode:
         .. note:: Similar to IRAF SYNPHOT SHOWFILES.
 
         """
-        info_str = '#Throughput table names:\n'
+        info_str = "#Throughput table names:\n"
         for name in self._throughput_filenames:
             if name != conf.clear_filter:
-                info_str += f'{name}\n'
+                info_str += f"{name}\n"
         log.info(info_str.rstrip())
 
 
@@ -362,10 +369,9 @@ class ObservationMode(BaseObservationMode):
         Maps component filename to corresponding `Component`.
 
     """
-    def __init__(self, obsmode, graphtable=None, comptable=None,
-                 component_dict={}):
-        super(ObservationMode, self).__init__(
-            obsmode, graphtable=graphtable, comptable=comptable)
+
+    def __init__(self, obsmode, graphtable=None, comptable=None, component_dict={}):
+        super().__init__(obsmode, graphtable=graphtable, comptable=comptable)
         self._component_dict = component_dict
         self.components = self._get_components()
 
@@ -377,14 +383,13 @@ class ObservationMode(BaseObservationMode):
             parkey = self._parkey_from_filename(throughput_name)
 
             # Hack for WFPC2 ramp filters
-            if parkey == 'wave' and self.modes[0] == 'wfpc2':
-                parkey = 'lrf'
+            if parkey == "wave" and self.modes[0] == "wfpc2":
+                parkey = "lrf"
 
             cdict_key = (throughput_name, self.pardict.get(parkey))
 
             if cdict_key not in self._component_dict:
-                self._component_dict[cdict_key] = Component(
-                    cdict_key[0], interpval=cdict_key[1])
+                self._component_dict[cdict_key] = Component(cdict_key[0], interpval=cdict_key[1])
 
             component = self._component_dict[cdict_key]
 
@@ -398,11 +403,11 @@ class ObservationMode(BaseObservationMode):
         product = self.components[index].throughput
 
         if len(self.components) > index:
-            for component in self.components[index + 1:]:
+            for component in self.components[index + 1 :]:
                 if not component.empty:
                     product = product * component.throughput
 
-        product.meta['header'] = ''  # Clean up messy header
+        product.meta["header"] = ""  # Clean up messy header
         return product
 
     @lazyproperty
@@ -412,8 +417,7 @@ class ObservationMode(BaseObservationMode):
             thru = self._mul_thru(0)
         except IndexError as e:  # pragma: no cover
             thru = None
-            warnings.warn(
-                f'Graph table is broken: {repr(e)}', AstropyUserWarning)
+            warnings.warn(f"Graph table is broken: {e!r}", AstropyUserWarning)
         return thru
 
     @lazyproperty
@@ -428,9 +432,8 @@ class ObservationMode(BaseObservationMode):
         x = self.throughput.waveset
         y = self.throughput(x)
         thru = y.value * x.value * self._constant.value
-        meta = {'expr': f'Sensitivity for {self._obsmode}'}
-        return SpectralElement(
-            Empirical1D, points=x, lookup_table=thru, meta=meta)
+        meta = {"expr": f"Sensitivity for {self._obsmode}"}
+        return SpectralElement(Empirical1D, points=x, lookup_table=thru, meta=meta)
 
     def thermal_spectrum(self, thermtable=None):
         """Calculate thermal spectrum using
@@ -453,14 +456,12 @@ class ObservationMode(BaseObservationMode):
             Calculation failed.
 
         """
-        thom = ThermalObservationMode(
-            self._obsmode, graphtable=self.gtname, comptable=self.ctname,
-            thermtable=thermtable)
+        thom = ThermalObservationMode(self._obsmode, graphtable=self.gtname, comptable=self.ctname, thermtable=thermtable)
 
         try:
             sp = thom.to_spectrum()
         except IndexError as e:  # pragma: no cover
-            raise synexceptions.SynphotError(f'Broken graph table: {repr(e)}')
+            raise synexceptions.SynphotError(f"Broken graph table: {e!r}")
 
         return sp
 
@@ -491,18 +492,16 @@ class ThermalObservationMode(BaseObservationMode):
         Clear filters only not supported.
 
     """
-    def __init__(self, obsmode, graphtable=None, comptable=None,
-                 thermtable=None):
-        global _GRAPHDICT, _COMPDICT, _THERMDICT
 
-        super(ThermalObservationMode, self).__init__(
-            obsmode, graphtable=graphtable, comptable=comptable)
+    def __init__(self, obsmode, graphtable=None, comptable=None, thermtable=None):
+        global _GRAPHDICT, _COMPDICT, _THERMDICT  # noqa: PLW0602
+
+        super().__init__(obsmode, graphtable=graphtable, comptable=comptable)
 
         # Check here to see if there are any valid filters.
         # "0.0" was added in tae17277m_tmt.fits (Apr 2017).
-        if set(self.thcompnames).issubset(set([conf.clear_filter, '', '0.0'])):
-            raise NotImplementedError(
-                f'No thermal support provided for {self._obsmode}')
+        if set(self.thcompnames).issubset(set([conf.clear_filter, "", "0.0"])):
+            raise NotImplementedError(f"No thermal support provided for {self._obsmode}")
 
         # Use default thermal component table if not given
         if thermtable is None:
@@ -526,18 +525,16 @@ class ThermalObservationMode(BaseObservationMode):
         """Get thermal components."""
         components = []
 
-        for throughput_name, thermal_name in zip(
-                self._throughput_filenames, self._thermal_filenames):
+        for throughput_name, thermal_name in zip(self._throughput_filenames, self._thermal_filenames):
             parkey = self._parkey_from_filename(throughput_name)
-            component = ThermalComponent(throughput_name, thermal_name,
-                                         interpval=self.pardict.get(parkey))
+            component = ThermalComponent(throughput_name, thermal_name, interpval=self.pardict.get(parkey))
             if not component.empty:
                 components.append(component)
 
         return components
 
     def __str__(self):
-        return f'{self._obsmode} (thermal)'
+        return f"{self._obsmode} (thermal)"
 
     def _merge_em_wave(self):
         """Merge emissivity wavelength sets in Angstrom."""
@@ -585,7 +582,7 @@ class ThermalObservationMode(BaseObservationMode):
 
         # Intersect with Vega
         if Vega is None:
-            raise synexceptions.SynphotError('Missing Vega spectrum.')
+            raise synexceptions.SynphotError("Missing Vega spectrum.")
         w = Vega.waveset.value  # Angstrom
 
         return result[(result > w.min()) & (result < w.max())]
@@ -609,7 +606,7 @@ class ThermalObservationMode(BaseObservationMode):
         # Create zero-flux spectrum
         x = self._get_wave_intersection()  # Angstrom
         y = np.zeros_like(x, dtype=np.float64)  # PHOTLAM
-        minw, maxw = x[([0, -1], )]
+        minw, maxw = x[([0, -1],)]
         sp = SourceSpectrum(Empirical1D, points=x, lookup_table=y)
 
         for component in self.components:
@@ -628,6 +625,6 @@ class ThermalObservationMode(BaseObservationMode):
                 y = sp(x)
                 sp = SourceSpectrum(Empirical1D, points=x, lookup_table=y)
 
-        meta = {'expr': f'{self._obsmode} ThermalSpectrum'}
+        meta = {"expr": f"{self._obsmode} ThermalSpectrum"}
         sp.meta.update(meta)
         return sp

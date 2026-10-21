@@ -5,10 +5,11 @@
 * Basic ASCII - See `astropy.io.ascii`
 
 """
+
 # STDLIB
 import fnmatch
-import re
 import os
+import re
 import sys
 import warnings
 from pathlib import Path
@@ -19,18 +20,27 @@ import numpy as np
 # ASTROPY
 from astropy import units as u
 from astropy.io import ascii, fits
-from astropy.utils.exceptions import AstropyUserWarning
 from astropy.utils.data import get_pkg_data_path
+from astropy.utils.exceptions import AstropyUserWarning
 
 # SYNPHOT
 from synphot import exceptions as synexceptions
 from synphot import units
 
-__all__ = ['resolve_filename', 'irafconvert', 'get_latest_file',
-           'read_graphtable', 'read_comptable', 'read_catalog', 'read_wavecat',
-           'read_waveset', 'read_detector_pars', 'read_interp_spec']
+__all__ = [
+    "get_latest_file",
+    "irafconvert",
+    "read_catalog",
+    "read_comptable",
+    "read_detector_pars",
+    "read_graphtable",
+    "read_interp_spec",
+    "read_wavecat",
+    "read_waveset",
+    "resolve_filename",
+]
 
-_irafconvpat = re.compile(r'\$(\w*)')
+_irafconvpat = re.compile(r"\$(\w*)")
 _irafconvdata = None
 
 
@@ -52,8 +62,8 @@ def resolve_filename(path, *args):
 
     """
     path_lc = path.lower()
-    if path_lc.startswith(('ftp', 'http')):
-        sep = '/'
+    if path_lc.startswith(("ftp", "http")):
+        sep = "/"
         fname = sep.join(args)
         if path_lc.endswith(sep):
             reg_filename = path + fname
@@ -61,8 +71,8 @@ def resolve_filename(path, *args):
             reg_filename = path + sep + fname
 
         # Catch-all to ensure result is OS-independent.
-        if sys.platform.startswith('win'):
-            reg_filename = reg_filename.replace('\\', sep)
+        if sys.platform.startswith("win"):
+            reg_filename = reg_filename.replace("\\", sep)
     else:
         reg_filename = str(Path(path) / os.sep.join(args))
 
@@ -71,31 +81,31 @@ def resolve_filename(path, *args):
 
 def _iraf_decode(irafdir):
     """Decode IRAF dir shortcut."""
-    from stsynphot.config import conf  # Put here to avoid circular import error  # noqa
+    from stsynphot.config import conf  # Put here to avoid circular import error
+
     global _irafconvdata
 
     irafdir = irafdir.lower()
 
-    if irafdir == 'synphot':  # Local data
-        path = get_pkg_data_path('data')
-    elif irafdir == 'crrefer':  # Root dir
+    if irafdir == "synphot":  # Local data
+        path = get_pkg_data_path("data")
+    elif irafdir == "crrefer":  # Root dir
         path = conf.rootdir
     else:  # Read from file
         # Avoid repeated I/O but do not load if not used
         if _irafconvdata is None:
             _irafconvdata = ascii.read(irafconvert(conf.irafshortcutfile))
 
-        mask = _irafconvdata['IRAFNAME'] == irafdir
+        mask = _irafconvdata["IRAFNAME"] == irafdir
         if not np.any(mask):
-            raise KeyError(f'IRAF shortcut {irafdir} not found in '
-                           f'{conf.irafshortcutfile}.')
-        relpath = os.path.normpath(_irafconvdata['RELPATH'][mask][0])
+            raise KeyError(f"IRAF shortcut {irafdir} not found in {conf.irafshortcutfile}.")
+        relpath = os.path.normpath(_irafconvdata["RELPATH"][mask][0])
         path = os.path.join(conf.rootdir, relpath)
 
     return path
 
 
-def irafconvert(iraf_filename, sep='$'):
+def irafconvert(iraf_filename, sep="$"):
     """Convert IRAF filename to regular filename.
 
     Acceptable IRAF formats:
@@ -142,7 +152,7 @@ def irafconvert(iraf_filename, sep='$'):
 
     """
     if not isinstance(iraf_filename, str):
-        raise TypeError(f'{iraf_filename} is not a string.')
+        raise TypeError(f"{iraf_filename} is not a string.")
 
     # Nothing needs to be done
     if sep not in iraf_filename:
@@ -155,7 +165,7 @@ def irafconvert(iraf_filename, sep='$'):
     if iraf_filename.startswith(sep):
         match = _irafconvpat.match(iraf_filename)
         path = os.environ[match.group(1)]
-        fname = iraf_filename[match.end() + 1:]  # 1 to omit leading slash
+        fname = iraf_filename[match.end() + 1 :]  # 1 to omit leading slash
 
     # dir$file
     else:
@@ -166,7 +176,7 @@ def irafconvert(iraf_filename, sep='$'):
 
 
 # TODO: Use CRDS instead.
-def get_latest_file(template, raise_error=False, err_msg=''):
+def get_latest_file(template, raise_error=False, err_msg=""):
     """Find the filename that appears last in sorted order
     based on given template.
 
@@ -202,23 +212,24 @@ def get_latest_file(template, raise_error=False, err_msg=''):
         path = os.curdir
 
     # Remote HTTP/HTTPS directory
-    if path_lc.startswith('http'):
+    if path_lc.startswith("http"):
         from urllib import request
+
         from bs4 import BeautifulSoup
 
         with request.urlopen(path) as fin:  # nosec
-            soup = BeautifulSoup(fin, 'html.parser')
+            soup = BeautifulSoup(fin, "html.parser")
 
-        allfiles = [x.text for x in soup.find_all('a')]
-        sep = '/'
+        allfiles = [x.text for x in soup.find_all("a")]
+        sep = "/"
 
     # Remote FTP directory
-    elif path_lc.startswith('ftp:'):
+    elif path_lc.startswith("ftp:"):
         from urllib import request
 
-        response = request.urlopen(path).read().decode('utf-8').splitlines()  # nosec  # noqa
-        allfiles = list(set([x.split()[-1] for x in response]))  # Rid symlink
-        sep = '/'
+        response = request.urlopen(path).read().decode("utf-8").splitlines()  # nosec
+        allfiles = list(set([x.split()[-1] for x in response]))  # Rid symlink  # noqa: C403
+        sep = "/"
 
     # Local directory
     elif os.path.isdir(path):
@@ -238,13 +249,13 @@ def get_latest_file(template, raise_error=False, err_msg=''):
     # No files found
     else:
         if not err_msg:
-            err_msg = f'No files found for {template}'
+            err_msg = f"No files found for {template}"
 
         if raise_error:
-            raise IOError(err_msg)
+            raise OSError(err_msg)
         else:
             warnings.warn(err_msg, AstropyUserWarning)
-            filename = ''
+            filename = ""
 
     return filename
 
@@ -277,22 +288,20 @@ def _read_table(filename, ext, dtypes):
 
     """
     # FITS
-    if filename.endswith(('.fits', '.fit')):
+    if filename.endswith((".fits", ".fit")):
         with fits.open(filename) as f:
             data = f[ext].data.copy()
 
-        err_str = ''
+        err_str = ""
         for key, val in dtypes.items():
             if not np.issubdtype(data[key].dtype, val):
-                err_str += (f'Expect {key} to be {val} but get '
-                            f'{data[key].dtype}.\n')
+                err_str += f"Expect {key} to be {val} but get {data[key].dtype}.\n"
         if err_str:
             raise synexceptions.SynphotError(err_str)
 
     # ASCII
     else:  # pragma: no cover
-        converters = dict(
-            [[k, ascii.convert_numpy(v)] for k, v in dtypes.items()])
+        converters = dict([[k, ascii.convert_numpy(v)] for k, v in dtypes.items()])
         data = ascii.read(filename, converters=converters)
 
     return data
@@ -348,14 +357,19 @@ def read_graphtable(filename, tab_ext=1):
 
     """
     graph_dtypes = {
-        'COMPNAME': np.str_, 'KEYWORD': np.str_, 'INNODE': np.int32,
-        'OUTNODE': np.int32, 'THCOMPNAME': np.str_, 'COMMENT': np.str_}
+        "COMPNAME": np.str_,
+        "KEYWORD": np.str_,
+        "INNODE": np.int32,
+        "OUTNODE": np.int32,
+        "THCOMPNAME": np.str_,
+        "COMMENT": np.str_,
+    }
     data = _read_table(filename, tab_ext, graph_dtypes)
 
     # Get primary area
-    if filename.endswith(('.fits', '.fit')):
+    if filename.endswith((".fits", ".fit")):
         with fits.open(filename) as f:
-            primary_area = f[str('PRIMARY')].header.get('PRIMAREA', None)
+            primary_area = f["PRIMARY"].header.get("PRIMAREA", None)
     else:  # pragma: no cover
         primary_area = None
 
@@ -363,10 +377,8 @@ def read_graphtable(filename, tab_ext=1):
         primary_area = primary_area * units.AREA
 
     # Check for segmented graph table
-    if np.any([x.lower().endswith('graph')
-               for x in data['COMPNAME']]):  # pragma: no cover
-        raise synexceptions.SynphotError(
-            'Segmented graph tables not supported.')
+    if np.any([x.lower().endswith("graph") for x in data["COMPNAME"]]):  # pragma: no cover
+        raise synexceptions.SynphotError("Segmented graph tables not supported.")
 
     return primary_area, data
 
@@ -402,9 +414,7 @@ def read_comptable(filename, tab_ext=1):
         Data table.
 
     """
-    return _read_table(filename, tab_ext,
-                       {'TIME': np.str_, 'COMPNAME': np.str_,
-                        'FILENAME': np.str_, 'COMMENT': np.str_})
+    return _read_table(filename, tab_ext, {"TIME": np.str_, "COMPNAME": np.str_, "FILENAME": np.str_, "COMMENT": np.str_})
 
 
 def read_catalog(filename, tab_ext=1):
@@ -443,8 +453,7 @@ def read_catalog(filename, tab_ext=1):
         Data table.
 
     """
-    return _read_table(filename, tab_ext, {'INDEX': np.str_,
-                                           'FILENAME': np.str_})
+    return _read_table(filename, tab_ext, {"INDEX": np.str_, "FILENAME": np.str_})
 
 
 def read_wavecat(filename):
@@ -479,10 +488,12 @@ def read_wavecat(filename):
 
     """
     return ascii.read(
-        filename, names=('OBSMODE', 'FILENAME'),
-        guess=False, format='no_header',
-        converters={'OBSMODE': [ascii.convert_numpy(str)],
-                    'FILENAME': [ascii.convert_numpy(str)]})
+        filename,
+        names=("OBSMODE", "FILENAME"),
+        guess=False,
+        format="no_header",
+        converters={"OBSMODE": [ascii.convert_numpy(str)], "FILENAME": [ascii.convert_numpy(str)]},
+    )
 
 
 def read_waveset(filename, wave_unit=u.AA):
@@ -517,9 +528,13 @@ def read_waveset(filename, wave_unit=u.AA):
     """
     wave_unit = units.validate_wave_unit(wave_unit)
     data = ascii.read(
-        filename, guess=False, format='no_header', names=('WAVELENGTH', ),
-        converters={'WAVELENGTH': [ascii.convert_numpy(float)]})
-    waveset = data['WAVELENGTH'].data
+        filename,
+        guess=False,
+        format="no_header",
+        names=("WAVELENGTH",),
+        converters={"WAVELENGTH": [ascii.convert_numpy(float)]},
+    )
+    waveset = data["WAVELENGTH"].data
 
     if not isinstance(waveset, u.Quantity):
         waveset = waveset * u.AA
@@ -560,12 +575,18 @@ def read_detector_pars(filename):
 
     """
     return ascii.read(
-        filename, guess=False, format='no_header', delimiter=r'\s',
-        names=('OBSMODE', 'SCALE', 'NX', 'NY'),
-        converters={'OBSMODE': [ascii.convert_numpy(str)],
-                    'SCALE': [ascii.convert_numpy(float)],
-                    'NX': [ascii.convert_numpy(int)],
-                    'NY': [ascii.convert_numpy(int)]})
+        filename,
+        guess=False,
+        format="no_header",
+        delimiter=r"\s",
+        names=("OBSMODE", "SCALE", "NX", "NY"),
+        converters={
+            "OBSMODE": [ascii.convert_numpy(str)],
+            "SCALE": [ascii.convert_numpy(float)],
+            "NX": [ascii.convert_numpy(int)],
+            "NY": [ascii.convert_numpy(int)],
+        },
+    )
 
 
 def read_interp_spec(filename, tab_ext=1):
@@ -619,21 +640,21 @@ def read_interp_spec(filename, tab_ext=1):
 
     """
     with fits.open(filename) as f:
-        pri_hdr = f[str('PRIMARY')].header
+        pri_hdr = f["PRIMARY"].header
 
-        params = pri_hdr.get('PARAMS', '')
-        if params.lower() == 'wavelength':
+        params = pri_hdr.get("PARAMS", "")
+        if params.lower() == "wavelength":
             do_wave_shift = True
         else:
             do_wave_shift = False
 
-        extrap = pri_hdr.get('EXTRAP', False)
-        if extrap in (True, 'T', 't'):
+        extrap = pri_hdr.get("EXTRAP", False)
+        if extrap in (True, "T", "t"):
             allow_extrap = True
         else:
             allow_extrap = False
 
-        wave_unit = f[tab_ext].header['TUNIT1'].lower()
+        wave_unit = f[tab_ext].header["TUNIT1"].lower()
         data = f[tab_ext].data.copy()
 
     return data, wave_unit, do_wave_shift, allow_extrap

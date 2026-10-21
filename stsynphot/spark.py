@@ -15,19 +15,25 @@ import re
 from astropy import log
 
 # LOCAL
-from stsynphot.exceptions import ParserError, GenericASTTraversalPruningException
+from stsynphot.exceptions import GenericASTTraversalPruningException, ParserError
 
-__all__ = ['GenericScanner', 'GenericParser', 'GenericASTBuilder',
-           'GenericASTTraversal', 'GenericASTMatcher']
+__all__ = [
+    "GenericASTBuilder",
+    "GenericASTMatcher",
+    "GenericASTTraversal",
+    "GenericParser",
+    "GenericScanner",
+]
 
-__version__ = 'SPARK-0.6.1'
+__version__ = "SPARK-0.6.1"
 
 
+# fmt: off
 def _namelist(instance):
     namelist, namedict, classlist = [], {}, [instance.__class__]
     for c in classlist:
         for b in c.__bases__:
-            classlist.append(b)
+            classlist.append(b)  # noqa: PERF402
         for name in dir(c):
             if name not in namedict:
                 namelist.append(name)
@@ -88,7 +94,6 @@ class GenericScanner:
 
     def t_default(self, s):
         r'( . | \n )+'
-        pass
 
 
 class GenericParser:
@@ -173,7 +178,7 @@ class GenericParser:
         changes = 1
         while changes:
             changes = 0
-            for src, dest in union.keys():
+            for src, dest in union:
                 destlen = len(self.first[dest])
                 self.first[dest].update(self.first[src])
                 if len(self.first[dest]) != destlen:
@@ -237,7 +242,7 @@ class GenericParser:
                         break
 
                     prule, ppos, pparent = pitem
-                    plhs, prhs = prule
+                    _plhs, prhs = prule
 
                     if prhs[ppos:ppos+1] == (lhs,):
                         new = (prule,
@@ -368,10 +373,10 @@ class GenericParser:
 
                 tokpos = self.buildTree_r(stack, tokens, tokpos, tree, child)
                 pos = pos - 1
-                (crule, cpos, cparent), cstate = child
+                (_crule, _cpos, cparent), _cstate = child
                 state = cparent
 
-        lhs, rhs = rule
+        _lhs, rhs = rule
         result = self.rule2func[rule](stack[:len(rhs)])
         stack[:len(rhs)] = [result]
         return tokpos
@@ -387,13 +392,13 @@ class GenericParser:
         sortlist = []
         name2index = {}
         for i in range(len(children)):
-            ((rule, pos, parent), index) = children[i]
-            lhs, rhs = rule
+            ((rule, _pos, _parent), _index) = children[i]
+            _lhs, rhs = rule
             name = self.rule2name[rule]
             sortlist.append((len(rhs), name))
             name2index[name] = i
         sortlist.sort()
-        outlist = list(map(lambda ab: ab[1], sortlist))
+        outlist = list(map(lambda ab: ab[1], sortlist))  # noqa: C417
         return children[name2index[self.resolve(outlist)]]
 
     def resolve(self, list):
@@ -413,14 +418,14 @@ class GenericParser:
 #
 class GenericASTBuilder(GenericParser):
     def __init__(self, AST, start):
-        super(GenericASTBuilder, self).__init__(start)
+        super().__init__(start)
         self.AST = AST
 
     def rebind(self, lhs):
         return lambda args, lhs=lhs, self=self: self.buildASTNode(args, lhs)
 
     def preprocess(self, rule, func):
-        lhs, rhs = rule
+        lhs, _rhs = rule
         return rule, self.rebind(lhs)
 
     def buildASTNode(self, args, lhs):
@@ -506,7 +511,7 @@ class GenericASTTraversal:
 #
 class GenericASTMatcher(GenericParser):
     def __init__(self, start, ast):
-        super(GenericASTMatcher, self).__init__(start)
+        super().__init__(start)
         self.ast = ast
 
     def rebind(self, func):
@@ -549,3 +554,5 @@ class GenericASTMatcher(GenericParser):
         #  Resolve ambiguity in favor of the longest RHS.
         #
         return list[-1]
+
+# fmt: on
