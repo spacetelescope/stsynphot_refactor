@@ -22,14 +22,12 @@ testing:
     - conftest.py
     - tox.ini
     - stsynphot/tests/**/*
-    - stsynphot/commissioning/**/*
 
 installation:
 - changed-files:
   - any-glob-to-any-file:
     - MANIFEST.in
     - pyproject.toml
-    - setup.*
 
 catalog:
 - changed-files:

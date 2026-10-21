@@ -54,7 +54,6 @@ namespaces = false
 [tool.setuptools.package-data]
 "stsynphot" = ["data/*.*", "data/wavecats/*"]
 "stsynphot.tests" = ["data/*"]
-"stsynphot.commissioning.tests" = ["data/*"]
 
 [tool.setuptools_scm]
 version_file = "stsynphot/version.py"
@@ -62,7 +61,7 @@ version_file = "stsynphot/version.py"
 [tool.pytest]
 minversion = "9"
 testpaths = ["stsynphot", "docs"]
-norecursedirs = ["build", "docs/_build", "stsynphot/data", "stsynphot/commissioning"]
+norecursedirs = ["build", "docs/_build", "stsynphot/data"]
 astropy_header = true
 addopts = ["--doctest-rst"]
 doctest_plus = "enabled"

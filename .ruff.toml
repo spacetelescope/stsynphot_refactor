@@ -1,7 +1,6 @@
 exclude = [
     "docs",
     "legacy_materials",
-    "commissioning",
     ".tox",
     ".eggs",
     "build",
