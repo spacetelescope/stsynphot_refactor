@@ -3,7 +3,6 @@ exclude = [
     "legacy_materials",
     "commissioning",
     "spark.py",
-    "spparser.py",
     ".tox",
     ".eggs",
     "build",

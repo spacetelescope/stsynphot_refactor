@@ -16,6 +16,7 @@ See :ref:`stsynphot-parser` for more details and
     IRAF SYNPHOT extinction names are obsolete and no longer supported.
 
 """
+
 # ASTROPY
 from astropy import log
 from astropy import units as u
@@ -23,28 +24,35 @@ from astropy import units as u
 # SYNPHOT
 from synphot import exceptions as synexceptions
 from synphot import units
-from synphot.models import (BlackBodyNorm1D, Box1D, ConstFlux1D,
-                            GaussianFlux1D, PowerLawFlux1D)
+from synphot.models import BlackBodyNorm1D, Box1D, ConstFlux1D, GaussianFlux1D, PowerLawFlux1D
 from synphot.spectrum import SourceSpectrum, SpectralElement
 
 # LOCAL
 from stsynphot import exceptions, spectrum
 from stsynphot.catalog import grid_to_spec
 from stsynphot.config import conf
-from stsynphot.spark import GenericScanner, GenericASTBuilder, GenericASTMatcher
+from stsynphot.spark import GenericASTBuilder, GenericASTMatcher, GenericScanner
 from stsynphot.stio import irafconvert
 
-__all__ = ['Token', 'AST', 'BaseScanner', 'Scanner', 'BaseParser',
-           'Interpreter', 'tokens_info', 'scan', 'parse', 'interpret',
-           'parse_spec']
+__all__ = [
+    "AST",
+    "BaseParser",
+    "BaseScanner",
+    "Interpreter",
+    "Scanner",
+    "Token",
+    "interpret",
+    "parse",
+    "parse_spec",
+    "scan",
+    "tokens_info",
+]
 
 # IRAF SYNPHOT functions
-_SYFUNCTIONS = ('band', 'bb', 'box', 'ebmvx', 'em', 'icat', 'pl', 'rn', 'spec',
-                'unit', 'z')
+_SYFUNCTIONS = ("band", "bb", "box", "ebmvx", "em", "icat", "pl", "rn", "spec", "unit", "z")
 
 # IRAF SYNPHOT flux units
-_SYFORMS = ('abmag', 'counts', 'flam', 'fnu', 'jy', 'mjy', 'obmag', 'photlam',
-            'photnu', 'stmag', 'vegamag')
+_SYFORMS = ("abmag", "counts", "flam", "fnu", "jy", "mjy", "obmag", "photlam", "photnu", "stmag", "vegamag")
 
 
 def _convertstr(value):
@@ -70,13 +78,10 @@ class Token:
         self.type = token_type
         self.attr = attr
 
-    def __cmp__(self, o):  # pragma: py2
-        return cmp(self.type, o)
-
-    def __eq__(self, o):  # pragma: py3
+    def __eq__(self, o):
         return self.type == o
 
-    def __lt__(self, o):  # pragma: py3
+    def __lt__(self, o):
         return self.type < o
 
     def __repr__(self):
@@ -95,25 +100,20 @@ class AST:
     def __getitem__(self, i):
         return self._kids[i]
 
-    def __setitem__(self, i, seq):  # pragma: py3
+    def __setitem__(self, i, seq):
         self._kids[i] = seq
 
     def __len__(self):
         return len(self._kids)
 
-    def __setslice__(self, low, high, seq):  # pragma: py2
-        self._kids[low:high] = seq
-
-    def __cmp__(self, o):  # pragma: py2
-        return cmp(self.type, o)
-
-    def __eq__(self, o):  # pragma: py3
+    def __eq__(self, o):
         return self.type == o
 
-    def __lt__(self, o):  # pragma: py3
+    def __lt__(self, o):
         return self.type < o
 
 
+# fmt: off
 class BaseScanner(GenericScanner):
     # Base class to handle language scanner.
     def tokenize(self, s):
@@ -179,7 +179,7 @@ class Scanner(BaseScanner):
 class BaseParser(GenericASTBuilder):
     # Base class to handle language parser.
     def __init__(self, ASTclass, start='top'):
-        super(BaseParser, self).__init__(ASTclass, start)
+        super().__init__(ASTclass, start)
 
     def p_top(self, args):
         """
@@ -223,7 +223,7 @@ class BaseParser(GenericASTBuilder):
 class Interpreter(GenericASTMatcher):
     # Class to handle language interpreter.
     def __init__(self, ast):
-        super(Interpreter, self).__init__('V', ast)
+        super().__init__('V', ast)
 
     def error(self, token):
         # Raise en exception.
@@ -271,7 +271,7 @@ class Interpreter(GenericASTMatcher):
     def p_value_paren(self, tree):
         """ V ::= value ( LPAREN V RPAREN ) """
         tree.value = _convertstr(tree[1].value)
-        tree.svalue = f'({str(tree[1].value):s})'
+        tree.svalue = f'({tree[1].value!s:s})'
 
     def p_arglist(self, tree):
         """ V ::= arglist ( V , V ) """
@@ -435,9 +435,10 @@ class Interpreter(GenericASTMatcher):
             # Default
             else:
                 tree.value = (f'would call {fname} with the following args: '
-                              f'{repr(args)}')
+                              f'{args!r}')
 
 
+# fmt: on
 def tokens_info(tlist):  # pragma: no cover
     """Print tokens for debugging.
 
@@ -448,13 +449,13 @@ def tokens_info(tlist):  # pragma: no cover
 
     """
     for token in tlist:
-        log.info(f'{token.type} {token.attr}')
+        log.info(f"{token.type} {token.attr}")
 
 
 def scan(input_str):
     """Scan language string."""
     scanner = Scanner()
-    input_str = input_str.replace('%2b', '+')
+    input_str = input_str.replace("%2b", "+")
     return scanner.tokenize(input_str)
 
 
