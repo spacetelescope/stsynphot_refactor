@@ -1,5 +1,10 @@
-1.6.1 (unreleased)
+1.7.0 (unreleased)
 ==================
+
+- Removed ``stsynphot.commissioning`` subpackage because it is
+  no longer relevant now that ``stsynphot`` is stable and
+  ``pysynphot`` is no longer actively developed. It has been
+  archived under ``legacy_materials`` instead. [#242]
 
 1.6.0 (2026-10-20)
 ==================

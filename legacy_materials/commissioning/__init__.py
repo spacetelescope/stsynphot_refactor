@@ -3,6 +3,11 @@
 
 .. note::
 
+    This was in ``stsynphot`` source directory, so the instructions
+    below no longer works and are only kept for archiving purpose.
+
+.. note::
+
     Tests require ASTROLIB PYSYNPHOT to be installed.
     Specifically, install the version to be compared against ``stsynphot``.
 
