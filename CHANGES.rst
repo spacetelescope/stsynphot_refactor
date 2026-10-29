@@ -1,6 +1,8 @@
 1.7.0 (unreleased)
 ==================
 
+- ``grid_to_spec()`` caches the grid spectra it reads, so each is read and
+  validated once until ``reset_cache()``. [#244]
 - Removed ``stsynphot.commissioning`` subpackage because it is
   no longer relevant now that ``stsynphot`` is stable and
   ``pysynphot`` is no longer actively developed. It has been
