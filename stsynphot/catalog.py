@@ -2,6 +2,7 @@
 """This module handles :ref:`catalog spectra <stsynphot-spec-atlas>`."""
 
 # STDLIB
+import copy
 import numbers
 from urllib.error import HTTPError
 
@@ -31,12 +32,14 @@ __all__ = [
 
 _PARAM_NAMES = ["T_eff", "metallicity", "log_g"]
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.
+_SPECTRUM_CACHE = {}  # Stores grid spectra (by file and column) to reduce file I/O.
 
 
 def reset_cache():
-    """Empty the catalog grid cache."""
-    global _CACHE  # noqa: PLW0602
+    """Empty the catalog grid cache, including cached grid spectra."""
+    global _CACHE, _SPECTRUM_CACHE  # noqa: PLW0602
     _CACHE.clear()
+    _SPECTRUM_CACHE.clear()
 
 
 def _par_from_parser(x):
@@ -83,13 +86,24 @@ def _get_spectrum(parlist, catdir):
     column = name.split("[")[1][:-1]
 
     filename = stio.resolve_filename(catdir, *filename.split("/"))
-    sp = SourceSpectrum.from_file(filename, flux_col=column)
 
-    totflux = sp.integrate()
-    try:
-        validate_totalflux(totflux)
-    except synexceptions.SynphotError:
+    # Interpolating one spectrum reads up to 8 grid spectra, and neighbouring
+    # parameters (e.g. stars along an isochrone) share most of them, so keep each
+    # validated spectrum after its first read. None marks one without valid data.
+    # Callers get a shallow copy with its own meta: on a grid point, grid_to_spec
+    # returns this spectrum itself, and changing it must not change the cache.
+    key = (filename, column)
+    if key not in _SPECTRUM_CACHE:
+        sp = SourceSpectrum.from_file(filename, flux_col=column)
+        try:
+            validate_totalflux(sp.integrate())
+        except synexceptions.SynphotError:
+            sp = None
+        _SPECTRUM_CACHE[key] = sp
+    if _SPECTRUM_CACHE[key] is None:
         raise exceptions.ParameterOutOfBounds(f"Parameter '{parlist}' has no valid data.")
+    sp = copy.copy(_SPECTRUM_CACHE[key])
+    sp.meta = dict(sp.meta)
 
     result = [member for member in parlist]
     result.pop()
