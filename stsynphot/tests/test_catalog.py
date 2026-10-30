@@ -1,9 +1,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Test catalog.py module."""
 
-# STDLIB
-from unittest.mock import patch
-
 # THIRD-PARTY
 import numpy as np
 import pytest
@@ -13,8 +10,8 @@ from astropy import units as u
 from astropy.table import Table
 
 # SYNPHOT
-from synphot import SourceSpectrum, units
 from synphot import exceptions as synexceptions
+from synphot import units
 
 # LOCAL
 from stsynphot import catalog, exceptions
@@ -268,30 +265,35 @@ def test_get_spectrum_cache(tmp_path):
     """Each grid spectrum is read and validated once, until reset_cache()."""
     wave = np.linspace(3000, 10000, 50) * u.AA
     flux = np.ones(50) * units.FLAM
-    Table([wave, flux, np.zeros(50) * units.FLAM], names=["WAVELENGTH", "g40", "g45"]).write(
-        tmp_path / "grid_00001.fits", format="fits"
-    )
+    t = Table([wave, flux, np.zeros(50) * units.FLAM], names=["WAVELENGTH", "g40", "g45"])
+    t.write(tmp_path / "grid_00001.fits", format="fits")
+    parlist = [5000.0, 0.0, 4.0, "grid_00001.fits[g40]"]
+    catdir = str(tmp_path)
     catalog.reset_cache()
-    read = SourceSpectrum.from_file
 
-    with patch.object(SourceSpectrum, "from_file", side_effect=read) as from_file:
-        sp1 = catalog._get_spectrum([5000.0, 0.0, 4.0, "grid_00001.fits[g40]"], str(tmp_path))
-        sp2 = catalog._get_spectrum([5000.0, 0.0, 4.0, "grid_00001.fits[g40]"], str(tmp_path))
-        assert from_file.call_count == 1
-        assert sp1[:3] == [5000.0, 0.0, 4.0]
-        np.testing.assert_array_equal(sp1[-1](wave), sp2[-1](wave))
+    with pytest.raises(KeyError, match=".* is not cached"):
+        catalog._get_spectrum(parlist, catdir, cache_only=True)
 
-        # Changing a returned spectrum does not change the cached one.
-        sp1[-1].meta["changed"] = True
-        assert "changed" not in sp2[-1].meta
+    result_1 = catalog._get_spectrum(parlist, catdir)
+    sp_1 = result_1[-1]
+    sp_1.meta["changed"] = True
 
-        # A spectrum without valid data raises every time, from one read.
-        for _ in range(2):
-            with pytest.raises(exceptions.ParameterOutOfBounds):
-                catalog._get_spectrum([5000.0, 0.0, 4.5, "grid_00001.fits[g45]"], str(tmp_path))
-        assert from_file.call_count == 2
+    result_2 = catalog._get_spectrum(parlist, catdir, cache_only=True)
+    sp_2 = result_2[-1]
 
-        catalog.reset_cache()
-        assert catalog._SPECTRUM_CACHE == {}
-        catalog._get_spectrum([5000.0, 0.0, 4.0, "grid_00001.fits[g40]"], str(tmp_path))
-        assert from_file.call_count == 3
+    assert result_1[:3] == result_2[:3] == parlist[:3]
+    np.testing.assert_array_equal(sp_1(wave), sp_2(wave))
+
+    # Changing a returned spectrum does not change the cached one.
+    assert "changed" not in sp_2.meta
+
+    # A spectrum without valid data raises every time, from one read.
+    bad_parlist = [5000.0, 0.0, 4.5, "grid_00001.fits[g45]"]
+    with pytest.raises(exceptions.ParameterOutOfBounds):
+        catalog._get_spectrum(bad_parlist, catdir)
+    with pytest.raises(exceptions.ParameterOutOfBounds):
+        catalog._get_spectrum(bad_parlist, catdir, cache_only=True)
+
+    catalog.reset_cache()
+    assert catalog._CACHE == {}
+    assert catalog._SPECTRUM_CACHE == {}

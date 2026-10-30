@@ -83,7 +83,7 @@ def _break_list(in_list, index, parameter):
     return upper_list, lower_list
 
 
-def _get_spectrum(parlist, catdir):
+def _get_spectrum(parlist, catdir, cache_only=False):
     """Get list of spectra for given parameter list and base name."""
     name = parlist[3]
 
@@ -93,12 +93,15 @@ def _get_spectrum(parlist, catdir):
     filename = stio.resolve_filename(catdir, *filename.split("/"))
 
     # Interpolating one spectrum reads up to 8 grid spectra, and neighbouring
-    # parameters (e.g. stars along an isochrone) share most of them, so keep each
+    # parameters (e.g., stars along an isochrone) share most of them, so keep each
     # validated spectrum after its first read. None marks one without valid data.
     # Callers get a shallow copy with its own meta: on a grid point, grid_to_spec
     # returns this spectrum itself, and changing it must not change the cache.
     key = (filename, column)
     if key not in _SPECTRUM_CACHE:
+        if cache_only:
+            raise KeyError(f"{key} is not cached, try again with cache_only=False")
+
         sp = SourceSpectrum.from_file(filename, flux_col=column)
         try:
             validate_totalflux(sp.integrate())
@@ -107,8 +110,7 @@ def _get_spectrum(parlist, catdir):
         _SPECTRUM_CACHE[key] = sp
     if _SPECTRUM_CACHE[key] is None:
         raise exceptions.ParameterOutOfBounds(f"Parameter '{parlist}' has no valid data.")
-    sp = copy.copy(_SPECTRUM_CACHE[key])
-    sp.meta = dict(sp.meta)
+    sp = copy.deepcopy(_SPECTRUM_CACHE[key])
 
     result = [member for member in parlist]
     result.pop()
