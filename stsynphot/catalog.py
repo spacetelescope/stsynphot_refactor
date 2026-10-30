@@ -36,7 +36,12 @@ _SPECTRUM_CACHE = {}  # Stores grid spectra (by file and column) to reduce file 
 
 
 def reset_cache():
-    """Empty the catalog grid cache, including cached grid spectra."""
+    """Empty the catalog grid cache, including cached grid spectra.
+
+    Catalog indices and grid spectra are read once and kept for the rest of
+    the session. Call this after grid files are changed on disk, so that
+    they are read again.
+    """
     global _CACHE, _SPECTRUM_CACHE  # noqa: PLW0602
     _CACHE.clear()
     _SPECTRUM_CACHE.clear()
@@ -184,6 +189,11 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     Interpolate if necessary.
 
     Grid parameters are read with :func:`get_catalog_index`.
+
+    The grid spectra are cached: each is read from file and validated the
+    first time it is needed, then kept for the rest of the session. Changes
+    to the grid files on disk are not seen until :func:`reset_cache` is
+    called.
 
     Parameters
     ----------

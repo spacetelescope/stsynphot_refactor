@@ -2,7 +2,9 @@
 ==================
 
 - ``grid_to_spec()`` caches the grid spectra it reads, so each is read and
-  validated once until ``reset_cache()``. [#244]
+  validated once per session until ``stsynphot.catalog.reset_cache()``.
+  Previously every call re-read the files. If a grid file changes on disk
+  during a session, call ``reset_cache()`` to read the new version. [#244]
 - Removed ``stsynphot.commissioning`` subpackage because it is
   no longer relevant now that ``stsynphot`` is stable and
   ``pysynphot`` is no longer actively developed. It has been
