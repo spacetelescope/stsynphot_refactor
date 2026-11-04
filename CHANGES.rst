@@ -10,6 +10,12 @@
   ``pysynphot`` is no longer actively developed. It has been
   archived under ``legacy_materials`` instead. [#242]
 
+- ``grid_to_spec()`` no longer copies the FITS headers of the grid spectra
+  when it interpolates between them, which made it about 3x faster when the
+  grid spectra are already in memory. Fluxes are unchanged. An interpolated
+  spectrum no longer has the headers in the metadata of its model components.
+  A spectrum on a grid point keeps its header. [#XXX]
+
 1.6.0 (2026-10-20)
 ==================
 

@@ -12,6 +12,7 @@ from astropy.table import Table
 # SYNPHOT
 from synphot import exceptions as synexceptions
 from synphot import units
+from synphot.models import get_metadata
 
 # LOCAL
 from stsynphot import catalog, exceptions
@@ -297,3 +298,37 @@ def test_get_spectrum_cache(tmp_path):
     catalog.reset_cache()
     assert catalog._CACHE == {}
     assert catalog._SPECTRUM_CACHE == {}
+
+
+def test_grid_to_spec_header(tmp_path):
+    """Interpolated spectra are built without the FITS headers of the grid spectra,
+    and a spectrum on a grid point keeps its header."""
+    custom_name = "linear_test"
+    custom_dir = tmp_path / "grid" / custom_name
+    custom_dir.mkdir(parents=True)
+
+    # Flux is linear in the parameters, so interpolation reproduces it exactly.
+    wave = np.linspace(3000, 10000, 50) * u.AA
+    columns, data = {}, []
+    for t_eff in (5000, 6000):
+        for metallicity in (0.0, 0.5):
+            for log_g in (4.0, 4.5):
+                col = f"g{len(columns)}"
+                columns[col] = np.full(wave.size, t_eff / 1000 + metallicity + log_g) * units.FLAM
+                data.append((f"{t_eff},{metallicity},{log_g}", f"{custom_name}_00000.fits[{col}]"))
+    Table([wave, *columns.values()], names=["WAVELENGTH", *columns]).write(custom_dir / f"{custom_name}_00000.fits")
+    Table(rows=data, names=["INDEX", "FILENAME"], dtype=["S14", "S46"]).write(custom_dir / "catalog.fits")
+
+    catalog.reset_cache()
+    with stsyn_conf.set_temp("rootdir", str(tmp_path)):
+        sp = catalog.grid_to_spec(custom_name, 5400, 0.2, 4.1)
+        sp_grid = catalog.grid_to_spec(custom_name, 5000, 0.0, 4.0)
+    catalog.reset_cache()
+
+    np.testing.assert_allclose(units.convert_flux(wave, sp(wave), units.FLAM).value, 9.7)
+    assert sp.meta["expr"] == f"{custom_name}(T_eff=5400,metallicity=0.2,log_g=4.1)"
+    assert "header" not in sp.meta
+    assert "header" not in get_metadata(sp.model)
+
+    np.testing.assert_allclose(units.convert_flux(wave, sp_grid(wave), units.FLAM).value, 9.0)
+    assert "header" in sp_grid.meta

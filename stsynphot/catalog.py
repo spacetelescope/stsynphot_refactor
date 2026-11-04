@@ -131,6 +131,13 @@ def _interpolate_spectrum(sp1, sp2, par):
     else:
         a = (par1 - par) / (par1 - par2)
         b = 1.0 - a
+        # Spectrum arithmetic deep-copies the metadata of both operands, including the
+        # FITS header of each grid spectrum, and then drops the header from the result.
+        # The header is not used here, so remove it first. Both spectra belong to this
+        # grid_to_spec call. A spectrum on a grid point is returned with its header.
+        for spectrum in (spectrum1, spectrum2):
+            spectrum.meta.pop("header", None)
+            spectrum.model.meta.pop("header", None)
         sp = a * spectrum2 + b * spectrum1
 
     result = [member for member in sp1]
