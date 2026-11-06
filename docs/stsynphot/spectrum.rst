@@ -120,9 +120,8 @@ one spectrum reads up to 8 grid spectra, and nearby parameters share most of
 them, so each file is read and validated only the first time it is needed.
 
 Because of this, changes to the grid files on disk are not seen by a running
-session. If you modify, replace, or add grid files after using them, call
-:func:`~stsynphot.catalog.reset_cache` to clear the cache, so they are read
-again::
+session. If you modify/replace/add grid files after using them or need to free memory, call
+:func:`~stsynphot.catalog.reset_cache` to clear the cache::
 
     >>> from stsynphot import catalog
     >>> catalog.reset_cache()
