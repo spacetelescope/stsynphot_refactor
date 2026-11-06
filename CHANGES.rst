@@ -5,16 +5,15 @@
   validated once per session until ``stsynphot.catalog.reset_cache()``.
   Previously every call re-read the files. If a grid file changes on disk
   during a session, call ``reset_cache()`` to read the new version. [#244]
+- ``grid_to_spec()`` no longer copies the FITS headers of the grid spectra
+  when it interpolates between them, which made it about 4x faster when the
+  grid spectra are already in memory. Fluxes are unchanged. An interpolated
+  spectrum no longer has the headers in the metadata of its model components.
+  A spectrum on a grid point keeps its header. [#246]
 - Removed ``stsynphot.commissioning`` subpackage because it is
   no longer relevant now that ``stsynphot`` is stable and
   ``pysynphot`` is no longer actively developed. It has been
   archived under ``legacy_materials`` instead. [#242]
-
-- ``grid_to_spec()`` no longer copies the FITS headers of the grid spectra
-  when it interpolates between them, which made it about 2.8x faster when the
-  grid spectra are already in memory. Fluxes are unchanged. An interpolated
-  spectrum no longer has the headers in the metadata of its model components.
-  A spectrum on a grid point keeps its header. [#246]
 
 1.6.0 (2026-10-20)
 ==================

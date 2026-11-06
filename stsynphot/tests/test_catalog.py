@@ -323,6 +323,10 @@ def test_grid_to_spec_header(tmp_path):
     with stsyn_conf.set_temp("rootdir", str(tmp_path)):
         sp = catalog.grid_to_spec(custom_name, 5400, 0.2, 4.1)
         sp_grid = catalog.grid_to_spec(custom_name, 5000, 0.0, 4.0)
+        # Changing the header of a spectrum on a grid point does not change the cached one.
+        sp_grid.meta["header"]["changed"] = True
+        sp_grid.model.meta["header"]["changed"] = True
+        sp_grid_2 = catalog.grid_to_spec(custom_name, 5000, 0.0, 4.0)
     catalog.reset_cache()
 
     np.testing.assert_allclose(units.convert_flux(wave, sp(wave), units.FLAM).value, 9.7)
@@ -332,3 +336,5 @@ def test_grid_to_spec_header(tmp_path):
 
     np.testing.assert_allclose(units.convert_flux(wave, sp_grid(wave), units.FLAM).value, 9.0)
     assert "header" in sp_grid.meta
+    assert "changed" not in sp_grid_2.meta["header"]
+    assert "changed" not in sp_grid_2.model.meta["header"]

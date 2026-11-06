@@ -95,8 +95,8 @@ def _get_spectrum(parlist, catdir, cache_only=False):
     # Interpolating one spectrum reads up to 8 grid spectra, and neighbouring
     # parameters (e.g., stars along an isochrone) share most of them, so keep each
     # validated spectrum after its first read. None marks one without valid data.
-    # Callers get a shallow copy with its own meta: on a grid point, grid_to_spec
-    # returns this spectrum itself, and changing it must not change the cache.
+    # Callers get a copy: on a grid point, grid_to_spec returns this spectrum
+    # itself, and changing it must not change the cache.
     key = (filename, column)
     if key not in _SPECTRUM_CACHE:
         if cache_only:
@@ -110,7 +110,12 @@ def _get_spectrum(parlist, catdir, cache_only=False):
         _SPECTRUM_CACHE[key] = sp
     if _SPECTRUM_CACHE[key] is None:
         raise exceptions.ParameterOutOfBounds(f"Parameter '{parlist}' has no valid data.")
-    sp = copy.deepcopy(_SPECTRUM_CACHE[key])
+    # The copy shares the FITS headers with the cached spectrum instead of copying
+    # them: interpolation drops them, and grid_to_spec copies them only for a
+    # spectrum on a grid point.
+    cached = _SPECTRUM_CACHE[key]
+    headers = [meta["header"] for meta in (cached.meta, cached.model.meta) if "header" in meta]
+    sp = copy.deepcopy(cached, {id(header): header for header in headers})
 
     result = [member for member in parlist]
     result.pop()
@@ -133,8 +138,9 @@ def _interpolate_spectrum(sp1, sp2, par):
         b = 1.0 - a
         # Spectrum arithmetic deep-copies the metadata of both operands, including the
         # FITS header of each grid spectrum, and then drops the header from the result.
-        # The header is not used here, so remove it first. Both spectra belong to this
-        # grid_to_spec call. A spectrum on a grid point is returned with its header.
+        # The header is not used here, so remove it first. Both spectra and their
+        # metadata belong to this grid_to_spec call. A spectrum on a grid point is
+        # returned with its header.
         for spectrum in (spectrum1, spectrum2):
             spectrum.meta.pop("header", None)
             spectrum.model.meta.pop("header", None)
@@ -281,6 +287,10 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     spa7 = _interpolate_spectrum(spa5, spa6, t_eff)
 
     sp = spa7[0]
+    # On a grid point, sp still shares its FITS headers with the cached spectrum.
+    for meta in (sp.meta, sp.model.meta):
+        if "header" in meta:
+            meta["header"] = copy.deepcopy(meta["header"])
     sp.meta["expr"] = f"{gridname}(T_eff={t_eff:g},metallicity={metallicity:g},log_g={log_g:g})"
 
     return sp
