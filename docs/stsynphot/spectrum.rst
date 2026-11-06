@@ -113,5 +113,18 @@ flux values and would need to be renormalize using
     :width: 600px
     :alt: Kurucz stellar and Seyfert 1 galaxy spectra.
 
-For performance, the grid data is cached. You can use
-:func:`~stsynphot.catalog.reset_cache` to clear the cache.
+For performance, the grid data is cached in memory for the rest of the
+session: the catalog index of each grid, and each grid spectrum that
+:func:`~stsynphot.catalog.grid_to_spec` reads (by file and column). Interpolating
+one spectrum reads up to 8 grid spectra, and nearby parameters share most of
+them, so each file is read and validated only the first time it is needed.
+
+Because of this, changes to the grid files on disk are not seen by a running
+session. If you modify/replace/add grid files after using them or need to free memory, call
+:func:`~stsynphot.catalog.reset_cache` to clear the cache::
+
+    >>> from stsynphot import catalog
+    >>> catalog.reset_cache()
+
+Spectra returned by :func:`~stsynphot.catalog.grid_to_spec` are copies, so
+changing one does not change the cache.
