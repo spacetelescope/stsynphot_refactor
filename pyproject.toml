@@ -16,7 +16,7 @@ dependencies = [
     "numpy>=2",
     "astropy>=7",
     "scipy>=1.14",
-    "synphot>=1.5",
+    "synphot@git+https://github.com/pllim/synphot_refactor.git@shhh-unit",
     "beautifulsoup4"]
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
