@@ -5,6 +5,8 @@
   validated once per session until ``stsynphot.catalog.reset_cache()``.
   Previously every call re-read the files. If a grid file changes on disk
   during a session, call ``reset_cache()`` to read the new version. [#244]
+- Spectra read by ``grid_to_spec()`` no longer keeps their primary
+  headers for faster interpolation. [#249]
 - Removed ``stsynphot.commissioning`` subpackage because it is
   no longer relevant now that ``stsynphot`` is stable and
   ``pysynphot`` is no longer actively developed. It has been

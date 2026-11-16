@@ -8,12 +8,10 @@ from urllib.error import HTTPError
 
 # THIRD-PARTY
 import numpy as np
-
-# ASTROPY
+import synphot
 from astropy import units as u
 from astropy.io import fits
-
-# SYNPHOT
+from astropy.utils import minversion
 from synphot import exceptions as synexceptions
 from synphot import units
 from synphot.spectrum import SourceSpectrum
@@ -33,6 +31,12 @@ __all__ = [
 _PARAM_NAMES = ["T_eff", "metallicity", "log_g"]
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.
 _SPECTRUM_CACHE = {}  # Stores grid spectra (by file and column) to reduce file I/O.
+
+SYNPHOT_LT_1_9 = not minversion(synphot, "1.8.1.dev")
+if SYNPHOT_LT_1_9:
+    _prihdr_kw = {}
+else:
+    _prihdr_kw = {"primary_header": False}  # Omit header for performance
 
 
 def reset_cache():
@@ -102,7 +106,7 @@ def _get_spectrum(parlist, catdir, cache_only=False):
         if cache_only:
             raise KeyError(f"{key} is not cached, try again with cache_only=False")
 
-        sp = SourceSpectrum.from_file(filename, flux_col=column)
+        sp = SourceSpectrum.from_file(filename, flux_col=column, **_prihdr_kw)
         try:
             validate_totalflux(sp.integrate())
         except synexceptions.SynphotError:
@@ -201,9 +205,10 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     ----------
     gridname : {'ck04models', 'k93models', 'phoenix'}
         Model to use:
-            * ``ck04models`` - Castelli & Kurucz (2004)
-            * ``k93models`` - Kurucz (1993)
-            * ``phoenix`` - Allard et al. (2009)
+
+        * ``ck04models`` - Castelli & Kurucz (2004)
+        * ``k93models`` - Kurucz (1993)
+        * ``phoenix`` - Allard et al. (2009)
 
     t_eff : str, float or `astropy.units.quantity.Quantity`
         Effective temperature of model.
