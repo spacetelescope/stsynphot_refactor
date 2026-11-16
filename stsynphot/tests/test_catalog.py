@@ -4,18 +4,15 @@
 # THIRD-PARTY
 import numpy as np
 import pytest
-
-# ASTROPY
 from astropy import units as u
 from astropy.table import Table
-
-# SYNPHOT
 from synphot import exceptions as synexceptions
 from synphot import units
 
 # LOCAL
 from stsynphot import catalog, exceptions
 from stsynphot import conf as stsyn_conf
+from stsynphot.catalog import SYNPHOT_LT_1_9
 
 
 @pytest.mark.remote_data
@@ -279,8 +276,11 @@ def test_get_spectrum_cache(tmp_path):
     sp_1 = result_1[-1]
     sp_1.meta["changed"] = True
 
-    # Header should have been discarded on read.
-    assert sp_1.meta["header"] == {}
+    # Header should have been discarded on read for synphot 1.9 or later.
+    if SYNPHOT_LT_1_9:
+        assert "SIMPLE" in sp_1.meta["header"]
+    else:
+        assert sp_1.meta["header"] == {}
 
     result_2 = catalog._get_spectrum(parlist, catdir, cache_only=True)
     sp_2 = result_2[-1]
