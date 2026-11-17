@@ -32,7 +32,7 @@ _PARAM_NAMES = ["T_eff", "metallicity", "log_g"]
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.
 _SPECTRUM_CACHE = {}  # Stores grid spectra (by file and column) to reduce file I/O.
 
-SYNPHOT_LT_1_9 = not minversion(synphot, "1.8.1.dev")
+SYNPHOT_LT_1_9 = not minversion(synphot, "1.9.0")
 if SYNPHOT_LT_1_9:
     _prihdr_kw = {}
 else:
