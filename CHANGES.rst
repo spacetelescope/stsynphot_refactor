@@ -1,4 +1,4 @@
-1.7.0 (unreleased)
+1.7.0 (2026-11-17)
 ==================
 
 - ``grid_to_spec()`` caches the grid spectra it reads, so each is read and
