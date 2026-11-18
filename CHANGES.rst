@@ -5,7 +5,7 @@
   waveset, it interpolates their flux arrays instead of building compound
   models, and it searches the catalog with numpy. The values are unchanged;
   the returned spectrum is now one ``Empirical1D`` table, and a spectrum on a
-  grid point no longer has an empty ``header`` in its ``meta``. [#xxx]
+  grid point no longer has an empty ``header`` in its ``meta``. [#251]
 
 1.7.0 (2026-11-17)
 ==================
