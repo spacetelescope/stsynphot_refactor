@@ -5,7 +5,7 @@
   spectra with numpy instead of combining spectrum objects. It always returns a
   new ``Empirical1D`` spectrum. When the grid spectra have different wavelength
   grids (some ``phoenix`` spectra), they are interpolated onto the union of the
-  grids first, and the result can differ from before in the last digit. [#TBD]
+  grids first, and the result can differ from before in the last digit. [#252]
 
 1.7.0 (2026-11-17)
 ==================
