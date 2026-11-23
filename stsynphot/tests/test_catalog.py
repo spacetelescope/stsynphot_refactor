@@ -304,8 +304,8 @@ def test_get_spectrum_cache(tmp_path):
 
 
 @pytest.mark.parametrize("shared_waveset", [True, False])
-def test_grid_to_spec_interpolation(tmp_path, shared_waveset):
-    """Trilinear interpolation, from flux arrays if the grid spectra share a waveset."""
+def test_grid_to_spec_neighbors(tmp_path, shared_waveset):
+    """The eight neighboring grid points are found and interpolated trilinearly."""
     grid_dir = tmp_path / "grid" / "mockgrid"
     grid_dir.mkdir(parents=True)
     rng = np.random.default_rng(0)
@@ -339,15 +339,10 @@ def test_grid_to_spec_interpolation(tmp_path, shared_waveset):
         for pars in [(5300, 0.2, 4.1), (5000, 0.2, 4.0), (5000, 0.0, 4.0)]:
             sp = catalog.grid_to_spec("mockgrid", *pars)
             np.testing.assert_allclose(sp(w).value, expected(w.value, *pars), rtol=1e-12)
-            assert (type(sp.model).__name__ == "Empirical1D") is (shared_waveset or pars == (5000, 0.0, 4.0))
 
-        # A spectrum on a grid point does not share data with the cache.
-        sp = catalog.grid_to_spec("mockgrid", 5000, 0.0, 4.0)
-        for cached in catalog._SPECTRUM_CACHE.values():
-            assert not np.shares_memory(sp.model.points[0], cached.model.points[0])
-            assert not np.shares_memory(sp.model.lookup_table, cached.model.lookup_table)
-        sp.model.lookup_table[:] = 0
-        assert np.all(catalog.grid_to_spec("mockgrid", 5000, 0.0, 4.0)(w).value > 0)
+        # Out of bounds.
+        with pytest.raises(exceptions.ParameterOutOfBounds):
+            catalog.grid_to_spec("mockgrid", 7000, 0.2, 4.1)
 
     catalog.reset_cache()
-    assert catalog._PARAMS_CACHE == catalog._SAME_WAVESET == {}
+    assert catalog._PARAMS_CACHE == {}

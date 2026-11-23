@@ -14,7 +14,6 @@ from astropy.io import fits
 from astropy.utils import minversion
 from synphot import exceptions as synexceptions
 from synphot import units
-from synphot.models import Empirical1D
 from synphot.spectrum import SourceSpectrum
 from synphot.utils import validate_totalflux
 
@@ -33,7 +32,6 @@ _PARAM_NAMES = ["T_eff", "metallicity", "log_g"]
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.
 _SPECTRUM_CACHE = {}  # Stores grid spectra (by file and column) to reduce file I/O.
 _PARAMS_CACHE = {}  # Grid parameters of each catalog as an array, by catalog directory.
-_SAME_WAVESET = {}  # Whether two grid files share wavelengths, by (catalog dir, file, file).
 
 SYNPHOT_LT_1_9 = not minversion(synphot, "1.9.0")
 if SYNPHOT_LT_1_9:
@@ -49,11 +47,10 @@ def reset_cache():
     the session. Call this after grid files are changed on disk, so that
     they are read again.
     """
-    global _CACHE, _SPECTRUM_CACHE, _PARAMS_CACHE, _SAME_WAVESET  # noqa: PLW0602
+    global _CACHE, _SPECTRUM_CACHE, _PARAMS_CACHE  # noqa: PLW0602
     _CACHE.clear()
     _SPECTRUM_CACHE.clear()
     _PARAMS_CACHE.clear()
-    _SAME_WAVESET.clear()
 
 
 def _par_from_parser(x):
@@ -90,7 +87,7 @@ def _break_list(params, rows, index, parameter):
     return upper_rows, lower_rows
 
 
-def _get_spectrum(parlist, catdir, cache_only=False, copy_spectrum=True):
+def _get_spectrum(parlist, catdir, cache_only=False):
     """Get list of spectra for given parameter list and base name."""
     name = parlist[3]
 
@@ -117,7 +114,7 @@ def _get_spectrum(parlist, catdir, cache_only=False, copy_spectrum=True):
         _SPECTRUM_CACHE[key] = sp
     if _SPECTRUM_CACHE[key] is None:
         raise exceptions.ParameterOutOfBounds(f"Parameter '{parlist}' has no valid data.")
-    sp = copy.deepcopy(_SPECTRUM_CACHE[key]) if copy_spectrum else _SPECTRUM_CACHE[key]
+    sp = copy.deepcopy(_SPECTRUM_CACHE[key])
 
     result = [member for member in parlist]
     result.pop()
@@ -264,28 +261,14 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     list10, list11 = _break_list(params, list4, 2, log_g)
     list12, list13 = _break_list(params, list5, 2, log_g)
 
-    parlists = [indices[lst[0]] for lst in (list6, list7, list8, list9, list10, list11, list12, list13)]
-
-    # If all eight share one waveset, interpolate their flux arrays: building
-    # compound models copies and merges the metadata of every spectrum.
-    # Columns of one file share its wavelengths, so compare files, once per pair.
-    cached = [_get_spectrum(par, catdir, copy_spectrum=False)[-1] for par in parlists]
-    models = {par[3].split("[")[0]: sp.model for par, sp in zip(parlists, cached)}
-    (file1, model1), *others = models.items()
-    as_arrays = all(isinstance(sp.model, Empirical1D) for sp in cached)
-    for file2, model2 in others:
-        if not as_arrays:
-            break
-        key = (catdir, file1, file2)
-        if key not in _SAME_WAVESET:
-            _SAME_WAVESET[key] = np.array_equal(model1.points[0], model2.points[0])
-        as_arrays = _SAME_WAVESET[key]
-    wave = model1.points[0]
-    if as_arrays:
-        spectra = [[*par[:3], sp.model.lookup_table] for par, sp in zip(parlists, cached)]
-    else:
-        spectra = [_get_spectrum(par, catdir) for par in parlists]
-    sp1, sp2, sp3, sp4, sp5, sp6, sp7, sp8 = spectra
+    sp1 = _get_spectrum(indices[list6[0]], catdir)
+    sp2 = _get_spectrum(indices[list7[0]], catdir)
+    sp3 = _get_spectrum(indices[list8[0]], catdir)
+    sp4 = _get_spectrum(indices[list9[0]], catdir)
+    sp5 = _get_spectrum(indices[list10[0]], catdir)
+    sp6 = _get_spectrum(indices[list11[0]], catdir)
+    sp7 = _get_spectrum(indices[list12[0]], catdir)
+    sp8 = _get_spectrum(indices[list13[0]], catdir)
 
     spa1 = _interpolate_spectrum(sp1, sp2, log_g)
     spa2 = _interpolate_spectrum(sp3, sp4, log_g)
@@ -298,9 +281,6 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     spa7 = _interpolate_spectrum(spa5, spa6, t_eff)
 
     sp = spa7[0]
-    if as_arrays:
-        # Copied: on a grid point this is a cached array.
-        sp = SourceSpectrum(Empirical1D, points=wave.copy(), lookup_table=sp.copy())
     sp.meta["expr"] = f"{gridname}(T_eff={t_eff:g},metallicity={metallicity:g},log_g={log_g:g})"
 
     return sp
