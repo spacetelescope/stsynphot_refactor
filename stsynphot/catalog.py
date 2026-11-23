@@ -2,7 +2,6 @@
 """This module handles :ref:`catalog spectra <stsynphot-spec-atlas>`."""
 
 # STDLIB
-import copy
 import numbers
 from urllib.error import HTTPError
 
@@ -14,6 +13,7 @@ from astropy.io import fits
 from astropy.utils import minversion
 from synphot import exceptions as synexceptions
 from synphot import units
+from synphot.models import Empirical1D
 from synphot.spectrum import SourceSpectrum
 from synphot.utils import validate_totalflux
 
@@ -96,11 +96,10 @@ def _get_spectrum(parlist, catdir, cache_only=False):
 
     filename = stio.resolve_filename(catdir, *filename.split("/"))
 
-    # Interpolating one spectrum reads up to 8 grid spectra, and neighbouring
+    # Interpolating one spectrum reads up to 8 grid spectra, and neighboring
     # parameters (e.g., stars along an isochrone) share most of them, so keep each
     # validated spectrum after its first read. None marks one without valid data.
-    # Callers get a shallow copy with its own meta: on a grid point, grid_to_spec
-    # returns this spectrum itself, and changing it must not change the cache.
+    # The cached spectrum itself is returned: grid_to_spec only reads its arrays.
     key = (filename, column)
     if key not in _SPECTRUM_CACHE:
         if cache_only:
@@ -114,11 +113,9 @@ def _get_spectrum(parlist, catdir, cache_only=False):
         _SPECTRUM_CACHE[key] = sp
     if _SPECTRUM_CACHE[key] is None:
         raise exceptions.ParameterOutOfBounds(f"Parameter '{parlist}' has no valid data.")
-    sp = copy.deepcopy(_SPECTRUM_CACHE[key])
-
     result = [member for member in parlist]
     result.pop()
-    result.append(sp)
+    result.append(_SPECTRUM_CACHE[key])
 
     return result
 
@@ -259,14 +256,23 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     list10, list11 = _break_list(list4, 2, log_g)
     list12, list13 = _break_list(list5, 2, log_g)
 
-    sp1 = _get_spectrum(list6[0], catdir)
-    sp2 = _get_spectrum(list7[0], catdir)
-    sp3 = _get_spectrum(list8[0], catdir)
-    sp4 = _get_spectrum(list9[0], catdir)
-    sp5 = _get_spectrum(list10[0], catdir)
-    sp6 = _get_spectrum(list11[0], catdir)
-    sp7 = _get_spectrum(list12[0], catdir)
-    sp8 = _get_spectrum(list13[0], catdir)
+    parlists = [lst[0] for lst in (list6, list7, list8, list9, list10, list11, list12, list13)]
+    spectra = [_get_spectrum(par, catdir) for par in parlists]
+
+    # Interpolate the flux arrays on one wavelength grid: the shared one (all
+    # columns of a file share one), or else the union of all grids.
+    waves = {par[3].split("[")[0]: sp[-1].model.points[0] for par, sp in zip(parlists, spectra)}
+    wave, *others = waves.values()
+    if all(np.array_equal(wave, other) for other in others):
+        for sp in spectra:
+            sp[-1] = sp[-1].model.lookup_table
+    else:
+        wave = np.unique(np.concatenate(list(waves.values())))
+        for sp in spectra:
+            model = sp[-1].model
+            flux = np.interp(wave, model.points[0], model.lookup_table)
+            sp[-1] = model._process_neg_flux(wave, flux)
+    sp1, sp2, sp3, sp4, sp5, sp6, sp7, sp8 = spectra
 
     spa1 = _interpolate_spectrum(sp1, sp2, log_g)
     spa2 = _interpolate_spectrum(sp3, sp4, log_g)
@@ -278,7 +284,8 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
 
     spa7 = _interpolate_spectrum(spa5, spa6, t_eff)
 
-    sp = spa7[0]
+    # Copied: on a grid point these are the cached arrays.
+    sp = SourceSpectrum(Empirical1D, points=wave.copy(), lookup_table=spa7[0].copy())
     sp.meta["expr"] = f"{gridname}(T_eff={t_eff:g},metallicity={metallicity:g},log_g={log_g:g})"
 
     return sp

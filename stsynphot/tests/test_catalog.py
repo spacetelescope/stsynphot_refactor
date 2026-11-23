@@ -274,7 +274,6 @@ def test_get_spectrum_cache(tmp_path):
 
     result_1 = catalog._get_spectrum(parlist, catdir)
     sp_1 = result_1[-1]
-    sp_1.meta["changed"] = True
 
     # Header should have been discarded on read for synphot 1.9 or later.
     if SYNPHOT_LT_1_9:
@@ -285,11 +284,9 @@ def test_get_spectrum_cache(tmp_path):
     result_2 = catalog._get_spectrum(parlist, catdir, cache_only=True)
     sp_2 = result_2[-1]
 
+    # The second call returns the cached spectrum without reading the file.
     assert result_1[:3] == result_2[:3] == parlist[:3]
-    np.testing.assert_array_equal(sp_1(wave), sp_2(wave))
-
-    # Changing a returned spectrum does not change the cached one.
-    assert "changed" not in sp_2.meta
+    assert sp_2 is sp_1
 
     # A spectrum without valid data raises every time, from one read.
     bad_parlist = [5000.0, 0.0, 4.5, "grid_00001.fits[g45]"]
@@ -301,3 +298,54 @@ def test_get_spectrum_cache(tmp_path):
     catalog.reset_cache()
     assert catalog._CACHE == {}
     assert catalog._SPECTRUM_CACHE == {}
+
+
+@pytest.mark.parametrize("shared_waveset", [True, False])
+def test_grid_to_spec_interpolation(tmp_path, shared_waveset):
+    """Trilinear interpolation of the grid spectra, on the union of their wavesets."""
+    grid_dir = tmp_path / "grid" / "mockgrid"
+    grid_dir.mkdir(parents=True)
+    rng = np.random.default_rng(0)
+    waves = [np.linspace(3000, 10000, 50), np.linspace(2800, 10200, 70)]
+    if shared_waveset:
+        waves[1] = waves[0]
+    flux = {}  # (t_eff, metallicity, log_g) -> (wave, flux in PHOTLAM)
+    rows = []
+    for i, (t_eff, metal) in enumerate([(5000, 0.0), (5000, 0.5), (6000, 0.0), (6000, 0.5)]):
+        wave = waves[i % 2]
+        cols = {}
+        for log_g, col in [(4.0, "g40"), (4.5, "g45")]:
+            cols[col] = rng.uniform(1, 2, wave.size)
+            # synphot interpolates in PHOTLAM
+            flux[(t_eff, metal, log_g)] = (wave, units.convert_flux(wave, cols[col] * units.FLAM, units.PHOTLAM).value)
+            rows.append((f"{t_eff},{metal},{log_g}", f"m{i}.fits[{col}]"))
+        Table([wave * u.AA, cols["g40"] * units.FLAM, cols["g45"] * units.FLAM], names=["WAVELENGTH", "g40", "g45"]).write(
+            grid_dir / f"m{i}.fits"
+        )
+    Table(rows=rows, names=["INDEX", "FILENAME"]).write(grid_dir / "catalog.fits")
+
+    def expected(w, t_eff, metal, log_g):
+        total = 0
+        for t, wt in [(5000, (6000 - t_eff) / 1000), (6000, (t_eff - 5000) / 1000)]:
+            for m, wm in [(0.0, (0.5 - metal) / 0.5), (0.5, metal / 0.5)]:
+                for g, wg in [(4.0, (4.5 - log_g) / 0.5), (4.5, (log_g - 4.0) / 0.5)]:
+                    total = total + wt * wm * wg * np.interp(w, *flux[(t, m, g)])
+        return total
+
+    catalog.reset_cache()
+    with stsyn_conf.set_temp("rootdir", str(tmp_path)):
+        w = np.linspace(2700, 10300, 333) * u.AA
+        for pars in [(5300, 0.2, 4.1), (5000, 0.2, 4.0), (5000, 0.0, 4.0)]:
+            sp = catalog.grid_to_spec("mockgrid", *pars)
+            assert type(sp.model).__name__ == "Empirical1D"
+            np.testing.assert_allclose(sp(w).value, expected(w.value, *pars), rtol=1e-12)
+
+        # A spectrum on a grid point does not share data with the cache.
+        sp = catalog.grid_to_spec("mockgrid", 5000, 0.0, 4.0)
+        for cached in catalog._SPECTRUM_CACHE.values():
+            assert not np.shares_memory(sp.model.points[0], cached.model.points[0])
+            assert not np.shares_memory(sp.model.lookup_table, cached.model.lookup_table)
+        sp.model.lookup_table[:] = 0
+        assert np.all(catalog.grid_to_spec("mockgrid", 5000, 0.0, 4.0)(w).value > 0)
+
+    catalog.reset_cache()

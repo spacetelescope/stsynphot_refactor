@@ -126,5 +126,5 @@ session. If you modify/replace/add grid files after using them or need to free m
     >>> from stsynphot import catalog
     >>> catalog.reset_cache()
 
-Spectra returned by :func:`~stsynphot.catalog.grid_to_spec` are copies, so
+Each spectrum returned by :func:`~stsynphot.catalog.grid_to_spec` is new, so
 changing one does not change the cache.
