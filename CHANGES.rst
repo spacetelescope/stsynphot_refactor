@@ -1,6 +1,10 @@
 1.7.1 (unreleased)
 ==================
 
+- ``grid_to_spec()`` searches the catalog for the neighboring grid points
+  with numpy instead of a Python loop, which makes it faster. The output is
+  unchanged. [#251]
+
 1.7.0 (2026-11-17)
 ==================
 

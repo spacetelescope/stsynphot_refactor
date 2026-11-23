@@ -114,8 +114,9 @@ flux values and would need to be renormalize using
     :alt: Kurucz stellar and Seyfert 1 galaxy spectra.
 
 For performance, the grid data is cached in memory for the rest of the
-session: the catalog index of each grid, and each grid spectrum that
-:func:`~stsynphot.catalog.grid_to_spec` reads (by file and column). Interpolating
+session: the catalog index of each grid (also as an array of parameters), and
+each grid spectrum that :func:`~stsynphot.catalog.grid_to_spec` reads (by file
+and column). Interpolating
 one spectrum reads up to 8 grid spectra, and nearby parameters share most of
 them, so each file is read and validated only the first time it is needed.
 

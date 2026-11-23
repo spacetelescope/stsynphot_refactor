@@ -31,6 +31,7 @@ __all__ = [
 _PARAM_NAMES = ["T_eff", "metallicity", "log_g"]
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.
 _SPECTRUM_CACHE = {}  # Stores grid spectra (by file and column) to reduce file I/O.
+_PARAMS_CACHE = {}  # Grid parameters of each catalog as an array, by catalog directory.
 
 SYNPHOT_LT_1_9 = not minversion(synphot, "1.9.0")
 if SYNPHOT_LT_1_9:
@@ -46,9 +47,10 @@ def reset_cache():
     the session. Call this after grid files are changed on disk, so that
     they are read again.
     """
-    global _CACHE, _SPECTRUM_CACHE  # noqa: PLW0602
+    global _CACHE, _SPECTRUM_CACHE, _PARAMS_CACHE  # noqa: PLW0602
     _CACHE.clear()
     _SPECTRUM_CACHE.clear()
+    _PARAMS_CACHE.clear()
 
 
 def _par_from_parser(x):
@@ -58,9 +60,13 @@ def _par_from_parser(x):
     return x
 
 
-def _break_list(in_list, index, parameter):
-    """Break input list into upper and lower lists."""
-    array = np.array([parameters[index] for parameters in in_list], dtype=np.float64)
+def _break_list(params, rows, index, parameter):
+    """Break catalog rows into upper and lower rows.
+
+    ``params`` holds the grid parameters of all catalog rows (see
+    :func:`get_catalog_index`) and ``rows`` the row numbers to break.
+    """
+    array = params[rows, index]
     upper_array = array[array >= parameter]
     lower_array = array[array <= parameter]
 
@@ -75,16 +81,10 @@ def _break_list(in_list, index, parameter):
 
     upper = upper_array.min()
     lower = lower_array.max()
-    upper_list = []
-    lower_list = []
+    upper_rows = rows[(array >= parameter) & (array <= upper)]
+    lower_rows = rows[(array >= lower) & (array <= parameter)]
 
-    for i, parameters in enumerate(in_list):
-        if array[i] >= parameter and array[i] <= upper:
-            upper_list.append(parameters)
-        if array[i] >= lower and array[i] <= parameter:
-            lower_list.append(parameters)
-
-    return upper_list, lower_list
+    return upper_rows, lower_rows
 
 
 def _get_spectrum(parlist, catdir, cache_only=False):
@@ -184,6 +184,7 @@ def get_catalog_index(gridname):
             _CACHE[filename] = [
                 list(map(float, index.split(","))) + [data["FILENAME"][i]] for i, index in enumerate(data["INDEX"])
             ]
+            _PARAMS_CACHE[catdir] = np.array([row[:3] for row in _CACHE[filename]], dtype=np.float64)
         except (FileNotFoundError, HTTPError) as e:
             raise synexceptions.SynphotError(f"{gridname} catalog was not found: {e}") from e
 
@@ -249,24 +250,25 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
 
     t_eff = units.validate_quantity(_par_from_parser(t_eff), u.K).value
 
-    list0, list1 = _break_list(indices, 0, t_eff)
+    params = _PARAMS_CACHE[catdir]
+    list0, list1 = _break_list(params, np.arange(len(indices)), 0, t_eff)
 
-    list2, list3 = _break_list(list0, 1, metallicity)
-    list4, list5 = _break_list(list1, 1, metallicity)
+    list2, list3 = _break_list(params, list0, 1, metallicity)
+    list4, list5 = _break_list(params, list1, 1, metallicity)
 
-    list6, list7 = _break_list(list2, 2, log_g)
-    list8, list9 = _break_list(list3, 2, log_g)
-    list10, list11 = _break_list(list4, 2, log_g)
-    list12, list13 = _break_list(list5, 2, log_g)
+    list6, list7 = _break_list(params, list2, 2, log_g)
+    list8, list9 = _break_list(params, list3, 2, log_g)
+    list10, list11 = _break_list(params, list4, 2, log_g)
+    list12, list13 = _break_list(params, list5, 2, log_g)
 
-    sp1 = _get_spectrum(list6[0], catdir)
-    sp2 = _get_spectrum(list7[0], catdir)
-    sp3 = _get_spectrum(list8[0], catdir)
-    sp4 = _get_spectrum(list9[0], catdir)
-    sp5 = _get_spectrum(list10[0], catdir)
-    sp6 = _get_spectrum(list11[0], catdir)
-    sp7 = _get_spectrum(list12[0], catdir)
-    sp8 = _get_spectrum(list13[0], catdir)
+    sp1 = _get_spectrum(indices[list6[0]], catdir)
+    sp2 = _get_spectrum(indices[list7[0]], catdir)
+    sp3 = _get_spectrum(indices[list8[0]], catdir)
+    sp4 = _get_spectrum(indices[list9[0]], catdir)
+    sp5 = _get_spectrum(indices[list10[0]], catdir)
+    sp6 = _get_spectrum(indices[list11[0]], catdir)
+    sp7 = _get_spectrum(indices[list12[0]], catdir)
+    sp8 = _get_spectrum(indices[list13[0]], catdir)
 
     spa1 = _interpolate_spectrum(sp1, sp2, log_g)
     spa2 = _interpolate_spectrum(sp3, sp4, log_g)
