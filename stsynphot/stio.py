@@ -290,7 +290,7 @@ def _read_table(filename, ext, dtypes):
     # FITS
     if filename.endswith((".fits", ".fit")):
         with fits.open(filename) as f:
-            data = f[ext].data.copy()
+            data = f[ext].data
 
         err_str = ""
         for key, val in dtypes.items():
@@ -655,6 +655,6 @@ def read_interp_spec(filename, tab_ext=1):
             allow_extrap = False
 
         wave_unit = f[tab_ext].header["TUNIT1"].lower()
-        data = f[tab_ext].data.copy()
+        data = f[tab_ext].data
 
     return data, wave_unit, do_wave_shift, allow_extrap
