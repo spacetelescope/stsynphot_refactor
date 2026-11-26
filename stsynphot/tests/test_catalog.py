@@ -16,7 +16,7 @@ from stsynphot.catalog import SYNPHOT_LT_1_9
 
 
 @pytest.mark.remote_data
-def test_grid_to_spec():
+def test_grid_to_spec_k93():
     """Test creating spectrum from grid, and related cache."""
     sp = catalog.grid_to_spec("k93models", 6440, 0, 4.3)
     w = sp.waveset
@@ -197,11 +197,25 @@ def test_grid_to_spec():
     # Test cache
     key = list(catalog._CACHE.keys())[0]
     assert key.endswith("grid/k93models/catalog.fits")
-    assert isinstance(catalog._CACHE[key], list)
+    assert sorted(catalog._CACHE[key]) == ["files", "log_g", "metallicity", "t_eff"]
 
     # Reset cache
     catalog.reset_cache()
     assert catalog._CACHE == {}
+
+
+@pytest.mark.remote_data
+def test_grid_to_spec_phoenix():
+    # Combo that is sensitive to grid search algorithm change
+    sp = catalog.grid_to_spec("phoenix", 40500, -1.5, 4.2)
+    np.testing.assert_allclose(sp([10, 9e06] * u.AA), [5.32014480e-36, 4.21149959e10] * units.PHOTLAM)
+
+    # Make sure it copies on grid point
+    sp = catalog.grid_to_spec("phoenix", 14000, -2.5, 2)
+    sp.meta["changed"] = True
+    sp2 = catalog.grid_to_spec("phoenix", 14000, -2.5, 2)
+    assert "changed" not in sp2.meta
+    assert sp2 is not sp
 
 
 @pytest.mark.remote_data
@@ -210,23 +224,21 @@ def test_grid_to_spec():
 )
 def test_grid_to_spec_bounds_check(t, m, g):
     """Test out of bounds check."""
-    with pytest.raises(exceptions.ParameterOutOfBounds):
+    with pytest.raises(exceptions.ParameterOutOfBounds, match=".* exceeds data"):
         catalog.grid_to_spec("k93models", t, m, g)
 
 
 def test_grid_to_spec_exceptions_1():
     """Test other exceptions."""
-    # Invalid catalog
-    with pytest.raises(synexceptions.SynphotError):
+    with pytest.raises(synexceptions.SynphotError, match=".* catalog was not found"):
         catalog.grid_to_spec("foo", 6440, 0, 4.3)
 
 
 @pytest.mark.remote_data
 def test_grid_to_spec_exceptions_2():
-    # Quantity is not acceptable for log values
-    with pytest.raises(synexceptions.SynphotError):
+    with pytest.raises(synexceptions.SynphotError, match="Quantity is not supported"):
         catalog.grid_to_spec("k93models", 6440, 0 * u.dimensionless_unscaled, 4.3)
-    with pytest.raises(synexceptions.SynphotError):
+    with pytest.raises(synexceptions.SynphotError, match="Quantity is not supported"):
         catalog.grid_to_spec("k93models", 6440, 0, 4.3 * u.dimensionless_unscaled)
 
 
@@ -250,31 +262,41 @@ def test_get_catalog_index_custom(tmp_path):
 
     with stsyn_conf.set_temp("rootdir", str(tmp_path)):
         # Test whether we can get a valid catalog path for a custom catalog
-        catfiles, catdir = catalog.get_catalog_index(custom_name)
+        catkey, catdir = catalog.get_catalog_index(custom_name)
+        catfiles = catalog._CACHE[catkey]["files"]
         assert catdir.endswith(custom_name)
-        assert len(catfiles) == 3
-
-        # Test whether we get an exception with an invalid catalog name.
-        with pytest.raises(synexceptions.SynphotError, match="junk catalog was not found"):
-            catfiles, catdir = catalog.get_catalog_index("junk")
+        assert catfiles.size == 3
 
 
 def test_get_spectrum_cache(tmp_path):
     """Each grid spectrum is read and validated once, until reset_cache()."""
+    # Fake spectrum file
     wave = np.linspace(3000, 10000, 50) * u.AA
     flux = np.ones(50) * units.FLAM
     t = Table([wave, flux, np.zeros(50) * units.FLAM], names=["WAVELENGTH", "g40", "g45"])
     t.write(tmp_path / "grid_00001.fits", format="fits")
-    parlist = [5000.0, 0.0, 4.0, "grid_00001.fits[g40]"]
-    catdir = str(tmp_path)
+
+    # Desired parameters
+    t_eff = 5000.0
+    metallicity = 0.0
+    log_g = 4.0
+    fname = "grid_00001.fits[g40]"
+
+    # Build a fake catalog cache because this is not a real catalog.
     catalog.reset_cache()
+    catdir = str(tmp_path)
+    cachekey = str(tmp_path / "catalog.fits")
+    catalog._CACHE[cachekey] = {
+        "t_eff": np.array([t_eff]),
+        "metallicity": np.array([metallicity]),
+        "log_g": np.array([log_g]),
+        "files": np.array([fname]),
+    }
 
     with pytest.raises(KeyError, match=".* is not cached"):
-        catalog._get_spectrum(parlist, catdir, cache_only=True)
+        catalog._get_spectrum(t_eff, metallicity, log_g, cachekey, catdir, cache_only=True)
 
-    result_1 = catalog._get_spectrum(parlist, catdir)
-    sp_1 = result_1[-1]
-    sp_1.meta["changed"] = True
+    sp_1 = catalog._get_spectrum(t_eff, metallicity, log_g, cachekey, catdir)
 
     # Header should have been discarded on read for synphot 1.9 or later.
     if SYNPHOT_LT_1_9:
@@ -282,21 +304,15 @@ def test_get_spectrum_cache(tmp_path):
     else:
         assert sp_1.meta["header"] == {}
 
-    result_2 = catalog._get_spectrum(parlist, catdir, cache_only=True)
-    sp_2 = result_2[-1]
-
-    assert result_1[:3] == result_2[:3] == parlist[:3]
-    np.testing.assert_array_equal(sp_1(wave), sp_2(wave))
-
-    # Changing a returned spectrum does not change the cached one.
-    assert "changed" not in sp_2.meta
+    sp_2 = catalog._get_spectrum(t_eff, metallicity, log_g, cachekey, catdir, cache_only=True)
+    assert sp_2 is sp_1
 
     # A spectrum without valid data raises every time, from one read.
-    bad_parlist = [5000.0, 0.0, 4.5, "grid_00001.fits[g45]"]
-    with pytest.raises(exceptions.ParameterOutOfBounds):
-        catalog._get_spectrum(bad_parlist, catdir)
-    with pytest.raises(exceptions.ParameterOutOfBounds):
-        catalog._get_spectrum(bad_parlist, catdir, cache_only=True)
+    bad_g = 4.5
+    with pytest.raises(exceptions.ParameterOutOfBounds, match=".* no valid data"):
+        catalog._get_spectrum(t_eff, metallicity, bad_g, cachekey, catdir)
+    with pytest.raises(exceptions.ParameterOutOfBounds, match=".* no valid data"):
+        catalog._get_spectrum(t_eff, metallicity, bad_g, cachekey, catdir, cache_only=True)
 
     catalog.reset_cache()
     assert catalog._CACHE == {}

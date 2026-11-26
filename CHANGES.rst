@@ -1,5 +1,12 @@
-1.7.1 (unreleased)
+1.8.0 (unreleased)
 ==================
+
+- Internal catalog cache was re-organized, resulting in
+  ``get_catalog_index()`` returning differently formatted
+  output now. There was no deprecation period because
+  ``get_catalog_index()`` was only meant for internal use
+  by ``grid_to_spec()`` in the ``catalog`` module. [#253]
+- ``stio`` no longer forcefully copies FITS data on read. [#253]
 
 1.7.0 (2026-11-17)
 ==================

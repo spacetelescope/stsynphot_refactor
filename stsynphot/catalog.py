@@ -28,7 +28,6 @@ __all__ = [
     "reset_cache",
 ]
 
-_PARAM_NAMES = ["T_eff", "metallicity", "log_g"]
 _CACHE = {}  # Stores grid look-up parameters to reduce file I/O.
 _SPECTRUM_CACHE = {}  # Stores grid spectra (by file and column) to reduce file I/O.
 
@@ -58,89 +57,73 @@ def _par_from_parser(x):
     return x
 
 
-def _break_list(in_list, index, parameter):
-    """Break input list into upper and lower lists."""
-    array = np.array([parameters[index] for parameters in in_list], dtype=np.float64)
-    upper_array = array[array >= parameter]
-    lower_array = array[array <= parameter]
+def _break_list(array, parkey, parameter):
+    """Find closest grid neighbors for given parameter name."""
+
+    diff = array - parameter
+    lower_array = array[diff <= 0]
+    upper_array = array[diff >= 0]
 
     if upper_array.size == 0:
         raise exceptions.ParameterOutOfBounds(
-            f"Parameter '{_PARAM_NAMES[index]}' exceeds data. Max allowed={array.max()}, entered={parameter}."
+            f"Parameter '{parkey}' exceeds data. Max allowed={array.max()}, entered={parameter}."
         )
     if lower_array.size == 0:
         raise exceptions.ParameterOutOfBounds(
-            f"Parameter '{_PARAM_NAMES[index]}' exceeds data. Min allowed={array.min()}, entered={parameter}."
+            f"Parameter '{parkey}' exceeds data. Min allowed={array.min()}, entered={parameter}."
         )
 
-    upper = upper_array.min()
-    lower = lower_array.max()
-    upper_list = []
-    lower_list = []
+    lower = max(lower_array)
+    upper = min(upper_array)
 
-    for i, parameters in enumerate(in_list):
-        if array[i] >= parameter and array[i] <= upper:
-            upper_list.append(parameters)
-        if array[i] >= lower and array[i] <= parameter:
-            lower_list.append(parameters)
-
-    return upper_list, lower_list
+    return upper, lower
 
 
-def _get_spectrum(parlist, catdir, cache_only=False):
+def _get_spectrum(t_eff, metallicity, log_g, cachekey, catdir, cache_only=False):
     """Get list of spectra for given parameter list and base name."""
-    name = parlist[3]
-
-    filename = name.split("[")[0]
-    column = name.split("[")[1][:-1]
-
-    filename = stio.resolve_filename(catdir, *filename.split("/"))
+    key = (cachekey, t_eff, metallicity, log_g)
 
     # Interpolating one spectrum reads up to 8 grid spectra, and neighbouring
     # parameters (e.g., stars along an isochrone) share most of them, so keep each
     # validated spectrum after its first read. None marks one without valid data.
-    # Callers get a shallow copy with its own meta: on a grid point, grid_to_spec
-    # returns this spectrum itself, and changing it must not change the cache.
-    key = (filename, column)
+    # On a grid point, grid_to_spec returns this spectrum itself.
     if key not in _SPECTRUM_CACHE:
         if cache_only:
             raise KeyError(f"{key} is not cached, try again with cache_only=False")
 
-        sp = SourceSpectrum.from_file(filename, flux_col=column, **_prihdr_kw)
-        try:
-            validate_totalflux(sp.integrate())
-        except synexceptions.SynphotError:
+        cat_cache = _CACHE[cachekey]
+        name = cat_cache["files"][
+            (cat_cache["t_eff"] == t_eff) & (cat_cache["metallicity"] == metallicity) & (cat_cache["log_g"] == log_g)
+        ]
+        if name.size == 0:
             sp = None
+        else:
+            name = name[0]  # There can be only one
+            filename = name.split("[")[0]
+            column = name.split("[")[1][:-1]
+
+            filename = stio.resolve_filename(catdir, *filename.split("/"))
+
+            sp = SourceSpectrum.from_file(filename, flux_col=column, **_prihdr_kw)
+            try:
+                validate_totalflux(sp.integrate())
+            except synexceptions.SynphotError:
+                sp = None
         _SPECTRUM_CACHE[key] = sp
+
     if _SPECTRUM_CACHE[key] is None:
-        raise exceptions.ParameterOutOfBounds(f"Parameter '{parlist}' has no valid data.")
-    sp = copy.deepcopy(_SPECTRUM_CACHE[key])
+        raise exceptions.ParameterOutOfBounds(f"'{key}' has no valid data.")
 
-    result = [member for member in parlist]
-    result.pop()
-    result.append(sp)
-
-    return result
+    return _SPECTRUM_CACHE[key]
 
 
-def _interpolate_spectrum(sp1, sp2, par):
-    """Interpolate spectra to the given parameter value."""
-    spectrum1 = sp1.pop()
-    spectrum2 = sp2.pop()
-    par1 = sp1.pop()
-    par2 = sp2.pop()
-
-    if par1 == par2:
-        sp = spectrum1
-    else:
-        a = (par1 - par) / (par1 - par2)
-        b = 1.0 - a
-        sp = a * spectrum2 + b * spectrum1
-
-    result = [member for member in sp1]
-    result.append(sp)
-
-    return result
+def _interpolate_spectrum(par1, spectrum1, par2, spectrum2, par):
+    """Interpolate spectra to the given parameter value.
+    These values should already be validated prior.
+    """
+    a = (par1 - par) / (par1 - par2)
+    b = 1.0 - a
+    return a * spectrum2 + b * spectrum1
 
 
 def get_catalog_index(gridname):
@@ -148,6 +131,7 @@ def get_catalog_index(gridname):
 
     It is read once and then cached until the cache is cleared explicitly using
     :func:`reset_cache`.
+    The cache is a dictionary mapping parameter name to its arrays.
 
     Parameters
     ----------
@@ -158,8 +142,13 @@ def get_catalog_index(gridname):
 
     Returns
     -------
-    cat_index : list
-        List of ``[t_eff, metallicity, log_g, filename]``.
+    cache_key : str
+        Key of internal cache.
+
+        .. version-changed:: 1.8.0
+            The internal cache organization was changed and this is
+            reflected directly in return value. Previously, this was
+            a list of ``[t_eff, metallicity, log_g, filename]``.
 
     catdir : str
         Directory containing the requested catalog.
@@ -181,13 +170,18 @@ def get_catalog_index(gridname):
     if filename not in _CACHE:
         try:
             data = stio.read_catalog(filename)  # EXT 1
-            _CACHE[filename] = [
-                list(map(float, index.split(","))) + [data["FILENAME"][i]] for i, index in enumerate(data["INDEX"])
-            ]
         except (FileNotFoundError, HTTPError) as e:
             raise synexceptions.SynphotError(f"{gridname} catalog was not found: {e}") from e
 
-    return _CACHE[filename], catdir
+        array = np.array([row.split(",") for row in data["INDEX"]], dtype=float)
+        _CACHE[filename] = {
+            "t_eff": array[:, 0],
+            "metallicity": array[:, 1],
+            "log_g": array[:, 2],
+            "files": data["FILENAME"],
+        }
+
+    return filename, catdir
 
 
 def grid_to_spec(gridname, t_eff, metallicity, log_g):
@@ -237,8 +231,6 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
         Invalid inputs.
 
     """
-    indices, catdir = get_catalog_index(gridname)
-
     metallicity = _par_from_parser(metallicity)
     if isinstance(metallicity, u.Quantity):
         raise synexceptions.SynphotError("Quantity is not supported for metallicity.")
@@ -249,36 +241,41 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
 
     t_eff = units.validate_quantity(_par_from_parser(t_eff), u.K).value
 
-    list0, list1 = _break_list(indices, 0, t_eff)
+    cachekey, catdir = get_catalog_index(gridname)
+    cat = _CACHE[cachekey]
 
-    list2, list3 = _break_list(list0, 1, metallicity)
-    list4, list5 = _break_list(list1, 1, metallicity)
+    def interp_log_g(t, m):
+        at_tm = (cat["t_eff"] == t) & (cat["metallicity"] == m)
+        upper_g, lower_g = _break_list(cat["log_g"][at_tm], "log_g", log_g)
+        sp1 = _get_spectrum(t, m, upper_g, cachekey, catdir)
+        if upper_g == lower_g:
+            return True, sp1
+        sp2 = _get_spectrum(t, m, lower_g, cachekey, catdir)
+        return False, _interpolate_spectrum(upper_g, sp1, lower_g, sp2, log_g)
 
-    list6, list7 = _break_list(list2, 2, log_g)
-    list8, list9 = _break_list(list3, 2, log_g)
-    list10, list11 = _break_list(list4, 2, log_g)
-    list12, list13 = _break_list(list5, 2, log_g)
+    def interp_metallicity(t):
+        at_t = cat["t_eff"] == t
+        upper_m, lower_m = _break_list(cat["metallicity"][at_t], "metallicity", metallicity)
+        is_on_grid, sp1 = interp_log_g(t, upper_m)
+        if upper_m == lower_m:
+            return is_on_grid, sp1
+        _, sp2 = interp_log_g(t, lower_m)
+        return False, _interpolate_spectrum(upper_m, sp1, lower_m, sp2, metallicity)
 
-    sp1 = _get_spectrum(list6[0], catdir)
-    sp2 = _get_spectrum(list7[0], catdir)
-    sp3 = _get_spectrum(list8[0], catdir)
-    sp4 = _get_spectrum(list9[0], catdir)
-    sp5 = _get_spectrum(list10[0], catdir)
-    sp6 = _get_spectrum(list11[0], catdir)
-    sp7 = _get_spectrum(list12[0], catdir)
-    sp8 = _get_spectrum(list13[0], catdir)
+    upper_t, lower_t = _break_list(cat["t_eff"], "t_eff", t_eff)
+    is_on_grid, spt1 = interp_metallicity(upper_t)
+    if upper_t != lower_t:
+        is_on_grid = False
+        _, spt2 = interp_metallicity(lower_t)
+        spa7 = _interpolate_spectrum(upper_t, spt1, lower_t, spt2, t_eff)
+    else:
+        spa7 = spt1
 
-    spa1 = _interpolate_spectrum(sp1, sp2, log_g)
-    spa2 = _interpolate_spectrum(sp3, sp4, log_g)
-    spa3 = _interpolate_spectrum(sp5, sp6, log_g)
-    spa4 = _interpolate_spectrum(sp7, sp8, log_g)
-
-    spa5 = _interpolate_spectrum(spa1, spa2, metallicity)
-    spa6 = _interpolate_spectrum(spa3, spa4, metallicity)
-
-    spa7 = _interpolate_spectrum(spa5, spa6, t_eff)
-
-    sp = spa7[0]
+    # Copy on grid point to avoid accidentally changing cache.
+    if is_on_grid:
+        sp = copy.deepcopy(spa7)
+    else:
+        sp = spa7
     sp.meta["expr"] = f"{gridname}(T_eff={t_eff:g},metallicity={metallicity:g},log_g={log_g:g})"
 
     return sp
@@ -310,19 +307,17 @@ def find_valid_g_phoenix():  # pragma: no cover
         Unique metallicity values in the catalog.
 
     """
-    indices, catdir = get_catalog_index("phoenix")
+    cachekey, catdir = get_catalog_index("phoenix")
+    a = _CACHE[cachekey]
     specfiles = {}
     valid_g = {}
-    possible_g = set()
-    uniq_metallicity = set()
+    possible_g = set(a["log_g"])
+    uniq_metallicity = sorted(set(a["metallicity"]))
 
-    for a in indices:
-        key = tuple(a[:2])
-        uniq_metallicity.add(a[1])
-        possible_g.add(a[2])
-
+    for t, m, f in zip(a["t_eff"], a["metallicity"], a["files"]):
+        key = (t, m)
         if key not in specfiles:
-            specfiles[key] = a[3].split("[")[0]
+            specfiles[key] = f.split("[")[0]
 
     for key, spfile in specfiles.items():
         hdr = fits.getheader(stio.resolve_filename(catdir, *spfile.split("/")))["LOGG*"]
@@ -332,7 +327,7 @@ def find_valid_g_phoenix():  # pragma: no cover
             if gval in possible_g:
                 valid_g[key].append(gval)
 
-    return valid_g, sorted(uniq_metallicity)
+    return valid_g, uniq_metallicity
 
 
 def plot_phoenix(filename=""):  # pragma: no cover
