@@ -206,7 +206,16 @@ def test_grid_to_spec_k93():
 
 @pytest.mark.remote_data
 def test_grid_to_spec_phoenix():
+    # Combo that is sensitive to grid search algorithm change
     sp = catalog.grid_to_spec("phoenix", 40500, -1.5, 4.2)
+    np.testing.assert_allclose(sp([10, 9e06] * u.AA), [5.32014480e-36, 4.21149959e10] * units.PHOTLAM)
+
+    # Make sure it copies on grid point
+    sp = catalog.grid_to_spec("phoenix", 14000, -2.5, 2)
+    sp.meta["changed"] = True
+    sp2 = catalog.grid_to_spec("phoenix", 14000, -2.5, 2)
+    assert "changed" not in sp2.meta
+    assert sp2 is not sp
 
 
 @pytest.mark.remote_data

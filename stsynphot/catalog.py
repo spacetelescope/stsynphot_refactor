@@ -57,10 +57,9 @@ def _par_from_parser(x):
     return x
 
 
-def _break_list(cachekey, parkey, parameter):
+def _break_list(array, parkey, parameter):
     """Find closest grid neighbors for given parameter name."""
 
-    array = _CACHE[cachekey][parkey]
     diff = array - parameter
     lower_array = array[diff <= 0]
     upper_array = array[diff >= 0]
@@ -122,18 +121,9 @@ def _interpolate_spectrum(par1, spectrum1, par2, spectrum2, par):
     """Interpolate spectra to the given parameter value.
     These values should already be validated prior.
     """
-
-    if np.allclose(par, par1) or np.allclose(par1, par2):
-        return spectrum1
-
-    if np.allclose(par, par2):  # pragma: no cover
-        return spectrum2
-
     a = (par1 - par) / (par1 - par2)
     b = 1.0 - a
-    sp = a * spectrum2 + b * spectrum1
-
-    return sp
+    return a * spectrum2 + b * spectrum1
 
 
 def get_catalog_index(gridname):
@@ -252,43 +242,40 @@ def grid_to_spec(gridname, t_eff, metallicity, log_g):
     t_eff = units.validate_quantity(_par_from_parser(t_eff), u.K).value
 
     cachekey, catdir = get_catalog_index(gridname)
+    cat = _CACHE[cachekey]
 
-    upper_t, lower_t = _break_list(cachekey, "t_eff", t_eff)
-    upper_m, lower_m = _break_list(cachekey, "metallicity", metallicity)
-    upper_g, lower_g = _break_list(cachekey, "log_g", log_g)
+    def interp_log_g(t, m):
+        at_tm = (cat["t_eff"] == t) & (cat["metallicity"] == m)
+        upper_g, lower_g = _break_list(cat["log_g"][at_tm], "log_g", log_g)
+        sp1 = _get_spectrum(t, m, upper_g, cachekey, catdir)
+        if upper_g == lower_g:
+            return True, sp1
+        sp2 = _get_spectrum(t, m, lower_g, cachekey, catdir)
+        return False, _interpolate_spectrum(upper_g, sp1, lower_g, sp2, log_g)
 
-    sp1 = _get_spectrum(upper_t, upper_m, upper_g, cachekey, catdir)
-    sp2 = _get_spectrum(upper_t, upper_m, lower_g, cachekey, catdir)
-    sp3 = _get_spectrum(upper_t, lower_m, upper_g, cachekey, catdir)
-    sp4 = _get_spectrum(upper_t, lower_m, lower_g, cachekey, catdir)
-    sp5 = _get_spectrum(lower_t, upper_m, upper_g, cachekey, catdir)
-    sp6 = _get_spectrum(lower_t, upper_m, lower_g, cachekey, catdir)
-    sp7 = _get_spectrum(lower_t, lower_m, upper_g, cachekey, catdir)
-    sp8 = _get_spectrum(lower_t, lower_m, lower_g, cachekey, catdir)
+    def interp_metallicity(t):
+        at_t = cat["t_eff"] == t
+        upper_m, lower_m = _break_list(cat["metallicity"][at_t], "metallicity", metallicity)
+        is_on_grid, sp1 = interp_log_g(t, upper_m)
+        if upper_m == lower_m:
+            return is_on_grid, sp1
+        _, sp2 = interp_log_g(t, lower_m)
+        return False, _interpolate_spectrum(upper_m, sp1, lower_m, sp2, metallicity)
 
-    # upper_t, upper_m, log_g
-    spa1 = _interpolate_spectrum(upper_g, sp1, lower_g, sp2, log_g)
+    upper_t, lower_t = _break_list(cat["t_eff"], "t_eff", t_eff)
+    is_on_grid, spt1 = interp_metallicity(upper_t)
+    if upper_t != lower_t:
+        is_on_grid = False
+        _, spt2 = interp_metallicity(lower_t)
+        spa7 = _interpolate_spectrum(upper_t, spt1, lower_t, spt2, t_eff)
+    else:
+        spa7 = spt1
 
-    # upper_t, lower_m, log_g
-    spa2 = _interpolate_spectrum(upper_g, sp3, lower_g, sp4, log_g)
-
-    # lower_t, upper_m, log_g
-    spa3 = _interpolate_spectrum(upper_g, sp5, lower_g, sp6, log_g)
-
-    # lower_t, lower_m, log_g
-    spa4 = _interpolate_spectrum(upper_g, sp7, lower_g, sp8, log_g)
-
-    # upper_t, metallicity, log_g
-    spa5 = _interpolate_spectrum(upper_m, spa1, lower_m, spa2, metallicity)
-
-    # lower_t, metallicity, log_g
-    spa6 = _interpolate_spectrum(upper_m, spa3, lower_m, spa4, metallicity)
-
-    # t_eff, metallicity, log_g
-    spa7 = _interpolate_spectrum(upper_t, spa5, lower_t, spa6, t_eff)
-
-    # Copy to avoid accidentally changing cache.
-    sp = copy.deepcopy(spa7)
+    # Copy on grid point to avoid accidentally changing cache.
+    if is_on_grid:
+        sp = copy.deepcopy(spa7)
+    else:
+        sp = spa7
     sp.meta["expr"] = f"{gridname}(T_eff={t_eff:g},metallicity={metallicity:g},log_g={log_g:g})"
 
     return sp
