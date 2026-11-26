@@ -16,7 +16,7 @@ from stsynphot.catalog import SYNPHOT_LT_1_9
 
 
 @pytest.mark.remote_data
-def test_grid_to_spec():
+def test_grid_to_spec_k93():
     """Test creating spectrum from grid, and related cache."""
     sp = catalog.grid_to_spec("k93models", 6440, 0, 4.3)
     w = sp.waveset
@@ -202,6 +202,11 @@ def test_grid_to_spec():
     # Reset cache
     catalog.reset_cache()
     assert catalog._CACHE == {}
+
+
+@pytest.mark.remote_data
+def test_grid_to_spec_phoenix():
+    sp = catalog.grid_to_spec("phoenix", 40500, -1.5, 4.2)
 
 
 @pytest.mark.remote_data
